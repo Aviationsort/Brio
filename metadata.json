@@ -1,0 +1,6 @@
+{
+  "name": "Brio",
+  "description": "An all-in-one encrypted workstation suite featuring messaging, social feed, media player, gaming arcade, office tools, and telemetry.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
