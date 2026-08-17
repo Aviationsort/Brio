@@ -18,13 +18,13 @@ export const ConnectSocialHub: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Sub-tab Navigation */}
-      <div className="flex items-center gap-2 p-1.5 bg-slate-900/90 border border-slate-800 rounded-2xl overflow-x-auto no-scrollbar">
+      <div className="flex items-center gap-2 p-1.5 aero-panel overflow-x-auto no-scrollbar">
         <button
           onClick={() => setSubTab('messaging')}
-          className={`liquid-glass-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+          className={`skeuo-button flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
             subTab === 'messaging'
-              ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+              ? ''
+              : 'opacity-80 hover:opacity-100'
           }`}
         >
           <MessageSquare className="w-4 h-4" />
@@ -33,10 +33,10 @@ export const ConnectSocialHub: React.FC = () => {
 
         <button
           onClick={() => setSubTab('feed')}
-          className={`liquid-glass-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+          className={`skeuo-button flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
             subTab === 'feed'
-              ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+              ? ''
+              : 'opacity-80 hover:opacity-100'
           }`}
         >
           <Rss className="w-4 h-4" />
@@ -45,10 +45,10 @@ export const ConnectSocialHub: React.FC = () => {
 
         <button
           onClick={() => setSubTab('dialer')}
-          className={`liquid-glass-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+          className={`skeuo-button flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
             subTab === 'dialer'
-              ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+              ? ''
+              : 'opacity-80 hover:opacity-100'
           }`}
         >
           <Phone className="w-4 h-4" />
@@ -57,10 +57,10 @@ export const ConnectSocialHub: React.FC = () => {
 
         <button
           onClick={() => setSubTab('stickers')}
-          className={`liquid-glass-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+          className={`skeuo-button flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
             subTab === 'stickers'
-              ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+              ? ''
+              : 'opacity-80 hover:opacity-100'
           }`}
         >
           <Smile className="w-4 h-4" />

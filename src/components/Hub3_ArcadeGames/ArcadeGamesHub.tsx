@@ -138,19 +138,19 @@ export const ArcadeGamesHub: React.FC = () => {
       {/* Selector Header */}
       <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-400">
+          <div className="p-2.5 nightcore-panel border border-pink-500/50 rounded-xl text-pink-300">
             <Gamepad2 className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-white">Brio Arcade & Gaming Suite</h3>
-            <p className="text-xs text-slate-400">11 Fully interactive games with encrypted high score storage</p>
+            <h3 className="text-sm font-bold text-white drop-shadow-md">Brio Arcade & Gaming Suite</h3>
+            <p className="text-xs text-pink-200/90 font-medium">11 Fully interactive games with encrypted high score storage</p>
           </div>
         </div>
 
         {selectedGame && (
           <button
             onClick={() => setSelectedGame(null)}
-            className="liquid-glass-btn px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-rose-300 rounded-xl transition-all"
+            className="skeuo-button px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all"
           >
             ← Back to Games Menu
           </button>
@@ -180,25 +180,25 @@ export const ArcadeGamesHub: React.FC = () => {
               <button
                 key={game.id}
                 onClick={() => setSelectedGame(game.id)}
-                className="liquid-glass-btn bg-slate-900/90 border border-slate-800 hover:border-rose-500/50 rounded-2xl p-5 shadow-xl flex flex-col justify-between text-left transition-all hover:scale-[1.02] group"
+                className="glossy-card bg-slate-900/80 border border-slate-700/50 hover:border-pink-500/70 rounded-2xl p-5 shadow-xl flex flex-col justify-between text-left transition-all hover:scale-[1.02] group"
               >
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <div className="p-2 bg-slate-950 border border-slate-800 rounded-xl text-rose-400 group-hover:bg-rose-600 group-hover:text-white transition-colors">
+                    <div className="p-2 flash-panel border border-slate-600 rounded-xl text-pink-500 group-hover:bg-pink-600 group-hover:text-white transition-colors">
                       <Icon className="w-5 h-5" />
                     </div>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-500/30">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-pink-950 text-pink-300 border border-pink-500/50 shadow-inner">
                       {game.badge}
                     </span>
                   </div>
 
-                  <h4 className="text-sm font-bold text-white group-hover:text-rose-300 transition-colors mb-1">
+                  <h4 className="text-sm font-bold text-white group-hover:text-pink-300 transition-colors mb-1 drop-shadow-sm">
                     {game.title}
                   </h4>
-                  <p className="text-xs text-slate-400 leading-relaxed">{game.description}</p>
+                  <p className="text-xs text-slate-200/90 leading-relaxed font-medium">{game.description}</p>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-semibold text-rose-400">
+                <div className="mt-4 pt-3 border-t border-white/30 flex items-center justify-between text-[11px] font-semibold text-pink-300">
                   <span>Launch Game</span>
                   <span>➔</span>
                 </div>

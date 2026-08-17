@@ -757,23 +757,6 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
                 {user && (
                   <>
                     <button
-                      onClick={generateAccountQR}
-                      className="liquid-glass-btn w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <QrCode className="w-4 h-4" />
-                      <span>{t.accountQRCode}</span>
-                    </button>
-
-                    {qrDataUrl && (
-                      <div className="p-4 bg-white rounded-2xl flex flex-col items-center gap-3">
-                        <img src={qrDataUrl} alt="Account QR Code" className="w-40 h-40" />
-                        <p className="text-[10px] text-zinc-500 font-mono text-center">
-                           {t.scanToOpenBrioProfile}
-                        </p>
-                      </div>
-                    )}
-
-                    <button
                       onClick={() => {
                         logoutUser();
                         setActiveOverlay('NONE');
