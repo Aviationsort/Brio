@@ -1,1 +1,111 @@
 @import "tailwindcss";
+
+/* Liquid Glass Effect for Buttons */
+.liquid-glass-btn {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.75rem;
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.liquid-glass-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.liquid-glass-btn:hover::before {
+  left: 100%;
+}
+
+.liquid-glass-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 6px 12px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.liquid-glass-btn:active {
+  transform: translateY(0);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Liquid Glass Primary Variant */
+.liquid-glass-primary {
+  background: rgba(59, 130, 246, 0.3);
+  border: 1px solid rgba(59, 130, 246, 0.5);
+}
+
+.liquid-glass-primary:hover {
+  background: rgba(59, 130, 246, 0.4);
+  border-color: rgba(59, 130, 246, 0.7);
+}
+
+/* Liquid Glass Success Variant */
+.liquid-glass-success {
+  background: rgba(16, 185, 129, 0.3);
+  border: 1px solid rgba(16, 185, 129, 0.5);
+}
+
+.liquid-glass-success:hover {
+  background: rgba(16, 185, 129, 0.4);
+  border-color: rgba(16, 185, 129, 0.7);
+}
+
+/* Liquid Glass Danger Variant */
+.liquid-glass-danger {
+  background: rgba(239, 68, 68, 0.3);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+}
+
+.liquid-glass-danger:hover {
+  background: rgba(239, 68, 68, 0.4);
+  border-color: rgba(239, 68, 68, 0.7);
+}
+
+/* Liquid Glass Cyan Variant */
+.liquid-glass-cyan {
+  background: rgba(6, 182, 212, 0.3);
+  border: 1px solid rgba(6, 182, 212, 0.5);
+}
+
+.liquid-glass-cyan:hover {
+  background: rgba(6, 182, 212, 0.4);
+  border-color: rgba(6, 182, 212, 0.7);
+}
+
+/* Liquid Glass Blue Variant */
+.liquid-glass-blue {
+  background: rgba(37, 99, 235, 0.3);
+  border: 1px solid rgba(37, 99, 235, 0.5);
+}
+
+.liquid-glass-blue:hover {
+  background: rgba(37, 99, 235, 0.4);
+  border-color: rgba(37, 99, 235, 0.7);
+}

@@ -41,8 +41,6 @@ interface AppContextType {
   setShowAuthModal: (show: boolean) => void;
   showMobileGUI: boolean;
   setShowMobileGUI: (show: boolean) => void;
-  showTabletGUI: boolean;
-  setShowTabletGUI: (show: boolean) => void;
   t: UIStrings;
 
   user: UserAccount | null;
@@ -122,7 +120,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [showLanguagePicker, setShowLanguagePicker] = useState<boolean>(true);
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [showMobileGUI, setShowMobileGUI] = useState<boolean>(false);
-  const [showTabletGUI, setShowTabletGUI] = useState<boolean>(false);
   const [user, setUser] = useState<UserAccount | null>(null);
   const [masterPassphrase, setMasterPassphraseState] = useState<string>('');
   const [masterKeySet, setMasterKeySet] = useState<boolean>(false);
@@ -135,17 +132,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const width = window.innerWidth;
       const ua = navigator.userAgent || '';
       const isMobileUA = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-      const isTabletUA = /iPad|Tablet|PlayBook/i.test(ua);
 
       if (width < 640 || (isMobileUA && width < 768)) {
         setShowMobileGUI(true);
-        setShowTabletGUI(false);
-      } else if ((width >= 640 && width < 1024) || isTabletUA) {
-        setShowTabletGUI(true);
-        setShowMobileGUI(false);
       } else {
         setShowMobileGUI(false);
-        setShowTabletGUI(false);
       }
     };
 
@@ -597,8 +588,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setShowAuthModal,
         showMobileGUI,
         setShowMobileGUI,
-        showTabletGUI,
-        setShowTabletGUI,
         t,
         user,
         masterKeySet,

@@ -18,7 +18,7 @@ export const ProductivityOfficeHub: React.FC = () => {
       <div className="flex items-center gap-2 p-1.5 bg-slate-900/90 border border-slate-800 rounded-2xl overflow-x-auto no-scrollbar">
         <button
           onClick={() => setSubTab('office')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+          className={`liquid-glass-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
             subTab === 'office'
               ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
@@ -30,7 +30,7 @@ export const ProductivityOfficeHub: React.FC = () => {
 
         <button
           onClick={() => setSubTab('pdf')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+          className={`liquid-glass-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
             subTab === 'pdf'
               ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
@@ -42,7 +42,7 @@ export const ProductivityOfficeHub: React.FC = () => {
 
         <button
           onClick={() => setSubTab('calculator')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+          className={`liquid-glass-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
             subTab === 'calculator'
               ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/60'

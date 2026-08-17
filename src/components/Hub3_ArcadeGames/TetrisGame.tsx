@@ -208,7 +208,7 @@ export const TetrisGame: React.FC = () => {
             {!isPlaying ? (
               <button
                 onClick={startGame}
-                className="w-full py-3 bg-gradient-to-r from-rose-600 to-pink-600 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
+                className="liquid-glass-btn w-full py-3 bg-gradient-to-r from-rose-600 to-pink-600 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
               >
                 <Play className="w-4 h-4" />
                 <span>{gameOver ? 'Play Again' : 'Start Tetris'}</span>
@@ -216,7 +216,7 @@ export const TetrisGame: React.FC = () => {
             ) : (
               <button
                 onClick={startGame}
-                className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2"
+                className="liquid-glass-btn w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2"
               >
                 <RotateCcw className="w-4 h-4" />
                 <span>Restart</span>

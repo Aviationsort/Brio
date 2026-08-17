@@ -120,14 +120,14 @@ export const UnoGame: React.FC = () => {
         {!gameStarted ? (
           <button
             onClick={startUno}
-            className="px-3.5 py-1.5 bg-gradient-to-r from-rose-600 to-pink-600 text-white text-xs font-bold rounded-xl shadow transition-all flex items-center gap-1.5"
+            className="liquid-glass-btn px-3.5 py-1.5 bg-gradient-to-r from-rose-600 to-pink-600 text-white text-xs font-bold rounded-xl shadow transition-all flex items-center gap-1.5"
           >
             <Sparkles className="w-4 h-4" /> Start UNO Match
           </button>
         ) : (
           <button
             onClick={startUno}
-            className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 rounded-xl"
+            className="liquid-glass-btn px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 rounded-xl"
           >
             Reset Match
           </button>
@@ -150,7 +150,7 @@ export const UnoGame: React.FC = () => {
             <button
               onClick={drawCard}
               disabled={!gameStarted}
-              className="w-16 h-24 rounded-2xl bg-slate-800 border-2 border-slate-700 flex items-center justify-center font-bold text-white shadow-lg active:scale-95 transition-all"
+              className="liquid-glass-btn w-16 h-24 rounded-2xl bg-slate-800 border-2 border-slate-700 flex items-center justify-center font-bold text-white shadow-lg active:scale-95 transition-all"
             >
               DRAW
             </button>
@@ -159,7 +159,7 @@ export const UnoGame: React.FC = () => {
           <div>
             <p className="text-[10px] text-slate-500 mb-1">Top Discard</p>
             <div
-              className={`w-16 h-24 rounded-2xl flex flex-col items-center justify-center font-black text-sm shadow-2xl border-2 border-white/20 ${getBgColor(
+              className={`liquid-glass-btn w-16 h-24 rounded-2xl flex flex-col items-center justify-center font-black text-sm shadow-2xl border-2 border-white/20 ${getBgColor(
                 topCard.color
               )}`}
             >
@@ -183,7 +183,7 @@ export const UnoGame: React.FC = () => {
               key={card.id}
               onClick={() => playCard(card)}
               disabled={turn !== 'player'}
-              className={`w-14 h-20 rounded-xl flex flex-col items-center justify-center font-black text-xs shadow-lg transition-transform hover:scale-110 border border-white/20 ${getBgColor(
+              className={`liquid-glass-btn w-14 h-20 rounded-xl flex flex-col items-center justify-center font-black text-xs shadow-lg transition-transform hover:scale-110 border border-white/20 ${getBgColor(
                 card.color
               )}`}
             >

@@ -2,65 +2,56 @@
 # Dependencies
 node_modules/
 
-# Environment
-.env
-.env.local
-.env.*
-
-# Build outputs
+# Build artifacts
 dist/
 build/
 target/
 
-# Logs
-*.log
+# Environment variables
+.env
+.env.local
+.env.*
 
-# Coverage
-coverage/
-htmlcov/
-.coverage
-
-# IDE
+# IDE specific
 .vscode/
 .idea/
-*.swp
-*.swo
-*.tmp
 
-# Python
+# Python specific
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-.Python
-env/
-venv/
-.venv/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
+*.py.class
+*.py.obj
+*.py.out
+
+# Logs
 *.log
-.git/
+
+# Coverage reports
+coverage/
+htmlcov/
+.coverage
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Testing
 .mypy_cache/
 .pytest_cache/
-.hypothesis/
+.nyc_output/
+coverage.xml
+*.gcda
+*.gcno
 
-# Compiled and binary
-*.o
-*.obj
-*.so
-*.a
-*.dll
-*.dylib
-*.exe
-*.out
-
-# Compressed
+# Compressed files
 *.zip
 *.gz
 *.tar
@@ -83,8 +74,4 @@ coverage.xml
 *.tar.bz2
 *.tar.xz
 *.tar.zst
-
-# System
-.DS_Store
-Thumbs.db
 ```

@@ -481,7 +481,7 @@ export const MyPlanePicsSuite: React.FC = () => {
           <div className="flex items-center gap-1.5 bg-black/50 backdrop-blur-md p-1.5 rounded-2xl border border-white/10 overflow-x-auto max-w-full no-scrollbar">
             <button
               onClick={() => setActiveTab('album')}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${
+              className={`liquid-glass-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${
                 activeTab === 'album'
                   ? 'bg-gradient-to-r from-[#FF5F1F] to-orange-500 text-black shadow-[0_4px_15px_rgba(255,95,31,0.4)] border border-white/20'
                   : 'text-slate-300 hover:text-white hover:bg-white/10'
@@ -493,7 +493,7 @@ export const MyPlanePicsSuite: React.FC = () => {
 
             <button
               onClick={() => setActiveTab('parser')}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${
+              className={`liquid-glass-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${
                 activeTab === 'parser'
                   ? 'bg-gradient-to-r from-[#FF5F1F] to-orange-500 text-black shadow-[0_4px_15px_rgba(255,95,31,0.4)] border border-white/20'
                   : 'text-slate-300 hover:text-white hover:bg-white/10'
@@ -505,7 +505,7 @@ export const MyPlanePicsSuite: React.FC = () => {
 
             <button
               onClick={() => setActiveTab('ranking')}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${
+              className={`liquid-glass-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${
                 activeTab === 'ranking'
                   ? 'bg-gradient-to-r from-[#FF5F1F] to-orange-500 text-black shadow-[0_4px_15px_rgba(255,95,31,0.4)] border border-white/20'
                   : 'text-slate-300 hover:text-white hover:bg-white/10'
@@ -517,13 +517,13 @@ export const MyPlanePicsSuite: React.FC = () => {
 
             <button
               onClick={() => setActiveTab('stats')}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${
+              className={`liquid-glass-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${
                 activeTab === 'stats'
                   ? 'bg-gradient-to-r from-[#FF5F1F] to-orange-500 text-black shadow-[0_4px_15px_rgba(255,95,31,0.4)] border border-white/20'
                   : 'text-slate-300 hover:text-white hover:bg-white/10'
               }`}
             >
-              <BarChart3 className="w-3.5 h-3.5" />
+              <BarChart3 className="liquid-glass-btn w-3.5 h-3.5" />
               <span>Analytics</span>
             </button>
           </div>
@@ -660,7 +660,7 @@ export const MyPlanePicsSuite: React.FC = () => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => singleInputRef.current?.click()}
-                  className="px-3.5 py-2 bg-gradient-to-r from-[#FF5F1F] to-orange-500 hover:from-[#ff7236] hover:to-orange-400 text-black font-extrabold text-xs rounded-xl shadow-[0_4px_15px_rgba(255,95,31,0.3)] transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="liquid-glass-btn px-3.5 py-2 bg-gradient-to-r from-[#FF5F1F] to-orange-500 hover:from-[#ff7236] hover:to-orange-400 text-black font-extrabold text-xs rounded-xl shadow-[0_4px_15px_rgba(255,95,31,0.3)] transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   <span>{t.uploadPhoto}</span>
@@ -668,7 +668,7 @@ export const MyPlanePicsSuite: React.FC = () => {
 
                 <button
                   onClick={() => folderInputRef.current?.click()}
-                  className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-sky-300 border border-sky-500/30 font-extrabold text-xs rounded-xl shadow-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="liquid-glass-btn px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-sky-300 border border-sky-500/30 font-extrabold text-xs rounded-xl shadow-lg transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <Layers className="w-4 h-4" />
                   <span>{t.folderImport}</span>
@@ -814,7 +814,7 @@ export const MyPlanePicsSuite: React.FC = () => {
                     <button
                       key={sample.name}
                       onClick={() => setTestFilename(sample.file)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
+                      className={`liquid-glass-btn px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
                         testFilename === sample.file
                           ? 'bg-gradient-to-r from-[#FF5F1F] to-orange-500 text-black font-extrabold shadow-lg'
                           : 'bg-slate-950 hover:bg-slate-800 text-slate-300 border border-white/10'
@@ -1096,7 +1096,7 @@ export const MyPlanePicsSuite: React.FC = () => {
                       setLightboxMedia(filteredPhotos[prevIndex]);
                     }
                   }}
-                  className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all cursor-pointer"
+                  className="liquid-glass-btn p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all cursor-pointer"
                 >
                   <ArrowLeft className="w-5 h-5" />
                 </button>
@@ -1112,7 +1112,7 @@ export const MyPlanePicsSuite: React.FC = () => {
                       setLightboxMedia(filteredPhotos[nextIndex]);
                     }
                   }}
-                  className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all cursor-pointer"
+                  className="liquid-glass-btn p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all cursor-pointer"
                 >
                   <ArrowRight className="w-5 h-5" />
                 </button>
@@ -1120,9 +1120,9 @@ export const MyPlanePicsSuite: React.FC = () => {
 
               <button
                 onClick={() => setIsLightboxOpen(false)}
-                className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all cursor-pointer"
+                className="liquid-glass-btn p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="liquid-glass-btn w-5 h-5" />
               </button>
             </div>
 
@@ -1145,10 +1145,10 @@ export const MyPlanePicsSuite: React.FC = () => {
 
             <div className="flex items-center justify-between text-xs font-mono text-slate-300">
               <div className="flex items-center gap-4">
-                <span className="text-slate-400">Airline: <span className="text-white font-bold">{lightboxMedia.airline || 'N/A'}</span></span>
-                <span className="text-slate-400">Model: <span className="text-white font-bold">{lightboxMedia.aircraftModel || 'N/A'}</span></span>
+                <span className="text-slate-400">Airline: <span className="liquid-glass-btn text-white font-bold">{lightboxMedia.airline || 'N/A'}</span></span>
+                <span className="text-slate-400">Model: <span className="liquid-glass-btn text-white font-bold">{lightboxMedia.aircraftModel || 'N/A'}</span></span>
               </div>
-              <span className="text-slate-400">Location: <span className="text-white font-bold">{lightboxMedia.location || 'N/A'}</span></span>
+              <span className="text-slate-400">Location: <span className="liquid-glass-btn text-white font-bold">{lightboxMedia.location || 'N/A'}</span></span>
             </div>
           </div>
         </div>
@@ -1174,9 +1174,9 @@ export const MyPlanePicsSuite: React.FC = () => {
               </div>
               <button
                 onClick={() => setShowFolderChoiceModal(false)}
-                className="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white"
+                className="liquid-glass-btn p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white"
               >
-                <X className="w-5 h-5" />
+                <X className="liquid-glass-btn w-5 h-5" />
               </button>
             </div>
 
@@ -1213,7 +1213,7 @@ export const MyPlanePicsSuite: React.FC = () => {
                <button
                  onClick={() => executeFolderUpload(false)}
                  disabled={isImporting}
-                 className="p-4 bg-slate-800 hover:bg-slate-700 border border-white/10 hover:border-sky-400/50 rounded-2xl text-left transition-all cursor-pointer group disabled:opacity-50 disabled:cursor-not-allowed"
+                 className="liquid-glass-btn p-4 bg-slate-800 hover:bg-slate-700 border border-white/10 hover:border-sky-400/50 rounded-2xl text-left transition-all cursor-pointer group disabled:opacity-50 disabled:cursor-not-allowed"
                >
                  <div className="flex items-center justify-between">
                    <span className="font-extrabold text-sm text-sky-300 group-hover:text-white">
@@ -1231,7 +1231,7 @@ export const MyPlanePicsSuite: React.FC = () => {
                <button
                  onClick={() => executeFolderUpload(true)}
                  disabled={isImporting}
-                 className="p-4 bg-gradient-to-r from-[#FF5F1F]/20 via-orange-950/40 to-slate-800 hover:from-[#FF5F1F]/30 border-2 border-[#FF5F1F]/60 rounded-2xl text-left transition-all cursor-pointer group shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                 className="liquid-glass-btn p-4 bg-gradient-to-r from-[#FF5F1F]/20 via-orange-950/40 to-slate-800 hover:from-[#FF5F1F]/30 border-2 border-[#FF5F1F]/60 rounded-2xl text-left transition-all cursor-pointer group shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                >
                  <div className="flex items-center justify-between">
                    <span className="font-extrabold text-sm text-[#FF5F1F] group-hover:text-orange-300 flex items-center gap-2">

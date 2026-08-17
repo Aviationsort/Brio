@@ -19,7 +19,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onBack }) => {
       <div className="flex items-center gap-2 pb-2 border-b border-zinc-800">
         <button
           onClick={onBack}
-          className="p-1.5 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white"
+          className="liquid-glass-btn p-1.5 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white"
         >
           <ArrowLeft className="w-4 h-4" />
         </button>

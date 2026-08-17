@@ -18,7 +18,7 @@ export const MediaStreamingHub: React.FC = () => {
       <div className="flex items-center gap-2 p-1.5 bg-slate-900/90 border border-slate-800 rounded-2xl overflow-x-auto no-scrollbar">
         <button
           onClick={() => setSubTab('nightcore')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+          className={`liquid-glass-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
             subTab === 'nightcore'
               ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
@@ -30,7 +30,7 @@ export const MediaStreamingHub: React.FC = () => {
 
         <button
           onClick={() => setSubTab('iptv')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+          className={`liquid-glass-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
             subTab === 'iptv'
               ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
@@ -42,7 +42,7 @@ export const MediaStreamingHub: React.FC = () => {
 
         <button
           onClick={() => setSubTab('rss')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+          className={`liquid-glass-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
             subTab === 'rss'
               ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/60'

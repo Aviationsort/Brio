@@ -85,7 +85,7 @@ export const SlotsGame: React.FC = () => {
         {reels.map((sym, i) => (
           <div
             key={i}
-            className={`w-20 h-24 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 border border-amber-500/40 flex items-center justify-center text-4xl shadow-inner transition-all ${
+            className={`liquid-glass-btn w-20 h-24 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 border border-amber-500/40 flex items-center justify-center text-4xl shadow-inner transition-all ${
               spinning ? 'animate-bounce' : ''
             }`}
           >
@@ -108,7 +108,7 @@ export const SlotsGame: React.FC = () => {
             <button
               key={val}
               onClick={() => setBet(val)}
-              className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+              className={`liquid-glass-btn px-3 py-1 rounded-xl text-xs font-bold transition-all ${
                 bet === val
                   ? 'bg-amber-500 text-slate-950 font-black shadow'
                   : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
@@ -122,7 +122,7 @@ export const SlotsGame: React.FC = () => {
         <button
           onClick={handleSpin}
           disabled={spinning}
-          className="w-full py-4 bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 hover:scale-[1.02] active:scale-95 text-slate-950 font-black text-sm rounded-2xl shadow-xl shadow-amber-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+          className="liquid-glass-btn w-full py-4 bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 hover:scale-[1.02] active:scale-95 text-slate-950 font-black text-sm rounded-2xl shadow-xl shadow-amber-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
         >
           <RefreshCw className={`w-5 h-5 ${spinning ? 'animate-spin' : ''}`} />
           <span>{spinning ? 'SPINNING...' : 'SPIN REELS'}</span>

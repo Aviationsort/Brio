@@ -12,7 +12,7 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
-  const { loginUser, user, showToast, authRequired } = useApp();
+  const { loginUser, user, showToast, authRequired, t } = useApp();
   const [isSignUp, setIsSignUp] = useState(false);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -23,7 +23,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
   const handleClose = () => {
     if (authRequired) {
-      showToast('Authentication Required', 'Please sign in or create an account to continue.', 'warning');
+      showToast(t.authRequired, t.pleaseSignIn, 'warning');
       return;
     }
     onClose();
@@ -42,7 +42,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         onClose();
       }
     } catch (err) {
-      showToast('Login Failed', String(err), 'error');
+      showToast(t.encryptionError, String(err), 'error');
     } finally {
       setLoading(false);
     }
@@ -61,25 +61,25 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             </div>
             <div>
               <h3 className="text-lg font-bold tracking-wide">
-                {isSignUp ? 'Create Encrypted Account' : 'Easy Login & Unlock'}
+                {isSignUp ? t.createEncryptedAccount : t.easyLoginUnlock}
               </h3>
               <p className="text-xs text-slate-400">
-                AES-GCM 256-bit Client Cryptography
+                {t.aesGCM256Cryptography}
               </p>
             </div>
           </div>
           <button
             onClick={handleClose}
-            className={`p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors ${authRequired ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`liquid-glass-btn p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors ${authRequired ? 'opacity-50 cursor-not-allowed' : ''}`}
             disabled={authRequired}
           >
-            <X className="w-5 h-5" />
+            <X className="liquid-glass-btn w-5 h-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-5 space-y-4">
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Username / Operator Call</label>
+            <label className="block text-xs font-medium text-slate-300 mb-1">{t.usernameOperatorCall}</label>
             <input
               type="text"
               required
@@ -92,7 +92,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
           {isSignUp && (
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Email Address (Optional)</label>
+              <label className="block text-xs font-medium text-slate-300 mb-1">{t.emailAddressOptional}</label>
               <input
                 type="email"
                 value={email}
@@ -105,7 +105,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
           <div>
             <label className="block text-xs font-medium text-slate-300 mb-1">
-              Vault Master Passphrase (PBKDF2 Derived)
+              {t.vaultMasterPassphrasePBKDF2}
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
@@ -114,26 +114,26 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 required
                 value={passphrase}
                 onChange={(e) => setPassphrase(e.target.value)}
-                placeholder="Enter your master secret passphrase..."
+                placeholder={t.enterMasterSecretPassphrase}
                 className="w-full pl-9 pr-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors"
               />
             </div>
             <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
-              This passphrase generates your client-side AES-256 GCM key.
+              {t.passphraseGeneratesClientSideKey}
             </p>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-semibold text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
+            className="liquid-glass-btn w-full py-3 bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-semibold text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
           >
             {loading ? (
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
               <>
                 <Shield className="w-4 h-4" />
-                {isSignUp ? 'Create Encrypted Vault' : 'Unlock Brio Vault'}
+                {isSignUp ? t.createEncryptedVault : t.unlockBrioVault}
               </>
             )}
           </button>
@@ -142,9 +142,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             <button
               type="button"
               onClick={() => setIsSignUp(!isSignUp)}
-              className="text-xs text-cyan-400 hover:underline"
+              className="liquid-glass-btn text-xs text-cyan-400 hover:underline"
             >
-              {isSignUp ? 'Already have a passphrase? Unlock Vault' : 'First time? Create a new Vault Account'}
+              {isSignUp ? t.alreadyHavePassphrase : t.firstTimeCreateNewVault}
             </button>
           </div>
         </form>

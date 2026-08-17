@@ -81,7 +81,7 @@ export const ScientificCalculator: React.FC = () => {
 
         <button
           onClick={clearCalculator}
-          className="p-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-xl transition-all"
+          className="liquid-glass-btn p-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-xl transition-all"
         >
           <RotateCcw className="w-4 h-4" />
         </button>
@@ -109,7 +109,7 @@ export const ScientificCalculator: React.FC = () => {
                     else if (btn === 'C') clearCalculator();
                     else appendSymbol(btn);
                   }}
-                  className={`py-3 rounded-2xl font-bold font-mono text-xs transition-all shadow ${
+                  className={`liquid-glass-btn py-3 rounded-2xl font-bold font-mono text-xs transition-all shadow ${
                     btn === '='
                       ? 'bg-[#FF5F1F] text-black font-black hover:bg-[#ff7236]'
                       : btn === 'C'

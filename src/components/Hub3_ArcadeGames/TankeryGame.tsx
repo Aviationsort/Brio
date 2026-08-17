@@ -114,7 +114,7 @@ export const TankeryGame: React.FC = () => {
       <button
         onClick={handleFireShell}
         disabled={selectedTank.hp === 0 || enemyTank.hp === 0}
-        className="w-full py-3.5 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-black text-xs rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-40"
+        className="liquid-glass-btn w-full py-3.5 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-black text-xs rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-40"
       >
         <Crosshair className="w-5 h-5" />
         <span>FIRE APHE SHELL</span>

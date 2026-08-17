@@ -395,6 +395,30 @@ export interface UIStrings {
   selectedLabel: string;
   languageIFE: string;
   openLanguageScreen: string;
+  placeholderSearchAcronyms: string;
+  placeholderFilterBusRoute: string;
+  placeholderRssFeedUrl: string;
+  placeholderSearchRssContent: string;
+  placeholderFilterNightcore: string;
+  placeholderNightcoreStreamUrl: string;
+  placeholderIptvPlaylist: string;
+  placeholderSearchIptvChannels: string;
+  placeholderEventReminderTitle: string;
+  placeholderChannelRoomName: string;
+  placeholderSendMessageEncrypted: string;
+  placeholderSendMessage: string;
+  placeholderBroadcastMessage: string;
+  placeholderNoteTitle: string;
+  placeholderEncryptedNotes: string;
+  placeholderTagsComma: string;
+  placeholderUrgentTask: string;
+  placeholderPlaceNote: string;
+  placeholderSearchApps: string;
+  placeholderIcaoCode: string;
+  placeholderNoteTitleMobile: string;
+  placeholderUsernameExample: string;
+  placeholderEmail: string;
+  noBusRoutesMatched: string;
 }
 
 const DEFAULT_EN: UIStrings = {

@@ -387,7 +387,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
               <span className="font-bold text-zinc-900 text-[11px]">{currentTime}</span>
               <button
                 onClick={() => setActiveOverlay('CLOCK')}
-                className="p-0.5 rounded hover:bg-zinc-300 ml-1"
+                className="liquid-glass-btn p-0.5 rounded hover:bg-zinc-300 ml-1"
                 title="Clock Suite"
               >
                 <Clock className="w-3 h-3 text-indigo-600" />
@@ -410,7 +410,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                   playTouchSound(550);
                   setScreenMode('SEARCH');
                 }}
-                className="w-full bg-white/95 hover:bg-white text-zinc-800 rounded-lg px-3 py-2 shadow-lg border border-white/40 flex items-center justify-between transition-transform active:scale-98 cursor-pointer group"
+                className="liquid-glass-btn w-full bg-white/95 hover:bg-white text-zinc-800 rounded-lg px-3 py-2 shadow-lg border border-white/40 flex items-center justify-between transition-transform active:scale-98 cursor-pointer group"
                 title="Search Apps & Features"
               >
                 <div className="flex items-center gap-2">
@@ -435,7 +435,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                     {/* Weather Widget */}
                     <button
                       onClick={() => { setCurrentFeature('weather'); setScreenMode('FEATURE'); playTouchSound(580); }}
-                      className="w-full p-3 bg-gradient-to-r from-sky-500/20 to-blue-600/20 border border-sky-400/30 rounded-2xl text-left active:scale-[0.98] transition-transform"
+                      className="liquid-glass-btn w-full p-3 bg-gradient-to-r from-sky-500/20 to-blue-600/20 border border-sky-400/30 rounded-2xl text-left active:scale-[0.98] transition-transform"
                     >
                       <div className="flex items-center justify-between">
                         <div>
@@ -452,7 +452,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                     {/* Quick Dialer Widget */}
                     <button
                       onClick={() => { setCurrentFeature('dialer'); setScreenMode('FEATURE'); playTouchSound(580); }}
-                      className="w-full p-3 bg-gradient-to-r from-emerald-500/20 to-teal-600/20 border border-emerald-400/30 rounded-2xl text-left active:scale-[0.98] transition-transform"
+                      className="liquid-glass-btn w-full p-3 bg-gradient-to-r from-emerald-500/20 to-teal-600/20 border border-emerald-400/30 rounded-2xl text-left active:scale-[0.98] transition-transform"
                     >
                       <div className="flex items-center justify-between">
                         <div>
@@ -468,7 +468,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                     {/* Notes Widget */}
                     <button
                       onClick={() => { setCurrentFeature('notes'); setScreenMode('FEATURE'); playTouchSound(580); }}
-                      className="w-full p-3 bg-gradient-to-r from-amber-500/20 to-orange-600/20 border border-amber-400/30 rounded-2xl text-left active:scale-[0.98] transition-transform"
+                      className="liquid-glass-btn w-full p-3 bg-gradient-to-r from-amber-500/20 to-orange-600/20 border border-amber-400/30 rounded-2xl text-left active:scale-[0.98] transition-transform"
                     >
                       <div className="flex items-center justify-between">
                         <div>
@@ -484,7 +484,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                     {/* Now Playing Widget */}
                     <button
                       onClick={() => { setCurrentFeature('music'); setScreenMode('FEATURE'); playTouchSound(580); }}
-                      className="w-full p-3 bg-gradient-to-r from-purple-500/20 to-pink-600/20 border border-purple-400/30 rounded-2xl text-left active:scale-[0.98] transition-transform"
+                      className="liquid-glass-btn w-full p-3 bg-gradient-to-r from-purple-500/20 to-pink-600/20 border border-purple-400/30 rounded-2xl text-left active:scale-[0.98] transition-transform"
                     >
                       <div className="flex items-center justify-between">
                         <div>
@@ -500,7 +500,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                     {/* Recent Photos Widget with Paging */}
                     <button
                       onClick={() => { setCurrentFeature('photos'); setScreenMode('FEATURE'); playTouchSound(580); }}
-                      className="w-full p-3 bg-gradient-to-r from-[#FF5F1F]/20 to-red-600/20 border border-[#FF5F1F]/30 rounded-2xl text-left active:scale-[0.98] transition-transform"
+                      className="liquid-glass-btn w-full p-3 bg-gradient-to-r from-[#FF5F1F]/20 to-red-600/20 border border-[#FF5F1F]/30 rounded-2xl text-left active:scale-[0.98] transition-transform"
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div>
@@ -516,7 +516,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                           {myPlanePics.slice(planePicsPage * planePicsPerPage, (planePicsPage + 1) * planePicsPerPage).slice(0, 8).map((photo) => (
                             <div key={photo.id} className="aspect-square rounded-lg overflow-hidden bg-black border border-white/10">
                                {photo.mediaType === 'video' && photo.videoUrl ? (
-                                 <video src={photo.videoUrl} className="w-full h-full object-cover" muted />
+                                 <video src={photo.videoUrl} className="liquid-glass-btn w-full h-full object-cover" muted />
                                ) : (
                                  <img src={photo.thumbnailUrl || photo.imageUrl} alt={photo.registration} className="w-full h-full object-cover" />
                                )}
@@ -531,7 +531,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                           <button
                             onClick={(e) => { e.stopPropagation(); setPlanePicsPage(p => Math.max(0, p - 1)); }}
                             disabled={planePicsPage === 0}
-                            className="p-1 bg-black/50 rounded text-white disabled:opacity-30"
+                            className="liquid-glass-btn p-1 bg-black/50 rounded text-white disabled:opacity-30"
                           >
                             <ChevronLeft className="w-3 h-3" />
                           </button>
@@ -539,7 +539,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                           <button
                             onClick={(e) => { e.stopPropagation(); setPlanePicsPage(p => Math.min(Math.ceil(myPlanePics.length / planePicsPerPage) - 1, p + 1)); }}
                             disabled={planePicsPage >= Math.ceil(myPlanePics.length / planePicsPerPage) - 1}
-                            className="p-1 bg-black/50 rounded text-white disabled:opacity-30"
+                            className="liquid-glass-btn p-1 bg-black/50 rounded text-white disabled:opacity-30"
                           >
                             <ChevronRight className="w-3 h-3" />
                           </button>
@@ -550,7 +550,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                     {/* News Ticker Widget */}
                     <button
                       onClick={() => { setCurrentFeature('news'); setScreenMode('FEATURE'); playTouchSound(580); }}
-                      className="w-full p-3 bg-gradient-to-r from-cyan-500/20 to-sky-600/20 border border-cyan-400/30 rounded-2xl text-left active:scale-[0.98] transition-transform"
+                      className="liquid-glass-btn w-full p-3 bg-gradient-to-r from-cyan-500/20 to-sky-600/20 border border-cyan-400/30 rounded-2xl text-left active:scale-[0.98] transition-transform"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
@@ -574,9 +574,9 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                     </span>
                     <button
                       onClick={() => setScreenMode('HOME')}
-                      className="p-1 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white"
+                      className="liquid-glass-btn p-1 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="liquid-glass-btn w-4 h-4" />
                     </button>
                   </div>
 
@@ -587,7 +587,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                         <button
                           key={idx}
                           onClick={() => handleAppClick(app.hub, app.name)}
-                          className="w-full p-2 rounded-xl bg-zinc-900 hover:bg-sky-600/30 border border-zinc-800 flex items-center justify-between transition-colors cursor-pointer text-left"
+                          className="liquid-glass-btn w-full p-2 rounded-xl bg-zinc-900 hover:bg-sky-600/30 border border-zinc-800 flex items-center justify-between transition-colors cursor-pointer text-left"
                         >
                           <div className="flex items-center gap-2.5">
                             <div className="p-1.5 rounded-lg bg-sky-500/20 text-sky-400 border border-sky-400/30">
@@ -620,9 +620,9 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                     />
                     <button
                       onClick={() => setScreenMode('HOME')}
-                      className="p-2 rounded-xl bg-zinc-800 text-zinc-400"
+                      className="liquid-glass-btn p-2 rounded-xl bg-zinc-800 text-zinc-400"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="liquid-glass-btn w-4 h-4" />
                     </button>
                   </div>
 
@@ -633,7 +633,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                         <button
                           key={idx}
                           onClick={() => handleAppClick(app.hub, app.name)}
-                          className="w-full p-2 rounded-xl bg-zinc-900 hover:bg-sky-600/30 border border-zinc-800 flex items-center justify-between text-left cursor-pointer"
+                          className="liquid-glass-btn w-full p-2 rounded-xl bg-zinc-900 hover:bg-sky-600/30 border border-zinc-800 flex items-center justify-between text-left cursor-pointer"
                         >
                           <div className="flex items-center gap-2.5">
                             <Icon className="w-4 h-4 text-sky-400 shrink-0" />
@@ -657,9 +657,9 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                     <span className="text-xs font-bold text-white">{t.accountVaultSettings}</span>
                     <button
                       onClick={() => setScreenMode('HOME')}
-                      className="p-1 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white"
+                      className="liquid-glass-btn p-1 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="liquid-glass-btn w-4 h-4" />
                     </button>
                   </div>
 
@@ -683,7 +683,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                             setShowAuthModal(true);
                             showToast('Auth Modal', 'Opening login modal', 'info');
                           }}
-                          className="flex-1 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs rounded-lg text-center"
+                          className="liquid-glass-btn flex-1 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs rounded-lg text-center"
                         >
                           {t.loginSignUp}
                         </button>
@@ -693,7 +693,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                             logoutUser();
                             showToast(t.loggedOut, t.userSessionTerminated, 'info');
                           }}
-                          className="flex-1 py-1.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-lg text-center flex items-center justify-center gap-1"
+                          className="liquid-glass-btn flex-1 py-1.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-lg text-center flex items-center justify-center gap-1"
                         >
                           <LogOut className="w-3 h-3" /> {t.signOut}
                         </button>
@@ -705,7 +705,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                   {user && (
                     <button
                       onClick={generateAccountQR}
-                      className="w-full p-3 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-xl text-left transition-all cursor-pointer flex items-center gap-2.5"
+                      className="liquid-glass-btn w-full p-3 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-xl text-left transition-all cursor-pointer flex items-center gap-2.5"
                     >
                       <div className="p-2 bg-[#FF5F1F]/20 rounded-lg border border-[#FF5F1F]/30">
                         <QrCode className="w-5 h-5 text-[#FF5F1F]" />
@@ -733,7 +733,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                     />
                     <button
                       onClick={handleSetPassphrase}
-                      className="w-full py-1.5 bg-emerald-600 hover:bg-emerald-500 text-black font-bold text-xs rounded-lg cursor-pointer"
+                      className="liquid-glass-btn w-full py-1.5 bg-emerald-600 hover:bg-emerald-500 text-black font-bold text-xs rounded-lg cursor-pointer"
                     >
                       {t.verifySetKey}
                     </button>
@@ -748,9 +748,9 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                     <span className="text-xs font-bold text-white">{t.accountInfoMyPlanePics}</span>
                     <button
                       onClick={() => setScreenMode('ACCOUNT_OVERLAY')}
-                      className="p-1 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white"
+                      className="liquid-glass-btn p-1 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="liquid-glass-btn w-4 h-4" />
                     </button>
                   </div>
 
@@ -780,7 +780,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
 
                      <button
                        onClick={() => setScreenMode('profile')}
-                       className="w-full py-2 bg-[#FF5F1F] hover:bg-[#FF5F1F]/90 text-black font-bold text-xs rounded-lg flex items-center justify-center gap-2"
+                       className="liquid-glass-btn w-full py-2 bg-[#FF5F1F] hover:bg-[#FF5F1F]/90 text-black font-bold text-xs rounded-lg flex items-center justify-center gap-2"
                      >
                        <User className="w-4 h-4" /> {t.viewFullProfile}
                      </button>
@@ -808,7 +808,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
 
                    <button
                      onClick={() => setScreenMode('HOME')}
-                     className="w-full py-2 bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs rounded-lg"
+                     className="liquid-glass-btn w-full py-2 bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs rounded-lg"
                    >
                      {t.backToHome}
                    </button>
@@ -822,9 +822,9 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                      <span className="text-xs font-bold text-white capitalize">{currentFeature}</span>
                      <button
                        onClick={() => setScreenMode('HOME')}
-                       className="p-1 rounded-lg bg-zinc-800 text-zinc-400"
+                       className="liquid-glass-btn p-1 rounded-lg bg-zinc-800 text-zinc-400"
                      >
-                       <X className="w-4 h-4" />
+                       <X className="liquid-glass-btn w-4 h-4" />
                      </button>
                    </div>
 
@@ -853,7 +853,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                                  setWeatherLoading(false);
                                }
                              }}
-                             className="px-3 py-1.5 bg-sky-600 text-white text-xs rounded-lg"
+                             className="liquid-glass-btn px-3 py-1.5 bg-sky-600 text-white text-xs rounded-lg"
                            >
                              {t.refresh}
                            </button>
@@ -895,7 +895,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                              <button
                                key={key}
                                onClick={() => { setDialNumber(d => d + key); playTouchSound(700 + parseInt(key) * 50); }}
-                               className="p-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-white font-bold text-lg"
+                               className="liquid-glass-btn p-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-white font-bold text-lg"
                              >
                                {key}
                              </button>
@@ -904,7 +904,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                          <div className="flex gap-2">
                            <button
                              onClick={() => setDialNumber(d => d.slice(0, -1))}
-                             className="flex-1 py-2 bg-zinc-800 text-white text-xs rounded-lg"
+                             className="liquid-glass-btn flex-1 py-2 bg-zinc-800 text-white text-xs rounded-lg"
                            >
                              {t.clear}
                            </button>
@@ -916,7 +916,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                                  setTimeout(() => setCallActive(false), 3000);
                                }
                              }}
-                             className="flex-1 py-2 bg-emerald-600 text-black font-bold text-xs rounded-lg"
+                             className="liquid-glass-btn flex-1 py-2 bg-emerald-600 text-black font-bold text-xs rounded-lg"
                            >
                              {callActive ? t.endCall : t.dialCall}
                            </button>
@@ -951,7 +951,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                                 showToast(t.success, t.save, 'success');
                               }
                             }}
-                            className="w-full py-1.5 bg-amber-600 text-black font-bold text-xs rounded-lg"
+                            className="liquid-glass-btn w-full py-1.5 bg-amber-600 text-black font-bold text-xs rounded-lg"
                           >
                             {t.save}
                           </button>
@@ -979,13 +979,13 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                                const prev = iptvChannels[(idx - 1 + iptvChannels.length) % iptvChannels.length];
                                if (prev) setCurrentTrack(prev as any);
                              }}
-                             className="p-2 bg-zinc-800 rounded-full text-white"
+                             className="liquid-glass-btn p-2 bg-zinc-800 rounded-full text-white"
                            >
                              <SkipBack className="w-5 h-5" />
                            </button>
                            <button
                              onClick={() => setIsPlayingMusic(!isPlayingMusic)}
-                             className="p-3 bg-purple-600 rounded-full text-white"
+                             className="liquid-glass-btn p-3 bg-purple-600 rounded-full text-white"
                            >
                              {isPlayingMusic ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
                            </button>
@@ -995,7 +995,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                                const next = iptvChannels[(idx + 1) % iptvChannels.length];
                                if (next) setCurrentTrack(next as any);
                              }}
-                             className="p-2 bg-zinc-800 rounded-full text-white"
+                             className="liquid-glass-btn p-2 bg-zinc-800 rounded-full text-white"
                            >
                              <SkipForward className="w-5 h-5" />
                            </button>
@@ -1050,7 +1050,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                                <button
                                  onClick={() => setPlanePicsPage(p => Math.max(0, p - 1))}
                                  disabled={planePicsPage === 0}
-                                 className="flex items-center gap-1 px-3 py-1.5 bg-zinc-800 rounded-lg text-white text-xs disabled:opacity-30"
+                                 className="liquid-glass-btn flex items-center gap-1 px-3 py-1.5 bg-zinc-800 rounded-lg text-white text-xs disabled:opacity-30"
                                >
                                  <ArrowLeft className="w-3 h-3" /> {t.previous}
                                </button>
@@ -1060,7 +1060,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                                <button
                                  onClick={() => setPlanePicsPage(p => Math.min(Math.ceil(myPlanePics.length / planePicsPerPage) - 1, p + 1))}
                                  disabled={planePicsPage >= Math.ceil(myPlanePics.length / planePicsPerPage) - 1}
-                                 className="flex items-center gap-1 px-3 py-1.5 bg-zinc-800 rounded-lg text-white text-xs disabled:opacity-30"
+                                 className="liquid-glass-btn flex items-center gap-1 px-3 py-1.5 bg-zinc-800 rounded-lg text-white text-xs disabled:opacity-30"
                                >
                                  {t.next} <ArrowRight className="w-3 h-3" />
                                </button>
@@ -1094,7 +1094,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                  <div className="flex items-center gap-2 mb-3 p-2 bg-zinc-900/90 border border-zinc-700 rounded-xl">
                    <button
                      onClick={() => setScreenMode('HOME')}
-                     className="p-1.5 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white"
+                     className="liquid-glass-btn p-1.5 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white"
                    >
                      <ArrowLeft className="w-4 h-4" />
                    </button>
@@ -1125,7 +1125,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                     playTouchSound(620);
                     setScreenMode('APP_DRAWER');
                   }}
-                  className="px-6 py-1 bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 border border-zinc-700 rounded-t-xl shadow-lg flex items-center gap-1.5 text-xs font-mono font-bold transition-all active:scale-95 cursor-pointer"
+                  className="liquid-glass-btn px-6 py-1 bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 border border-zinc-700 rounded-t-xl shadow-lg flex items-center gap-1.5 text-xs font-mono font-bold transition-all active:scale-95 cursor-pointer"
                   title="Open App Drawer"
                 >
                   <ChevronUp className="w-4 h-4 text-emerald-400 animate-bounce" />
@@ -1148,7 +1148,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                    showToast('BRIO DROID', 'Home Screen Active', 'info');
                  }
                }}
-               className="p-1.5 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors active:scale-90 cursor-pointer"
+               className="liquid-glass-btn p-1.5 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors active:scale-90 cursor-pointer"
                title="Back Key"
              >
                <RotateCcw className="w-5 h-5 text-zinc-300" />
@@ -1160,7 +1160,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                  playTouchSound(500);
                  setScreenMode('ACCOUNT_OVERLAY');
                }}
-               className="p-1.5 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors active:scale-90 cursor-pointer"
+               className="liquid-glass-btn p-1.5 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors active:scale-90 cursor-pointer"
                title="Menu Key"
              >
                <Menu className="w-5 h-5 text-zinc-300" />
@@ -1172,7 +1172,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                  playTouchSound(650);
                  setScreenMode('HOME');
                }}
-               className="p-1.5 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors active:scale-90 cursor-pointer"
+               className="liquid-glass-btn p-1.5 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors active:scale-90 cursor-pointer"
                title="Home Key"
              >
                <Home className="w-5 h-5 text-zinc-300" />
@@ -1184,7 +1184,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                  playTouchSound(580);
                  setScreenMode('SEARCH');
                }}
-               className="p-1.5 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors active:scale-90 cursor-pointer"
+               className="liquid-glass-btn p-1.5 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors active:scale-90 cursor-pointer"
                title="Search Key"
              >
                <Search className="w-5 h-5 text-zinc-300" />
@@ -1202,9 +1202,9 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                    </div>
                    <button
                      onClick={() => setActiveOverlay('NONE')}
-                     className="p-1.5 rounded-xl text-slate-400 hover:text-white bg-slate-800"
+                     className="liquid-glass-btn p-1.5 rounded-xl text-slate-400 hover:text-white bg-slate-800"
                    >
-                     <X className="w-4 h-4" />
+                     <X className="liquid-glass-btn w-4 h-4" />
                    </button>
                  </div>
 
@@ -1213,7 +1213,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                      <button
                        key={icao}
                        onClick={() => loadWeatherForStation(icao)}
-                       className={`px-3 py-1.5 rounded-lg text-[10px] font-bold font-mono transition-all shrink-0 ${
+                       className={`liquid-glass-btn px-3 py-1.5 rounded-lg text-[10px] font-bold font-mono transition-all shrink-0 ${
                          weatherStationData.icao === icao
                            ? 'bg-sky-500 text-black font-extrabold'
                            : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
@@ -1256,8 +1256,8 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                    </div>
 
                    <div className="space-y-1 pt-2 border-t border-slate-800">
-                     <p className="text-[10px] font-mono text-slate-400"><strong className="text-sky-300">METAR:</strong> {weatherStationData.metar}</p>
-                     <p className="text-[10px] font-mono text-slate-400"><strong className="text-sky-300">TAF:</strong> {weatherStationData.taf}</p>
+                     <p className="text-[10px] font-mono text-slate-400"><strong className="liquid-glass-btn text-sky-300">METAR:</strong> {weatherStationData.metar}</p>
+                     <p className="text-[10px] font-mono text-slate-400"><strong className="liquid-glass-btn text-sky-300">TAF:</strong> {weatherStationData.taf}</p>
                    </div>
                  </div>
                </div>

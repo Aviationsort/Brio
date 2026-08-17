@@ -91,7 +91,7 @@ export const TacticalRiskGame: React.FC = () => {
         <div className="flex items-center gap-2 p-1 bg-slate-950 border border-slate-800 rounded-2xl">
           <button
             onClick={() => switchMap('Lebanon')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            className={`liquid-glass-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
               selectedCountry === 'Lebanon'
                 ? 'bg-rose-600 text-white shadow'
                 : 'text-slate-400 hover:text-white'
@@ -101,7 +101,7 @@ export const TacticalRiskGame: React.FC = () => {
           </button>
           <button
             onClick={() => switchMap('Cyprus')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            className={`liquid-glass-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
               selectedCountry === 'Cyprus'
                 ? 'bg-rose-600 text-white shadow'
                 : 'text-slate-400 hover:text-white'
@@ -129,7 +129,7 @@ export const TacticalRiskGame: React.FC = () => {
                 <button
                   key={t.id}
                   onClick={() => setSelectedTerritory(t)}
-                  className={`p-4 rounded-2xl border text-left transition-all flex flex-col justify-between min-h-[110px] ${
+                  className={`liquid-glass-btn p-4 rounded-2xl border text-left transition-all flex flex-col justify-between min-h-[110px] ${
                     isSelected
                       ? 'bg-slate-800 border-rose-500 shadow-xl'
                       : 'bg-slate-950 border-slate-800/80 hover:border-slate-700'
@@ -138,7 +138,7 @@ export const TacticalRiskGame: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-white">{t.name}</span>
                     <span
-                      className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
+                      className={`liquid-glass-btn text-[10px] font-mono px-2 py-0.5 rounded-full ${
                         isBlue ? 'bg-cyan-950 text-cyan-300 border border-cyan-500/30' : 'bg-rose-950 text-rose-300 border border-rose-500/30'
                       }`}
                     >
@@ -172,7 +172,7 @@ export const TacticalRiskGame: React.FC = () => {
           <div className="space-y-2 pt-2">
             <button
               onClick={() => selectedTerritory && handleDeployTroops(selectedTerritory.id)}
-              className="w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs rounded-xl shadow transition-all flex items-center justify-center gap-1.5"
+              className="liquid-glass-btn w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs rounded-xl shadow transition-all flex items-center justify-center gap-1.5"
             >
               <Shield className="w-4 h-4" />
               <span>Deploy +5 Divisions (10 CP)</span>
@@ -180,7 +180,7 @@ export const TacticalRiskGame: React.FC = () => {
 
             <button
               onClick={() => selectedTerritory && handleLaunchOffensive(selectedTerritory.id)}
-              className="w-full py-2.5 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-bold text-xs rounded-xl shadow transition-all flex items-center justify-center gap-1.5"
+              className="liquid-glass-btn w-full py-2.5 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-bold text-xs rounded-xl shadow transition-all flex items-center justify-center gap-1.5"
             >
               <Swords className="w-4 h-4" />
               <span>Launch Tactical Assault (25 CP)</span>

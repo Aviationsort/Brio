@@ -66,13 +66,13 @@ export const PDFEditor: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={handleClear}
-            className="px-3 py-1.5 bg-zinc-900 border border-white/10 text-zinc-400 hover:text-white text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5"
+            className="liquid-glass-btn px-3 py-1.5 bg-zinc-900 border border-white/10 text-zinc-400 hover:text-white text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5"
           >
-            <Trash2 className="w-3.5 h-3.5" /> Clear Layers
+            <Trash2 className="liquid-glass-btn w-3.5 h-3.5" /> Clear Layers
           </button>
           <button
             onClick={handleExport}
-            className="px-4 py-1.5 bg-[#FF5F1F] hover:bg-[#ff7236] text-black text-xs font-bold rounded-xl shadow-lg transition-all flex items-center gap-1.5"
+            className="liquid-glass-btn px-4 py-1.5 bg-[#FF5F1F] hover:bg-[#ff7236] text-black text-xs font-bold rounded-xl shadow-lg transition-all flex items-center gap-1.5"
           >
             <Download className="w-3.5 h-3.5" /> Export Signed PDF
           </button>
@@ -84,15 +84,15 @@ export const PDFEditor: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setActiveTool('pen')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+            className={`liquid-glass-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
               activeTool === 'pen' ? 'bg-[#FF5F1F] text-black shadow' : 'bg-zinc-900 text-zinc-400'
             }`}
           >
-            <Edit3 className="w-3.5 h-3.5" /> Pen Tool
+            <Edit3 className="liquid-glass-btn w-3.5 h-3.5" /> Pen Tool
           </button>
           <button
             onClick={() => setActiveTool('highlighter')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+            className={`liquid-glass-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
               activeTool === 'highlighter' ? 'bg-[#FF5F1F] text-black shadow' : 'bg-zinc-900 text-zinc-400'
             }`}
           >
@@ -100,7 +100,7 @@ export const PDFEditor: React.FC = () => {
           </button>
           <button
             onClick={() => setActiveTool('text')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+            className={`liquid-glass-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
               activeTool === 'text' ? 'bg-[#FF5F1F] text-black shadow' : 'bg-zinc-900 text-zinc-400'
             }`}
           >
@@ -108,11 +108,11 @@ export const PDFEditor: React.FC = () => {
           </button>
           <button
             onClick={() => setActiveTool('signature')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+            className={`liquid-glass-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
               activeTool === 'signature' ? 'bg-[#FF5F1F] text-black shadow' : 'bg-zinc-900 text-zinc-400'
             }`}
           >
-            <CheckCircle2 className="w-3.5 h-3.5" /> Digital Stamp
+            <CheckCircle2 className="liquid-glass-btn w-3.5 h-3.5" /> Digital Stamp
           </button>
         </div>
 

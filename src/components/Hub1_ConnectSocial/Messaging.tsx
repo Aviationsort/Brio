@@ -122,7 +122,7 @@ export const Messaging: React.FC = () => {
         <div className="flex items-center justify-between p-1 bg-slate-900 border border-slate-800 rounded-xl text-xs">
           <button
             onClick={() => setMode('online')}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg font-semibold transition-all ${
+            className={`liquid-glass-btn flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg font-semibold transition-all ${
               mode === 'online' ? 'bg-cyan-600 text-white shadow' : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -131,7 +131,7 @@ export const Messaging: React.FC = () => {
           </button>
           <button
             onClick={() => setMode('bluetooth')}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg font-semibold transition-all ${
+            className={`liquid-glass-btn flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg font-semibold transition-all ${
               mode === 'bluetooth' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -145,7 +145,7 @@ export const Messaging: React.FC = () => {
             <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Channels</h4>
             <button
               onClick={() => setShowAddChannel(!showAddChannel)}
-              className="text-xs text-cyan-400 hover:text-cyan-300 font-bold border border-cyan-500/30 px-2 py-0.5 rounded-lg bg-cyan-950/40"
+              className="liquid-glass-btn text-xs text-cyan-400 hover:text-cyan-300 font-bold border border-cyan-500/30 px-2 py-0.5 rounded-lg bg-cyan-950/40"
             >
               + New Channel
             </button>
@@ -162,7 +162,7 @@ export const Messaging: React.FC = () => {
               />
               <button
                 type="submit"
-                className="w-full py-1 bg-cyan-600 hover:bg-cyan-500 text-black font-extrabold text-xs rounded-lg shadow"
+                className="liquid-glass-btn w-full py-1 bg-cyan-600 hover:bg-cyan-500 text-black font-extrabold text-xs rounded-lg shadow"
               >
                 Create Encrypted Channel
               </button>
@@ -174,7 +174,7 @@ export const Messaging: React.FC = () => {
               <button
                 key={contact.id}
                 onClick={() => setSelectedContact(contact)}
-                className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition-all ${
+                className={`liquid-glass-btn w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition-all ${
                   selectedContact.id === contact.id
                     ? 'bg-slate-800/90 border border-slate-700 text-white shadow'
                     : 'text-slate-300 hover:bg-slate-900/50 hover:text-white'
@@ -216,7 +216,7 @@ export const Messaging: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsEncrypted(!isEncrypted)}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
+              className={`liquid-glass-btn flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
                 isEncrypted
                   ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
                   : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
@@ -235,7 +235,7 @@ export const Messaging: React.FC = () => {
             return (
               <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                 <div
-                  className={`max-w-md p-3 rounded-2xl text-xs leading-relaxed shadow-lg ${
+                  className={`liquid-glass-btn max-w-md p-3 rounded-2xl text-xs leading-relaxed shadow-lg ${
                     isMe
                       ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-br-none'
                       : 'bg-slate-800 text-slate-100 border border-slate-700/60 rounded-bl-none'
@@ -274,7 +274,7 @@ export const Messaging: React.FC = () => {
           <button
             type="button"
             onClick={() => showToast('Attachment Locked', 'Select file or sticker from vault', 'info')}
-            className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-colors"
+            className="liquid-glass-btn p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-colors"
           >
             <Paperclip className="w-4 h-4" />
           </button>
@@ -283,7 +283,7 @@ export const Messaging: React.FC = () => {
             type="button"
             onClick={handleSendVoiceNote}
             disabled={recordingVoice}
-            className={`p-2 rounded-xl transition-colors ${
+            className={`liquid-glass-btn p-2 rounded-xl transition-colors ${
               recordingVoice
                 ? 'bg-rose-600 text-white animate-pulse'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
@@ -302,7 +302,7 @@ export const Messaging: React.FC = () => {
 
           <button
             type="submit"
-            className="px-3.5 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5"
+            className="liquid-glass-btn px-3.5 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5"
           >
             <Send className="w-3.5 h-3.5" />
             <span>Send</span>

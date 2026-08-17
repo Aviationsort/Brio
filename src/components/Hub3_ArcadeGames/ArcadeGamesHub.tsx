@@ -150,7 +150,7 @@ export const ArcadeGamesHub: React.FC = () => {
         {selectedGame && (
           <button
             onClick={() => setSelectedGame(null)}
-            className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-rose-300 rounded-xl transition-all"
+            className="liquid-glass-btn px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-rose-300 rounded-xl transition-all"
           >
             ← Back to Games Menu
           </button>
@@ -180,7 +180,7 @@ export const ArcadeGamesHub: React.FC = () => {
               <button
                 key={game.id}
                 onClick={() => setSelectedGame(game.id)}
-                className="bg-slate-900/90 border border-slate-800 hover:border-rose-500/50 rounded-2xl p-5 shadow-xl flex flex-col justify-between text-left transition-all hover:scale-[1.02] group"
+                className="liquid-glass-btn bg-slate-900/90 border border-slate-800 hover:border-rose-500/50 rounded-2xl p-5 shadow-xl flex flex-col justify-between text-left transition-all hover:scale-[1.02] group"
               >
                 <div>
                   <div className="flex items-center justify-between mb-3">

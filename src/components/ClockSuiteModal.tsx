@@ -293,9 +293,9 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-zinc-400 hover:text-white transition-all cursor-pointer"
+            className="liquid-glass-btn p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-zinc-400 hover:text-white transition-all cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="liquid-glass-btn w-5 h-5" />
           </button>
         </div>
 
@@ -303,7 +303,7 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
         <div className="px-6 py-3 bg-slate-950/90 border-b border-white/10 flex items-center gap-2 overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveTab('ANALOG')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`liquid-glass-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'ANALOG'
                 ? 'bg-gradient-to-r from-[#FF5F1F] to-orange-500 text-black shadow-lg font-black'
                 : 'bg-slate-900 text-zinc-300 hover:bg-slate-800'
@@ -315,7 +315,7 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
 
           <button
             onClick={() => setActiveTab('STOPWATCH')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`liquid-glass-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'STOPWATCH'
                 ? 'bg-gradient-to-r from-[#FF5F1F] to-orange-500 text-black shadow-lg font-black'
                 : 'bg-slate-900 text-zinc-300 hover:bg-slate-800'
@@ -327,7 +327,7 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
 
           <button
             onClick={() => setActiveTab('TIMER')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`liquid-glass-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'TIMER'
                 ? 'bg-gradient-to-r from-[#FF5F1F] to-orange-500 text-black shadow-lg font-black'
                 : 'bg-slate-900 text-zinc-300 hover:bg-slate-800'
@@ -339,7 +339,7 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
 
           <button
             onClick={() => setActiveTab('CALENDAR')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`liquid-glass-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'CALENDAR'
                 ? 'bg-gradient-to-r from-[#FF5F1F] to-orange-500 text-black shadow-lg font-black'
                 : 'bg-slate-900 text-zinc-300 hover:bg-slate-800'
@@ -463,7 +463,7 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
                 {!swRunning ? (
                   <button
                     onClick={() => setSwRunning(true)}
-                    className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-black font-black rounded-2xl text-sm flex items-center gap-2 cursor-pointer shadow-lg"
+                    className="liquid-glass-btn px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-black font-black rounded-2xl text-sm flex items-center gap-2 cursor-pointer shadow-lg"
                   >
                     <Play className="w-4 h-4 fill-current" />
                     <span>Start</span>
@@ -471,7 +471,7 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
                 ) : (
                   <button
                     onClick={() => setSwRunning(false)}
-                    className="px-6 py-3 bg-amber-500 hover:bg-amber-400 text-black font-black rounded-2xl text-sm flex items-center gap-2 cursor-pointer shadow-lg"
+                    className="liquid-glass-btn px-6 py-3 bg-amber-500 hover:bg-amber-400 text-black font-black rounded-2xl text-sm flex items-center gap-2 cursor-pointer shadow-lg"
                   >
                     <Pause className="w-4 h-4 fill-current" />
                     <span>Pause</span>
@@ -481,7 +481,7 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
                 <button
                   onClick={handleSwLap}
                   disabled={!swRunning}
-                  className="px-6 py-3 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-white font-black rounded-2xl text-sm flex items-center gap-2 cursor-pointer border border-white/10"
+                  className="liquid-glass-btn px-6 py-3 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-white font-black rounded-2xl text-sm flex items-center gap-2 cursor-pointer border border-white/10"
                 >
                   <Flag className="w-4 h-4" />
                   <span>Split Lap</span>
@@ -489,7 +489,7 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
 
                 <button
                   onClick={handleSwReset}
-                  className="px-6 py-3 bg-rose-900/60 hover:bg-rose-800 text-rose-200 font-black rounded-2xl text-sm flex items-center gap-2 cursor-pointer border border-rose-500/30"
+                  className="liquid-glass-btn px-6 py-3 bg-rose-900/60 hover:bg-rose-800 text-rose-200 font-black rounded-2xl text-sm flex items-center gap-2 cursor-pointer border border-rose-500/30"
                 >
                   <RotateCcw className="w-4 h-4" />
                   <span>Reset</span>
@@ -566,7 +566,7 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
                 {!timerRunning ? (
                   <button
                     onClick={startTimer}
-                    className="px-6 py-3 bg-gradient-to-r from-[#FF5F1F] to-orange-500 text-black font-extrabold rounded-2xl text-sm flex items-center gap-2 cursor-pointer shadow-lg"
+                    className="liquid-glass-btn px-6 py-3 bg-gradient-to-r from-[#FF5F1F] to-orange-500 text-black font-extrabold rounded-2xl text-sm flex items-center gap-2 cursor-pointer shadow-lg"
                   >
                     <Play className="w-4 h-4 fill-current" />
                     <span>Start Countdown</span>
@@ -574,7 +574,7 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
                 ) : (
                   <button
                     onClick={() => setTimerRunning(false)}
-                    className="px-6 py-3 bg-amber-500 text-black font-extrabold rounded-2xl text-sm flex items-center gap-2 cursor-pointer shadow-lg"
+                    className="liquid-glass-btn px-6 py-3 bg-amber-500 text-black font-extrabold rounded-2xl text-sm flex items-center gap-2 cursor-pointer shadow-lg"
                   >
                     <Pause className="w-4 h-4 fill-current" />
                     <span>Pause</span>
@@ -583,7 +583,7 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
 
                 <button
                   onClick={resetTimer}
-                  className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-extrabold rounded-2xl text-sm flex items-center gap-2 cursor-pointer border border-white/10"
+                  className="liquid-glass-btn px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-extrabold rounded-2xl text-sm flex items-center gap-2 cursor-pointer border border-white/10"
                 >
                   <RotateCcw className="w-4 h-4" />
                   <span>Reset</span>
@@ -601,7 +601,7 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
                 <div className="flex items-center justify-between px-2">
                   <button
                     onClick={prevMonth}
-                    className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white"
+                    className="liquid-glass-btn p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
@@ -610,7 +610,7 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
                   </span>
                   <button
                     onClick={nextMonth}
-                    className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white"
+                    className="liquid-glass-btn p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -634,7 +634,7 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
                       <button
                         key={idx}
                         onClick={() => setSelectedDateStr(dStr)}
-                        className={`h-9 rounded-xl flex flex-col items-center justify-center transition-all cursor-pointer relative ${
+                        className={`liquid-glass-btn h-9 rounded-xl flex flex-col items-center justify-center transition-all cursor-pointer relative ${
                           isSelected
                             ? 'bg-[#FF5F1F] text-black font-extrabold shadow-md'
                             : isToday
@@ -695,7 +695,7 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
 
                     <button
                       type="submit"
-                      className="flex-1 py-1 bg-[#FF5F1F] hover:bg-orange-500 text-black font-extrabold text-xs rounded-xl flex items-center justify-center gap-1 cursor-pointer"
+                      className="liquid-glass-btn flex-1 py-1 bg-[#FF5F1F] hover:bg-orange-500 text-black font-extrabold text-xs rounded-xl flex items-center justify-center gap-1 cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>Add Event</span>
@@ -710,7 +710,7 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
                     .map((ev) => (
                       <div
                         key={ev.id}
-                        className={`p-2.5 rounded-xl border flex items-center justify-between text-xs font-mono transition-all ${
+                        className={`liquid-glass-btn p-2.5 rounded-xl border flex items-center justify-between text-xs font-mono transition-all ${
                           ev.completed
                             ? 'bg-zinc-950 border-zinc-800 text-zinc-500 line-through'
                             : 'bg-slate-900 border-white/10 text-white'
@@ -719,9 +719,9 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => toggleEventComplete(ev.id)}
-                            className="p-1 rounded text-emerald-400 hover:text-emerald-300"
+                            className="liquid-glass-btn p-1 rounded text-emerald-400 hover:text-emerald-300"
                           >
-                            <CheckCircle2 className={`w-4 h-4 ${ev.completed ? 'fill-emerald-500 text-black' : ''}`} />
+                            <CheckCircle2 className={`liquid-glass-btn w-4 h-4 ${ev.completed ? 'fill-emerald-500 text-black' : ''}`} />
                           </button>
                           <div>
                             <span className="font-bold block">{ev.title}</span>
@@ -733,9 +733,9 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
 
                         <button
                           onClick={() => deleteEvent(ev.id)}
-                          className="p-1 text-zinc-500 hover:text-rose-400"
+                          className="liquid-glass-btn p-1 text-zinc-500 hover:text-rose-400"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Trash2 className="liquid-glass-btn w-3.5 h-3.5" />
                         </button>
                       </div>
                     ))}

@@ -72,7 +72,7 @@ export const LotteryGame: React.FC = () => {
         </div>
         <button
           onClick={handleQuickPick}
-          className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-cyan-300 rounded-xl transition-all"
+          className="liquid-glass-btn px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-cyan-300 rounded-xl transition-all"
         >
           Quick Pick
         </button>
@@ -88,7 +88,7 @@ export const LotteryGame: React.FC = () => {
               <button
                 key={num}
                 onClick={() => toggleNumber(num)}
-                className={`py-2.5 rounded-xl font-bold font-mono text-xs transition-all ${
+                className={`liquid-glass-btn py-2.5 rounded-xl font-bold font-mono text-xs transition-all ${
                   isSelected
                     ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/30 scale-105'
                     : 'bg-slate-950 border border-slate-800 text-slate-300 hover:bg-slate-800'
@@ -109,7 +109,7 @@ export const LotteryGame: React.FC = () => {
             {drawnNumbers.map((n) => (
               <span
                 key={n}
-                className={`w-9 h-9 rounded-full font-bold font-mono text-sm flex items-center justify-center ${
+                className={`liquid-glass-btn w-9 h-9 rounded-full font-bold font-mono text-sm flex items-center justify-center ${
                   selectedNumbers.includes(n)
                     ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/30 font-black'
                     : 'bg-slate-800 text-slate-300'
@@ -132,7 +132,7 @@ export const LotteryGame: React.FC = () => {
       <button
         onClick={handleRunDraw}
         disabled={drawing || selectedNumbers.length !== 5}
-        className="w-full py-3.5 bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 text-white font-bold text-xs rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-40"
+        className="liquid-glass-btn w-full py-3.5 bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 text-white font-bold text-xs rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-40"
       >
         <Sparkles className={`w-4 h-4 ${drawing ? 'animate-spin' : ''}`} />
         <span>{drawing ? 'Drawing Lucky Balls...' : 'Simulate Daily Draw'}</span>

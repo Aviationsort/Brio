@@ -178,7 +178,7 @@ https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream
         <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
           <button
             onClick={handleLoadDemoM3U}
-            className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+            className="liquid-glass-btn px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Load Sample Stream</span>
@@ -187,10 +187,10 @@ https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream
           {iptvChannels.length > 0 && (
             <button
               onClick={handleClearChannels}
-              className="px-3 py-2 bg-rose-950/60 hover:bg-rose-900 border border-rose-500/30 text-rose-300 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
+              className="liquid-glass-btn px-3 py-2 bg-rose-950/60 hover:bg-rose-900 border border-rose-500/30 text-rose-300 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
               title="Clear all loaded IPTV channels"
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              <Trash2 className="liquid-glass-btn w-3.5 h-3.5" />
               <span>Clear List</span>
             </button>
           )}
@@ -251,7 +251,7 @@ https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="px-2.5 py-1 bg-purple-950 border border-purple-500/40 text-purple-300 hover:text-white rounded-lg text-[10px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer"
+                className="liquid-glass-btn px-2.5 py-1 bg-purple-950 border border-purple-500/40 text-purple-300 hover:text-white rounded-lg text-[10px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer"
               >
                 <Upload className="w-3 h-3" />
                 <span>{isLoadingFile ? 'Reading...' : 'Upload .m3u File'}</span>
@@ -277,9 +277,9 @@ https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream
               <button
                 type="submit"
                 disabled={!m3uText.trim()}
-                className="w-full py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-extrabold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                className="liquid-glass-btn w-full py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-extrabold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
-                <CheckCircle2 className="w-4 h-4" />
+                <CheckCircle2 className="liquid-glass-btn w-4 h-4" />
                 <span>Parse & Append Channels</span>
               </button>
             </form>
@@ -311,7 +311,7 @@ https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream
               <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
                 <button
                   onClick={() => setSelectedCategory('all')}
-                  className={`px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold transition-all shrink-0 cursor-pointer ${
+                  className={`liquid-glass-btn px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold transition-all shrink-0 cursor-pointer ${
                     selectedCategory === 'all'
                       ? 'bg-purple-600 text-white'
                       : 'bg-slate-800 text-slate-400 hover:text-white'
@@ -323,7 +323,7 @@ https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold transition-all shrink-0 cursor-pointer ${
+                    className={`liquid-glass-btn px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold transition-all shrink-0 cursor-pointer ${
                       selectedCategory === cat
                         ? 'bg-purple-600 text-white'
                         : 'bg-slate-800 text-slate-400 hover:text-white'
@@ -344,7 +344,7 @@ https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream
                     <button
                       key={ch.id}
                       onClick={() => setSelectedIPTVChannel(ch)}
-                      className={`w-full p-2.5 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer ${
+                      className={`liquid-glass-btn w-full p-2.5 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer ${
                         isSelected
                           ? 'bg-purple-950/90 border-purple-500 text-white shadow-lg'
                           : 'bg-slate-950 border-slate-800/80 text-slate-300 hover:bg-slate-800/80'

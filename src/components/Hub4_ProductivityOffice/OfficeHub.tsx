@@ -152,7 +152,7 @@ export const OfficeHub: React.FC = () => {
 
               <button
                 type="submit"
-                className="w-full sm:w-auto px-5 py-2.5 bg-[#FF5F1F] hover:bg-[#ff7236] text-black font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 shrink-0"
+                className="liquid-glass-btn w-full sm:w-auto px-5 py-2.5 bg-[#FF5F1F] hover:bg-[#ff7236] text-black font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 shrink-0"
               >
                 <Plus className="w-4 h-4" /> Save Encrypted Note
               </button>
@@ -186,7 +186,7 @@ export const OfficeHub: React.FC = () => {
                     setSelectedNote(note.id);
                     setDecryptedText(null);
                   }}
-                  className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between min-h-[120px] ${
+                  className={`liquid-glass-btn p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between min-h-[120px] ${
                     isSelected
                       ? 'bg-zinc-900 border-[#FF5F1F] shadow-lg'
                       : 'bg-zinc-950/80 border-white/10 hover:border-zinc-700'
@@ -214,9 +214,9 @@ export const OfficeHub: React.FC = () => {
                         deleteNote(note.id);
                         showToast('Note Deleted', note.title, 'info');
                       }}
-                      className="text-zinc-500 hover:text-rose-400 p-1"
+                      className="liquid-glass-btn text-zinc-500 hover:text-rose-400 p-1"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="liquid-glass-btn w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
@@ -235,7 +235,7 @@ export const OfficeHub: React.FC = () => {
                     if (target) handleDecryptNote(target);
                   }}
                   disabled={decrypting}
-                  className="px-3 py-1 bg-[#FF5F1F] text-black text-[11px] font-bold rounded-lg hover:bg-[#ff7236] transition-all"
+                  className="liquid-glass-btn px-3 py-1 bg-[#FF5F1F] text-black text-[11px] font-bold rounded-lg hover:bg-[#ff7236] transition-all"
                 >
                   {decrypting ? 'Decrypting...' : 'Decrypt Payload'}
                 </button>
@@ -291,7 +291,7 @@ export const OfficeHub: React.FC = () => {
 
               <button
                 type="submit"
-                className="flex-1 py-2 bg-[#FF5F1F] hover:bg-[#ff7236] text-black font-bold text-xs rounded-xl shadow transition-all flex items-center justify-center gap-1"
+                className="liquid-glass-btn flex-1 py-2 bg-[#FF5F1F] hover:bg-[#ff7236] text-black font-bold text-xs rounded-xl shadow transition-all flex items-center justify-center gap-1"
               >
                 <Plus className="w-4 h-4" /> Add Task
               </button>
@@ -303,7 +303,7 @@ export const OfficeHub: React.FC = () => {
             {todos.map((todo) => (
               <div
                 key={todo.id}
-                className={`p-3 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
+                className={`liquid-glass-btn p-3 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
                   todo.completed
                     ? 'bg-zinc-950/50 border-white/5 opacity-60'
                     : 'bg-zinc-900 border-white/10 hover:border-zinc-700'
@@ -317,7 +317,7 @@ export const OfficeHub: React.FC = () => {
                     className="w-4 h-4 rounded accent-[#FF5F1F] cursor-pointer shrink-0"
                   />
                   <span
-                    className={`text-xs font-medium truncate ${
+                    className={`liquid-glass-btn text-xs font-medium truncate ${
                       todo.completed ? 'line-through text-zinc-500' : 'text-white'
                     }`}
                   >
@@ -327,7 +327,7 @@ export const OfficeHub: React.FC = () => {
 
                 <div className="flex items-center gap-2 shrink-0">
                   <span
-                    className={`text-[9px] font-mono px-2 py-0.5 rounded-full font-bold uppercase ${
+                    className={`liquid-glass-btn text-[9px] font-mono px-2 py-0.5 rounded-full font-bold uppercase ${
                       todo.priority === 'critical'
                         ? 'bg-rose-950 text-rose-300 border border-rose-500/30'
                         : todo.priority === 'high'
@@ -339,9 +339,9 @@ export const OfficeHub: React.FC = () => {
                   </span>
                   <button
                     onClick={() => deleteTodo(todo.id)}
-                    className="p-1 text-zinc-500 hover:text-rose-400"
+                    className="liquid-glass-btn p-1 text-zinc-500 hover:text-rose-400"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash2 className="liquid-glass-btn w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>

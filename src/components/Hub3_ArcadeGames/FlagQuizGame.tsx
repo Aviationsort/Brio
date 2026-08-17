@@ -86,7 +86,7 @@ export const FlagQuizGame: React.FC = () => {
               key={opt}
               onClick={() => handleAnswer(opt)}
               disabled={selectedOpt !== null}
-              className={`p-3.5 rounded-2xl border text-xs font-bold shadow-md transition-all ${btnClass}`}
+              className={`liquid-glass-btn p-3.5 rounded-2xl border text-xs font-bold shadow-md transition-all ${btnClass}`}
             >
               {opt}
             </button>
