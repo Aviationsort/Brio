@@ -41,9 +41,9 @@ export const ToastContainer: React.FC = () => {
             </div>
             <button
               onClick={() => removeToast(toast.id)}
-              className="p-1 hover:bg-white/10 rounded-lg transition-colors text-white/60 hover:text-white"
+              className="liquid-glass-btn p-1 hover:bg-white/10 rounded-lg transition-colors text-white/60 hover:text-white"
             >
-              <X className="w-4 h-4" />
+              <X className="liquid-glass-btn w-4 h-4" />
             </button>
           </div>
         );

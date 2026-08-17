@@ -68,14 +68,14 @@ export const Navigation: React.FC = () => {
             <button
               key={hub.id}
               onClick={() => setActiveHub(hub.id)}
-              className={`relative flex items-center gap-2.5 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shrink-0 select-none ${
+              className={`liquid-glass-btn relative flex items-center gap-2.5 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shrink-0 select-none ${
                 isActive
                   ? 'bg-[#FF5F1F] text-black shadow-lg shadow-[#FF5F1F]/20'
                   : 'bg-[#141414] border border-white/10 text-zinc-400 hover:text-white hover:bg-zinc-800'
               }`}
             >
               <div
-                className={`p-1.5 rounded-xl transition-colors ${
+                className={`liquid-glass-btn p-1.5 rounded-xl transition-colors ${
                   isActive ? 'bg-black text-[#FF5F1F]' : 'bg-zinc-900 text-zinc-400'
                 }`}
               >

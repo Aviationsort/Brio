@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { Camera, Award, BarChart3, User, Mail, ShieldCheck, QrCode, ArrowLeft } from 'lucide-react';
+import { Camera, Award, BarChart3, User, Mail, ShieldCheck, ArrowLeft } from 'lucide-react';
 import { computeAirlineRankings, computeAircraftModelRankings, computeLiveStats } from '../data/planePicsData';
 
 interface ProfilePageProps {
@@ -19,7 +19,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onBack }) => {
       <div className="flex items-center gap-2 pb-2 border-b border-zinc-800">
         <button
           onClick={onBack}
-          className="p-1.5 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white"
+          className="liquid-glass-btn p-1.5 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white"
         >
           <ArrowLeft className="w-4 h-4" />
         </button>

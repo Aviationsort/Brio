@@ -34,7 +34,7 @@ import {
 } from 'lucide-react';
 
 export const RSSReader: React.FC = () => {
-  const { showToast } = useApp();
+  const { showToast, t } = useApp();
 
   const [activeTab, setActiveTab] = useState<'all' | 'aviation' | 'world' | 'saved'>('all');
   const [articles, setArticles] = useState<NewsItem[]>([]);
@@ -45,6 +45,10 @@ export const RSSReader: React.FC = () => {
     total: 0,
     sourceName: '',
   });
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(9);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -202,6 +206,17 @@ export const RSSReader: React.FC = () => {
     searchQuery
   );
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredArticles.length / itemsPerPage);
+  const paginatedArticles = filteredArticles.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const goToPage = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
+
   const successfulSources = sources.filter((s) => s.status === 'success');
   const failedSources = sources.filter((s) => s.status === 'failed');
 
@@ -240,7 +255,7 @@ export const RSSReader: React.FC = () => {
           <button
             type="submit"
             disabled={addingFeed || !customFeedUrl.trim()}
-            className="px-4 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold text-xs rounded-2xl shadow-lg transition-all flex items-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-50"
+            className="liquid-glass-btn px-4 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold text-xs rounded-2xl shadow-lg transition-all flex items-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-50"
           >
             <Plus className="w-4 h-4" />
             <span>{addingFeed ? 'Syncing...' : 'Add Stream'}</span>
@@ -253,7 +268,7 @@ export const RSSReader: React.FC = () => {
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveTab('all')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`liquid-glass-btn px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'all'
                 ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
@@ -265,7 +280,7 @@ export const RSSReader: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('aviation')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`liquid-glass-btn px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'aviation'
                 ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
@@ -277,7 +292,7 @@ export const RSSReader: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('world')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`liquid-glass-btn px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'world'
                 ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
@@ -289,7 +304,7 @@ export const RSSReader: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('saved')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`liquid-glass-btn px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === 'saved'
                 ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
@@ -305,7 +320,7 @@ export const RSSReader: React.FC = () => {
           <button
             onClick={() => loadNews(activeTab)}
             disabled={loading}
-            className="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition-all cursor-pointer disabled:opacity-50"
+            className="liquid-glass-btn p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition-all cursor-pointer disabled:opacity-50"
             title="Refresh feeds"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-pink-400' : ''}`} />
@@ -332,7 +347,7 @@ export const RSSReader: React.FC = () => {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1 rounded-lg text-xs font-mono transition-all shrink-0 cursor-pointer ${
+              className={`liquid-glass-btn px-3 py-1 rounded-lg text-xs font-mono transition-all shrink-0 cursor-pointer ${
                 selectedCategory === cat
                   ? 'bg-pink-500/20 text-pink-300 border border-pink-500/40 font-bold'
                   : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-white'
@@ -379,7 +394,7 @@ export const RSSReader: React.FC = () => {
 
       {/* Articles Grid / Rich Visual Feed */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredArticles.map((art) => {
+        {paginatedArticles.map((art) => {
           const isSaved = savedArticles.some((a) => a.id === art.id);
 
           // Extract domain for favicon provider logo
@@ -461,7 +476,7 @@ export const RSSReader: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => toggleSaveArticle(art)}
-                      className={`p-2 rounded-xl border transition-all cursor-pointer ${
+                      className={`liquid-glass-btn p-2 rounded-xl border transition-all cursor-pointer ${
                         isSaved
                           ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 shadow-lg'
                           : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
@@ -487,6 +502,43 @@ export const RSSReader: React.FC = () => {
           );
         })}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-6">
+          <button
+            onClick={() => goToPage(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="liquid-glass-btn px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl border border-slate-700 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+          
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => goToPage(page)}
+                className={`liquid-glass-btn w-10 h-10 rounded-xl border transition-all cursor-pointer ${
+                  currentPage === page
+                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 border-purple-500/50 text-white shadow-lg'
+                    : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white hover:bg-slate-700'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
+          
+          <button
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="liquid-glass-btn px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl border border-slate-700 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
+        </div>
+      )}
 
       {/* Empty State */}
       {!loading && filteredArticles.length === 0 && (

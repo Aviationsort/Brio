@@ -393,7 +393,7 @@ export const NightcorePlayer: React.FC = () => {
             <button
               key={reg}
               onClick={() => setSelectedRegion(reg)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
+              className={`liquid-glass-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
                 selectedRegion === reg
                   ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800'
@@ -439,7 +439,7 @@ export const NightcorePlayer: React.FC = () => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setActiveBand('FM')}
-                  className={`px-3 py-1 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+                  className={`liquid-glass-btn px-3 py-1 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
                     activeBand === 'FM'
                       ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/20'
                       : 'bg-slate-800 text-slate-400'
@@ -449,7 +449,7 @@ export const NightcorePlayer: React.FC = () => {
                 </button>
                 <button
                   onClick={() => setActiveBand('AM')}
-                  className={`px-3 py-1 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+                  className={`liquid-glass-btn px-3 py-1 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
                     activeBand === 'AM'
                       ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20'
                       : 'bg-slate-800 text-slate-400'
@@ -462,7 +462,7 @@ export const NightcorePlayer: React.FC = () => {
               <button
                 onClick={handleSeekAutoScan}
                 disabled={isSeeking}
-                className="px-3 py-1 bg-cyan-950 border border-cyan-400/40 text-cyan-300 hover:text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="liquid-glass-btn px-3 py-1 bg-cyan-950 border border-cyan-400/40 text-cyan-300 hover:text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 <RotateCw className={`w-3.5 h-3.5 ${isSeeking ? 'animate-spin text-amber-400' : ''}`} />
                 <span>{isSeeking ? 'Scanning...' : 'Auto Seek Station'}</span>
@@ -526,7 +526,7 @@ export const NightcorePlayer: React.FC = () => {
             <div className="flex items-center justify-center gap-4 pt-1">
               <button
                 onClick={togglePlay}
-                className="px-8 py-3.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 hover:scale-105 text-white font-black text-sm rounded-2xl shadow-xl shadow-cyan-500/20 transition-all flex items-center gap-2 cursor-pointer"
+                className="liquid-glass-btn px-8 py-3.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 hover:scale-105 text-white font-black text-sm rounded-2xl shadow-xl shadow-cyan-500/20 transition-all flex items-center gap-2 cursor-pointer"
               >
                 {isPlayingMusic ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
                 <span>{isPlayingMusic ? 'Mute Radio Stream' : 'Tune & Stream Live'}</span>
@@ -566,7 +566,7 @@ export const NightcorePlayer: React.FC = () => {
                 <button
                   key={st.id}
                   onClick={() => tuneToStation(st)}
-                  className={`p-3 rounded-2xl border text-left transition-all flex items-center justify-between cursor-pointer ${
+                  className={`liquid-glass-btn p-3 rounded-2xl border text-left transition-all flex items-center justify-between cursor-pointer ${
                     isActive
                       ? 'bg-cyan-950/80 border-cyan-400 text-white shadow-lg ring-1 ring-cyan-400/50'
                       : 'bg-slate-950 border-slate-800/80 text-slate-300 hover:bg-slate-800/80'
@@ -626,7 +626,7 @@ export const NightcorePlayer: React.FC = () => {
             <button
               type="submit"
               disabled={!customAudioUrl.trim()}
-              className="w-full py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-extrabold text-xs rounded-xl shadow-lg transition-all cursor-pointer disabled:opacity-50"
+              className="liquid-glass-btn w-full py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-extrabold text-xs rounded-xl shadow-lg transition-all cursor-pointer disabled:opacity-50"
             >
               Relay Custom Stream
             </button>

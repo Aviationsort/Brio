@@ -83,7 +83,7 @@ export const SocialFeed: React.FC = () => {
 
         <button
           onClick={() => setShowAlgoModal(!showAlgoModal)}
-          className="flex items-center gap-2 px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-cyan-300 rounded-xl border border-cyan-500/20 transition-all shadow-md"
+          className="liquid-glass-btn flex items-center gap-2 px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-cyan-300 rounded-xl border border-cyan-500/20 transition-all shadow-md"
         >
           <Sliders className="w-4 h-4" />
           <span>Tune Feed Algorithm</span>
@@ -168,7 +168,7 @@ export const SocialFeed: React.FC = () => {
           <button
             type="button"
             onClick={() => setEncryptPost(!encryptPost)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+            className={`liquid-glass-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
               encryptPost
                 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
                 : 'bg-slate-800 border-slate-700 text-slate-400'
@@ -180,7 +180,7 @@ export const SocialFeed: React.FC = () => {
 
           <button
             type="submit"
-            className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center gap-1.5"
+            className="liquid-glass-btn px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center gap-1.5"
           >
             <Send className="w-3.5 h-3.5" />
             <span>Broadcast Post</span>
@@ -224,7 +224,7 @@ export const SocialFeed: React.FC = () => {
                       <p className="text-slate-400 font-mono italic">{post.content}</p>
                       <button
                         onClick={() => handleDecryptPost(post.id)}
-                        className="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-[11px] rounded-lg shadow transition-all shrink-0"
+                        className="liquid-glass-btn px-3 py-1 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-[11px] rounded-lg shadow transition-all shrink-0"
                       >
                         Decrypt Payload
                       </button>
@@ -239,7 +239,7 @@ export const SocialFeed: React.FC = () => {
               <div className="flex items-center gap-6 pt-1 text-slate-400 text-xs font-medium">
                 <button
                   onClick={() => toggleLikePost(post.id)}
-                  className={`flex items-center gap-1.5 transition-colors ${
+                  className={`liquid-glass-btn flex items-center gap-1.5 transition-colors ${
                     post.userLiked ? 'text-rose-400 font-bold' : 'hover:text-rose-400'
                   }`}
                 >
@@ -247,13 +247,13 @@ export const SocialFeed: React.FC = () => {
                   <span>{post.likes}</span>
                 </button>
 
-                <button className="flex items-center gap-1.5 hover:text-cyan-400 transition-colors">
+                <button className="liquid-glass-btn flex items-center gap-1.5 hover:text-cyan-400 transition-colors">
                   <MessageCircle className="w-4 h-4" />
                   <span>{post.commentsCount}</span>
                 </button>
 
-                <button className="flex items-center gap-1.5 hover:text-blue-400 transition-colors">
-                  <Share2 className="w-4 h-4" />
+                <button className="liquid-glass-btn flex items-center gap-1.5 hover:text-blue-400 transition-colors">
+                  <Share2 className="liquid-glass-btn w-4 h-4" />
                   <span>{post.shares}</span>
                 </button>
               </div>

@@ -6,7 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { SUPPORTED_LANGUAGES } from '../../utils/translations';
 import { LanguageCode } from '../../types';
-import { ShieldCheck, Lock, Unlock, Globe, User, Radio, Smartphone, Tablet } from 'lucide-react';
+import { ShieldCheck, Lock, Unlock, Globe, User, Radio, Smartphone } from 'lucide-react';
 import { AuthModal } from './AuthModal';
 
 export const Header: React.FC = () => {
@@ -18,8 +18,6 @@ export const Header: React.FC = () => {
     setShowLanguagePicker,
     showMobileGUI,
     setShowMobileGUI,
-    showTabletGUI,
-    setShowTabletGUI,
     t,
   } = useApp();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -83,41 +81,23 @@ export const Header: React.FC = () => {
 
           {/* Right Controls: 25-Language Selector & Auth */}
           <div className="flex items-center gap-2">
-            {/* Show device view toggles only if explicitly in mobile or tablet mode */}
-            {(showTabletGUI || showMobileGUI) && (
-              <>
-                {showTabletGUI && (
-                  <button
-                    onClick={() => {
-                      setShowTabletGUI(false);
-                      setShowMobileGUI(false);
-                    }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-500/40 border border-sky-200 text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
-                  >
-                    <Tablet className="w-4 h-4 text-sky-300" />
-                    <span className="hidden sm:inline">{t.tabletMode || 'Tablet IFE'}</span>
-                  </button>
-                )}
-
-                {showMobileGUI && (
-                  <button
-                    onClick={() => {
-                      setShowMobileGUI(false);
-                      setShowTabletGUI(false);
-                    }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/30 border border-amber-300 text-amber-200 rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
-                  >
-                    <Smartphone className="w-4 h-4 text-sky-300" />
-                    <span className="hidden sm:inline">{t.mobileMode || 'WP7 Mobile'}</span>
-                  </button>
-                )}
-              </>
+            {/* Show device view toggle only if explicitly in mobile mode */}
+            {showMobileGUI && (
+              <button
+                onClick={() => {
+                  setShowMobileGUI(false);
+                }}
+                className="liquid-glass-btn flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/30 border border-amber-300 text-amber-200 rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+              >
+                <Smartphone className="w-4 h-4 text-sky-300" />
+                <span className="hidden sm:inline">{t.mobileMode || 'WP7 Mobile'}</span>
+              </button>
             )}
 
             {/* Launch IFE Welcome Screen Button */}
             <button
               onClick={() => setShowLanguagePicker(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-sky-500/20 to-blue-600/30 hover:from-sky-400/30 hover:to-blue-500/40 border border-sky-300/40 rounded-xl text-xs font-bold text-sky-200 transition-all shadow-md active:scale-95 cursor-pointer"
+              className="liquid-glass-btn flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-sky-500/20 to-blue-600/30 hover:from-sky-400/30 hover:to-blue-500/40 border border-sky-300/40 rounded-xl text-xs font-bold text-sky-200 transition-all shadow-md active:scale-95 cursor-pointer"
               title={t.openLanguageScreen}
             >
               <Globe className="w-4 h-4 text-sky-300 animate-pulse" />
@@ -144,7 +124,7 @@ export const Header: React.FC = () => {
             {/* Auth Button */}
             <button
               onClick={() => setIsAuthOpen(true)}
-              className="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-gradient-to-b from-sky-400 via-sky-500 to-blue-600 hover:from-sky-300 hover:to-blue-500 border-t border-sky-200 text-xs font-bold text-white transition-all shadow-lg shadow-sky-500/20 active:scale-95 cursor-pointer"
+              className="liquid-glass-btn flex items-center gap-2 px-4 py-1.5 rounded-xl bg-gradient-to-b from-sky-400 via-sky-500 to-blue-600 hover:from-sky-300 hover:to-blue-500 border-t border-sky-200 text-xs font-bold text-white transition-all shadow-lg shadow-sky-500/20 active:scale-95 cursor-pointer"
             >
               {user ? (
                 <>

@@ -4,52 +4,54 @@
  */
 
 import React, { useState } from 'react';
+import { useApp } from '../../context/AppContext';
 import { NightcorePlayer } from './NightcorePlayer';
 import { IPTVPlayer } from './IPTVPlayer';
 import { RSSReader } from './RSSReader';
 import { Music, Tv, Rss } from 'lucide-react';
 
 export const MediaStreamingHub: React.FC = () => {
+  const { t } = useApp();
   const [subTab, setSubTab] = useState<'nightcore' | 'iptv' | 'rss'>('nightcore');
 
   return (
     <div className="space-y-6">
       {/* Sub-tab Navigation */}
-      <div className="flex items-center gap-2 p-1.5 bg-slate-900/90 border border-slate-800 rounded-2xl overflow-x-auto no-scrollbar">
+      <div className="flex items-center gap-2 p-1.5 nightcore-panel overflow-x-auto no-scrollbar">
         <button
           onClick={() => setSubTab('nightcore')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+          className={`skeuo-button flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
             subTab === 'nightcore'
-              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+              ? ''
+              : 'opacity-80 hover:opacity-100'
           }`}
         >
           <Music className="w-4 h-4" />
-          <span>Nightcore Music & Video Player</span>
+          <span>{t.nightcoreMusicPlayer}</span>
         </button>
 
         <button
           onClick={() => setSubTab('iptv')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+          className={`skeuo-button flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
             subTab === 'iptv'
-              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+              ? ''
+              : 'opacity-80 hover:opacity-100'
           }`}
         >
           <Tv className="w-4 h-4" />
-          <span>IPTV Live Streams</span>
+          <span>{t.iptvLiveStreams}</span>
         </button>
 
         <button
           onClick={() => setSubTab('rss')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+          className={`skeuo-button flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
             subTab === 'rss'
-              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+              ? ''
+              : 'opacity-80 hover:opacity-100'
           }`}
         >
           <Rss className="w-4 h-4" />
-          <span>RSS News Reader</span>
+          <span>{t.rssNewsReader}</span>
         </button>
       </div>
 

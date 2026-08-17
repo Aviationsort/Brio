@@ -147,7 +147,7 @@ export const CallDialer: React.FC = () => {
             <button
               key={digit}
               onClick={() => handleKeyPress(digit)}
-              className="py-3.5 bg-slate-800/80 hover:bg-slate-700 active:scale-95 border border-slate-700/60 rounded-2xl text-lg font-bold text-white shadow transition-all"
+              className="liquid-glass-btn py-3.5 bg-slate-800/80 hover:bg-slate-700 active:scale-95 border border-slate-700/60 rounded-2xl text-lg font-bold text-white shadow transition-all"
             >
               {digit}
             </button>
@@ -159,7 +159,7 @@ export const CallDialer: React.FC = () => {
           <button
             onClick={handleBackspace}
             disabled={!dialedNumber}
-            className="p-3.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-2xl transition-all disabled:opacity-40"
+            className="liquid-glass-btn p-3.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-2xl transition-all disabled:opacity-40"
           >
             <Delete className="w-5 h-5" />
           </button>
@@ -167,7 +167,7 @@ export const CallDialer: React.FC = () => {
           {inCall ? (
             <button
               onClick={endCall}
-              className="flex-1 py-3.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2"
+              className="liquid-glass-btn flex-1 py-3.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2"
             >
               <PhoneOff className="w-5 h-5" />
               <span>End Call</span>
@@ -176,7 +176,7 @@ export const CallDialer: React.FC = () => {
             <button
               onClick={() => startCall()}
               disabled={!dialedNumber}
-              className="flex-1 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-40"
+              className="liquid-glass-btn flex-1 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-40"
             >
               <Phone className="w-5 h-5" />
               <span>Dial Call</span>
@@ -202,7 +202,7 @@ export const CallDialer: React.FC = () => {
                   setDialedNumber(em.code);
                   startCall(em.code);
                 }}
-                className="w-full p-2.5 bg-slate-950 border border-slate-800 hover:border-rose-500/40 rounded-xl text-left transition-all group flex items-center justify-between"
+                className="liquid-glass-btn w-full p-2.5 bg-slate-950 border border-slate-800 hover:border-rose-500/40 rounded-xl text-left transition-all group flex items-center justify-between"
               >
                 <div>
                   <div className="flex items-center gap-1.5">

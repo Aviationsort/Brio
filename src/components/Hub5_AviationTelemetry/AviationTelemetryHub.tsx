@@ -276,7 +276,7 @@ export const AviationTelemetryHub: React.FC = () => {
       <div className="flex items-center gap-2 p-1.5 bg-[#141414] border border-white/10 rounded-2xl overflow-x-auto no-scrollbar">
         <button
           onClick={() => setSubTab('myplanepics')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+          className={`liquid-glass-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
             subTab === 'myplanepics'
               ? 'bg-[#FF5F1F] text-black shadow'
               : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
@@ -288,7 +288,7 @@ export const AviationTelemetryHub: React.FC = () => {
 
         <button
           onClick={() => setSubTab('camera')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+          className={`liquid-glass-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
             subTab === 'camera'
               ? 'bg-[#FF5F1F] text-black shadow'
               : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
@@ -300,7 +300,7 @@ export const AviationTelemetryHub: React.FC = () => {
 
         <button
           onClick={() => setSubTab('glossary')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+          className={`liquid-glass-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
             subTab === 'glossary'
               ? 'bg-[#FF5F1F] text-black shadow'
               : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
@@ -312,7 +312,7 @@ export const AviationTelemetryHub: React.FC = () => {
 
         <button
           onClick={() => setSubTab('transit')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+          className={`liquid-glass-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
             subTab === 'transit'
               ? 'bg-[#FF5F1F] text-black shadow'
               : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
@@ -324,7 +324,7 @@ export const AviationTelemetryHub: React.FC = () => {
 
         <button
           onClick={() => setSubTab('telemetry')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+          className={`liquid-glass-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
             subTab === 'telemetry'
               ? 'bg-[#FF5F1F] text-black shadow'
               : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
@@ -405,7 +405,7 @@ export const AviationTelemetryHub: React.FC = () => {
 
               <button
                 onClick={calculateOptics}
-                className="w-full py-3 bg-[#FF5F1F] hover:bg-[#ff7236] text-black font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
+                className="liquid-glass-btn w-full py-3 bg-[#FF5F1F] hover:bg-[#ff7236] text-black font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
               >
                 <Sparkles className="w-4 h-4" /> Calculate Optics Rating
               </button>
@@ -513,7 +513,7 @@ export const AviationTelemetryHub: React.FC = () => {
               <div className="flex gap-1.5">
                 <button
                   onClick={() => setBusCountry('Lebanon')}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  className={`liquid-glass-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     busCountry === 'Lebanon' ? 'bg-[#FF5F1F] text-black shadow-lg font-black' : 'bg-zinc-900 text-zinc-400 hover:text-white'
                   }`}
                 >
@@ -521,7 +521,7 @@ export const AviationTelemetryHub: React.FC = () => {
                 </button>
                 <button
                   onClick={() => setBusCountry('Cyprus')}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  className={`liquid-glass-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     busCountry === 'Cyprus' ? 'bg-[#FF5F1F] text-black shadow-lg font-black' : 'bg-zinc-900 text-zinc-400 hover:text-white'
                   }`}
                 >
@@ -594,7 +594,7 @@ export const AviationTelemetryHub: React.FC = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs font-mono text-zinc-300 bg-zinc-900/80 p-3 rounded-xl border border-white/10">
                     <p><strong className="text-zinc-400">Origin Station:</strong> {bus.origin}</p>
                     <p><strong className="text-zinc-400">Destination:</strong> {bus.destination}</p>
-                    <p><strong className="text-zinc-400">Operator Company:</strong> <span className="text-amber-300 font-bold">{bus.operator}</span></p>
+                    <p><strong className="text-zinc-400">Operator Company:</strong> <span className="liquid-glass-btn text-amber-300 font-bold">{bus.operator}</span></p>
                   </div>
 
                   {/* Complete Stops Sequence */}
@@ -628,7 +628,7 @@ export const AviationTelemetryHub: React.FC = () => {
                         return (
                           <span
                             key={t}
-                            className={`px-3 py-1 font-mono text-xs rounded-xl font-bold border transition-all ${
+                            className={`liquid-glass-btn px-3 py-1 font-mono text-xs rounded-xl font-bold border transition-all ${
                               isNext
                                 ? 'bg-amber-500 text-black border-amber-300 shadow-lg scale-105 ring-2 ring-amber-300'
                                 : 'bg-zinc-900 border-white/10 text-zinc-200'

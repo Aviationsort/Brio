@@ -96,7 +96,7 @@ export const StickersVault: React.FC = () => {
         <div className="flex items-end">
           <button
             type="submit"
-            className="w-full py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5"
+            className="liquid-glass-btn w-full py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5"
           >
             <Plus className="w-4 h-4" />
             <span>Add to Vault</span>
@@ -126,9 +126,9 @@ export const StickersVault: React.FC = () => {
 
             <button
               onClick={() => handleCopy(st)}
-              className="w-full py-1.5 bg-slate-800 hover:bg-cyan-600 text-slate-300 hover:text-white text-[11px] font-semibold rounded-xl transition-all flex items-center justify-center gap-1"
+              className="liquid-glass-btn w-full py-1.5 bg-slate-800 hover:bg-cyan-600 text-slate-300 hover:text-white text-[11px] font-semibold rounded-xl transition-all flex items-center justify-center gap-1"
             >
-              {copiedId === st.id ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              {copiedId === st.id ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="liquid-glass-btn w-3.5 h-3.5" />}
               <span>{copiedId === st.id ? 'Copied!' : 'Copy'}</span>
             </button>
           </div>

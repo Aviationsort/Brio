@@ -33,11 +33,8 @@ const MainAppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#060606] text-white font-sans selection:bg-[#FF5F1F] selection:text-black flex flex-col max-w-full overflow-x-hidden">
-      {/* Startup Language Selection Overlay */}
+      {/* Startup Language Selection Overlay - shown first */}
       {showLanguagePicker && <StartupLanguagePicker />}
-
-      {/* Auth / Signup Modal overlay - required if not logged in */}
-      {(showAuthModal || (authRequired && !user)) && <AuthModal isOpen={true} onClose={() => {}} />}
 
       {/* Main Automotive, Tablet IFE, or Mobile Phone Display Container */}
       <main className="flex-1 w-full max-w-7xl mx-auto p-2 sm:p-4 md:p-6 overflow-x-hidden box-border flex flex-col justify-center my-auto">
@@ -52,6 +49,9 @@ const MainAppContent: React.FC = () => {
           <InfotainmentMainMenu onNavigateTab={handleNavigateFromInfotainment} />
         )}
       </main>
+
+      {/* Auth / Signup Modal overlay - only shown when user explicitly opens it */}
+      {showAuthModal && <AuthModal isOpen={true} onClose={() => {}} />}
 
       {/* Global Toast Container */}
       <ToastContainer />

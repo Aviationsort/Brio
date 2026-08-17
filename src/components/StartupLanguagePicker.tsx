@@ -61,13 +61,12 @@ export const StartupLanguagePicker: React.FC = () => {
     setLanguage(selectedLang);
     setShowLanguagePicker(false);
     setActiveHub('home');
-    setAuthRequired(true);
-    setShowAuthModal(true);
+    // Do not show auth modal - user can access app directly and login later if needed
 
     const found = SUPPORTED_LANGUAGES.find((l) => l.code === selectedLang);
     showToast(
       t.systemLocaleConfigured,
-      `${t.selectedLabel} ${found?.nativeName || selectedLang}. ${t.pleaseSignInToAccess}`,
+      `${t.selectedLabel} ${found?.nativeName || selectedLang}.`,
       'success'
     );
   };
@@ -84,24 +83,6 @@ export const StartupLanguagePicker: React.FC = () => {
       name: 'French',
       nativeName: 'Français',
       flag: '🇫🇷',
-    },
-    {
-      code: 'fr-CA',
-      name: 'Canadian French',
-      nativeName: 'Français Canadien',
-      flag: '🇨🇦',
-    },
-    {
-      code: 'fr-BE',
-      name: 'Belgian French',
-      nativeName: 'Français Belge',
-      flag: '🇧🇪',
-    },
-    {
-      code: 'fr-MC',
-      name: 'Monégasque French',
-      nativeName: 'Français Monégasque',
-      flag: '🇲🇨',
     },
   ];
 
@@ -125,7 +106,7 @@ export const StartupLanguagePicker: React.FC = () => {
               <button
                 key={item.code}
                 onClick={() => handleSelectLang(item.code)}
-                className={`relative flex flex-col items-center justify-center p-3.5 sm:p-4 rounded-2xl transition-all duration-150 cursor-pointer text-center group h-28 sm:h-32 ${
+                className={`liquid-glass-btn relative flex flex-col items-center justify-center p-3.5 sm:p-4 rounded-2xl transition-all duration-150 cursor-pointer text-center group h-28 sm:h-32 ${
                   isSelected
                     ? 'bg-gradient-to-b from-[#216c5c] via-[#1a584b] to-[#124238] text-white border-2 border-[#38a892] shadow-[inset_0_3px_8px_rgba(0,0,0,0.6)] translate-y-1'
                     : 'bg-gradient-to-b from-[#f7f9fc] via-[#e8ecf2] to-[#d2d7e0] hover:from-[#ffffff] hover:to-[#dfe4ed] border-t-2 border-l-2 border-white/90 border-b-2 border-r-2 border-slate-500/50 shadow-[0_6px_14px_rgba(0,0,0,0.25)] active:translate-y-1 active:shadow-inner'
@@ -135,14 +116,14 @@ export const StartupLanguagePicker: React.FC = () => {
                   {item.flag}
                 </div>
                 <span
-                  className={`text-xs sm:text-sm font-semibold tracking-wide leading-tight ${
+                  className={`liquid-glass-btn text-xs sm:text-sm font-semibold tracking-wide leading-tight ${
                     isSelected ? 'text-white font-extrabold' : 'text-[#1d352e]'
                   }`}
                 >
                   {item.nativeName}
                 </span>
                 <span
-                  className={`text-[10px] font-mono mt-0.5 ${
+                  className={`liquid-glass-btn text-[10px] font-mono mt-0.5 ${
                     isSelected ? 'text-emerald-200' : 'text-slate-500'
                   }`}
                 >
@@ -151,7 +132,7 @@ export const StartupLanguagePicker: React.FC = () => {
 
                 {isSelected && (
                   <div className="absolute top-2 right-2 p-1 bg-emerald-400 text-black rounded-full shadow">
-                    <CheckCircle2 className="w-3 h-3" />
+                    <CheckCircle2 className="liquid-glass-btn w-3 h-3" />
                   </div>
                 )}
               </button>
@@ -169,7 +150,7 @@ export const StartupLanguagePicker: React.FC = () => {
 
           <button
             onClick={handleConfirmAndProceed}
-            className="w-full sm:w-auto px-7 py-3 rounded-xl bg-gradient-to-r from-[#1b5e50] via-[#1f7362] to-[#278e79] hover:from-[#154c41] hover:to-[#1e6f5e] text-white font-extrabold text-xs uppercase tracking-wider shadow-[0_6px_20px_rgba(27,94,80,0.4)] border-t border-emerald-300/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="liquid-glass-btn w-full sm:w-auto px-7 py-3 rounded-xl bg-gradient-to-r from-[#1b5e50] via-[#1f7362] to-[#278e79] hover:from-[#154c41] hover:to-[#1e6f5e] text-white font-extrabold text-xs uppercase tracking-wider shadow-[0_6px_20px_rgba(27,94,80,0.4)] border-t border-emerald-300/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <Sparkles className="w-4 h-4 text-emerald-200" />
             <span>{t.confirmProceedToHome}</span>

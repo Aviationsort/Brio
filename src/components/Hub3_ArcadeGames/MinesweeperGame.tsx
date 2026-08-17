@@ -135,7 +135,7 @@ export const MinesweeperGame: React.FC = () => {
         </div>
         <button
           onClick={initGrid}
-          className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-all"
+          className="liquid-glass-btn p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-all"
         >
           <RefreshCw className="w-4 h-4" />
         </button>
@@ -153,7 +153,7 @@ export const MinesweeperGame: React.FC = () => {
                 key={`${cell.r}-${cell.c}`}
                 onClick={() => revealCell(cell.r, cell.c)}
                 onContextMenu={(e) => toggleFlag(e, cell.r, cell.c)}
-                className={`w-7 h-7 rounded-lg text-xs font-bold transition-all flex items-center justify-center ${
+                className={`liquid-glass-btn w-7 h-7 rounded-lg text-xs font-bold transition-all flex items-center justify-center ${
                   cell.revealed
                     ? cell.isMine
                       ? 'bg-rose-600 text-white'

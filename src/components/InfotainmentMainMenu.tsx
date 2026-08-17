@@ -274,7 +274,7 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
               setActiveOverlay('NONE');
               showToast('System Reboot', 'Brio Infotainment set to Touch Home', 'info');
             }}
-            className="group flex flex-col items-center gap-1 text-zinc-400 hover:text-amber-400 transition-all cursor-pointer"
+            className="liquid-glass-btn group flex flex-col items-center gap-1 text-zinc-400 hover:text-amber-400 transition-all cursor-pointer"
             title="System Power / Home Reset"
           >
             <div className="w-11 h-11 rounded-xl bg-gradient-to-b from-zinc-800 to-zinc-900 border border-white/10 group-hover:border-amber-400/60 flex items-center justify-center shadow-md active:scale-95 transition-all">
@@ -291,13 +291,13 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
               setActiveOverlay('NONE');
               showToast('Home Navigation', 'Returned to Home Menu', 'info');
             }}
-            className={`group flex flex-col items-center gap-1 transition-all cursor-pointer ${
+            className={`liquid-glass-btn group flex flex-col items-center gap-1 transition-all cursor-pointer ${
               screenView === 'home' && activeOverlay === 'NONE' ? 'text-[#FF5F1F]' : 'text-zinc-400 hover:text-white'
             }`}
             title="Return to Home Menu"
           >
             <div
-              className={`w-11 h-11 rounded-xl bg-gradient-to-b from-zinc-800 to-zinc-900 border flex items-center justify-center shadow-md active:scale-95 transition-all ${
+              className={`liquid-glass-btn w-11 h-11 rounded-xl bg-gradient-to-b from-zinc-800 to-zinc-900 border flex items-center justify-center shadow-md active:scale-95 transition-all ${
                 screenView === 'home' && activeOverlay === 'NONE'
                   ? 'border-[#FF5F1F] bg-[#FF5F1F]/20 text-[#FF5F1F]'
                   : 'border-white/10 group-hover:border-white/40'
@@ -314,7 +314,7 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
               playAudioTone(500, 0.1);
               setActiveOverlay('WEATHER');
             }}
-            className={`group flex flex-col items-center gap-1 transition-all cursor-pointer ${
+            className={`liquid-glass-btn group flex flex-col items-center gap-1 transition-all cursor-pointer ${
               activeOverlay === 'WEATHER' ? 'text-sky-400' : 'text-zinc-400 hover:text-sky-400'
             }`}
             title="Live Weather METAR Station"
@@ -331,7 +331,7 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
               playAudioTone(600, 0.1);
               setActiveOverlay('ACCOUNT');
             }}
-            className={`group flex flex-col items-center gap-1 transition-all cursor-pointer ${
+            className={`liquid-glass-btn group flex flex-col items-center gap-1 transition-all cursor-pointer ${
               activeOverlay === 'ACCOUNT' ? 'text-emerald-400' : 'text-zinc-400 hover:text-emerald-400'
             }`}
             title="Account Settings"
@@ -348,11 +348,11 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
               setIsDarkMode(!isDarkMode);
               showToast('Display Mode', !isDarkMode ? 'Night Mode Activated' : 'Day Mode Activated', 'info');
             }}
-            className="group flex flex-col items-center gap-1 text-zinc-400 hover:text-amber-400 transition-all cursor-pointer"
+            className="liquid-glass-btn group flex flex-col items-center gap-1 text-zinc-400 hover:text-amber-400 transition-all cursor-pointer"
             title="Toggle Day / Night Mode"
           >
             <div className="w-11 h-11 rounded-xl bg-zinc-900 border border-white/10 group-hover:border-amber-400 flex items-center justify-center shadow-md">
-              {isDarkMode ? <Moon className="w-5 h-5 text-indigo-400" /> : <Sun className="w-5 h-5 text-amber-400" />}
+              {isDarkMode ? <Moon className="w-5 h-5 text-indigo-400" /> : <Sun className="liquid-glass-btn w-5 h-5 text-amber-400" />}
             </div>
             <span className="text-[9px] font-bold font-mono uppercase tracking-tighter">THEME</span>
           </button>
@@ -375,7 +375,7 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
             {/* Left Live Weather Status */}
             <button
               onClick={() => setActiveOverlay('WEATHER')}
-              className="flex items-center gap-2 bg-sky-950/80 hover:bg-sky-900 border border-sky-400/40 px-3 py-1.5 rounded-xl shadow transition-all cursor-pointer"
+              className="liquid-glass-btn flex items-center gap-2 bg-sky-950/80 hover:bg-sky-900 border border-sky-400/40 px-3 py-1.5 rounded-xl shadow transition-all cursor-pointer"
               title="Open Live NOAA Weather"
             >
               <CloudSun className="w-4 h-4 text-sky-400" />
@@ -389,7 +389,7 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
               {screenView !== 'home' ? (
                 <button
                   onClick={() => switchScreenView('home')}
-                  className="flex items-center gap-2 bg-[#FF5F1F] hover:bg-[#FF5F1F]/90 text-black px-4 py-1.5 rounded-xl font-extrabold text-xs shadow-lg transition-all active:scale-95 cursor-pointer"
+                  className="liquid-glass-btn flex items-center gap-2 bg-[#FF5F1F] hover:bg-[#FF5F1F]/90 text-black px-4 py-1.5 rounded-xl font-extrabold text-xs shadow-lg transition-all active:scale-95 cursor-pointer"
                 >
                   <Home className="w-4 h-4" />
                   <span>← Touch Home</span>
@@ -411,7 +411,7 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
                   playAudioTone(700, 0.1);
                   setActiveOverlay('CLOCK');
                 }}
-                className="text-sm font-black text-[#FF5F1F] font-mono tracking-widest bg-zinc-950 px-3 py-1.5 rounded-xl border border-[#FF5F1F]/40 hover:border-[#FF5F1F] active:scale-95 shadow-inner flex items-center gap-2 transition-all cursor-pointer"
+                className="liquid-glass-btn text-sm font-black text-[#FF5F1F] font-mono tracking-widest bg-zinc-950 px-3 py-1.5 rounded-xl border border-[#FF5F1F]/40 hover:border-[#FF5F1F] active:scale-95 shadow-inner flex items-center gap-2 transition-all cursor-pointer"
                 title="Open Clock, Analog View, Stopwatch, Timer & Calendar"
               >
                 <Clock className="w-4 h-4 text-[#FF5F1F] animate-pulse" />
@@ -648,9 +648,9 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
               </div>
               <button
                 onClick={() => setActiveOverlay('NONE')}
-                className="p-2 rounded-xl text-slate-400 hover:text-white bg-slate-800"
+                className="liquid-glass-btn p-2 rounded-xl text-slate-400 hover:text-white bg-slate-800"
               >
-                <X className="w-5 h-5" />
+                <X className="liquid-glass-btn w-5 h-5" />
               </button>
             </div>
 
@@ -660,7 +660,7 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
                 <button
                   key={icao}
                   onClick={() => loadWeatherForStation(icao)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold font-mono transition-all ${
+                  className={`liquid-glass-btn px-4 py-2 rounded-xl text-xs font-bold font-mono transition-all ${
                     weatherStationData.icao === icao
                       ? 'bg-sky-500 text-black font-extrabold shadow-lg'
                       : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
@@ -704,8 +704,8 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
               </div>
 
               <div className="space-y-2 pt-2 border-t border-slate-800">
-                <p className="text-xs font-mono text-slate-400"><strong className="text-sky-300">METAR:</strong> {weatherStationData.metar}</p>
-                <p className="text-xs font-mono text-slate-400"><strong className="text-sky-300">TAF:</strong> {weatherStationData.taf}</p>
+                <p className="text-xs font-mono text-slate-400"><strong className="liquid-glass-btn text-sky-300">METAR:</strong> {weatherStationData.metar}</p>
+                <p className="text-xs font-mono text-slate-400"><strong className="liquid-glass-btn text-sky-300">TAF:</strong> {weatherStationData.taf}</p>
               </div>
             </div>
           </div>
@@ -723,9 +723,9 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
                  </div>
               <button
                 onClick={() => setActiveOverlay('NONE')}
-                className="p-2 rounded-xl text-slate-400 hover:text-white bg-slate-800"
+                className="liquid-glass-btn p-2 rounded-xl text-slate-400 hover:text-white bg-slate-800"
               >
-                <X className="w-5 h-5" />
+                <X className="liquid-glass-btn w-5 h-5" />
               </button>
             </div>
 
@@ -748,7 +748,7 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
                     setActiveOverlay('NONE');
                     setShowAuthModal(true);
                   }}
-                  className="w-full py-3 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="liquid-glass-btn w-full py-3 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Key className="w-4 h-4" />
                   <span>{t.manageVaultPassphrase}</span>
@@ -757,28 +757,11 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
                 {user && (
                   <>
                     <button
-                      onClick={generateAccountQR}
-                      className="w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <QrCode className="w-4 h-4" />
-                      <span>{t.accountQRCode}</span>
-                    </button>
-
-                    {qrDataUrl && (
-                      <div className="p-4 bg-white rounded-2xl flex flex-col items-center gap-3">
-                        <img src={qrDataUrl} alt="Account QR Code" className="w-40 h-40" />
-                        <p className="text-[10px] text-zinc-500 font-mono text-center">
-                           {t.scanToOpenBrioProfile}
-                        </p>
-                      </div>
-                    )}
-
-                    <button
                       onClick={() => {
                         logoutUser();
                         setActiveOverlay('NONE');
                       }}
-                      className="w-full py-2.5 bg-rose-950/80 hover:bg-rose-900 border border-rose-500/30 text-rose-300 font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      className="liquid-glass-btn w-full py-2.5 bg-rose-950/80 hover:bg-rose-900 border border-rose-500/30 text-rose-300 font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <LogOut className="w-4 h-4" />
                       <span>{t.signOut}</span>

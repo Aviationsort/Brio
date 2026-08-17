@@ -1,6 +1,6 @@
 /**
  * ScientificCalculator Component: Full Scientific & Graphic Function Evaluation
- * Styled in Bento Grid theme
+ * Styled like iOS 3 Calculator with glossy buttons and orange accents
  */
 
 import React, { useState } from 'react';
@@ -66,34 +66,34 @@ export const ScientificCalculator: React.FC = () => {
   ];
 
   return (
-    <div className="bg-[#141414] border border-white/10 rounded-3xl p-6 shadow-2xl max-w-lg mx-auto space-y-6">
+    <div className="bg-gradient-to-b from-[#2a2a2a] to-[#1a1a1a] border-4 border-[#3a3a3a] rounded-[32px] p-4 shadow-2xl max-w-lg mx-auto space-y-4" style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.6), inset 0 2px 4px rgba(255,255,255,0.1)' }}>
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-white/10">
-        <div className="flex items-center gap-3">
-          <span className="p-2.5 bg-[#FF5F1F]/10 border border-[#FF5F1F]/20 rounded-xl text-[#FF5F1F]">
-            <Calculator className="w-5 h-5" />
+      <div className="flex items-center justify-between pb-2 border-b border-white/10">
+        <div className="flex items-center gap-2">
+          <span className="p-2 bg-gradient-to-b from-[#FF5F1F] to-[#cc4d19] rounded-xl text-black shadow-lg">
+            <Calculator className="w-4 h-4" />
           </span>
           <div>
-            <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Mathematical Engine</p>
-            <h3 className="text-base font-bold text-white">Scientific Calculator</h3>
+            <p className="text-[9px] text-zinc-400 uppercase tracking-widest font-bold">iOS Calculator</p>
+            <h3 className="text-sm font-bold text-white">Scientific</h3>
           </div>
         </div>
 
         <button
           onClick={clearCalculator}
-          className="p-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-xl transition-all"
+          className="p-2 bg-gradient-to-b from-rose-600 to-rose-800 text-white rounded-xl shadow-md active:scale-95 transition-all"
         >
           <RotateCcw className="w-4 h-4" />
         </button>
       </div>
 
-      {/* Screen Display */}
-      <div className="bg-zinc-950 p-5 rounded-2xl border border-white/10 space-y-2 text-right shadow-inner">
-        <p className="text-xs font-mono text-zinc-500 min-h-[20px] overflow-x-auto">{expression || '0'}</p>
-        <p className="text-3xl font-black font-mono text-[#FF5F1F] tracking-tight overflow-x-auto">{result}</p>
+      {/* Screen Display - iOS 3 style LCD */}
+      <div className="bg-gradient-to-b from-[#1a1a1a] to-[#0a0a0a] p-4 rounded-2xl border-2 border-[#333] shadow-inner text-right" style={{ boxShadow: 'inset 0 4px 12px rgba(0,0,0,0.8)' }}>
+        <p className="text-xs font-mono text-zinc-500 min-h-[18px] overflow-x-auto">{expression || '0'}</p>
+        <p className="text-3xl font-black font-mono text-white tracking-tight overflow-x-auto drop-shadow-[0_2px_4px_rgba(255,95,31,0.5)]">{result}</p>
       </div>
 
-      {/* Button Grid */}
+      {/* Button Grid - iOS 3 glossy style */}
       <div className="space-y-2">
         {BTNS.map((row, rIdx) => (
           <div key={rIdx} className="grid grid-cols-4 gap-2">
@@ -109,17 +109,22 @@ export const ScientificCalculator: React.FC = () => {
                     else if (btn === 'C') clearCalculator();
                     else appendSymbol(btn);
                   }}
-                  className={`py-3 rounded-2xl font-bold font-mono text-xs transition-all shadow ${
+                  className={`py-4 rounded-2xl font-bold font-mono text-lg transition-all shadow-md active:scale-95 ${
                     btn === '='
-                      ? 'bg-[#FF5F1F] text-black font-black hover:bg-[#ff7236]'
+                      ? 'bg-gradient-to-b from-[#FF5F1F] to-[#cc4d19] text-black font-black shadow-[0_4px_12px_rgba(255,95,31,0.4)]'
                       : btn === 'C'
-                      ? 'bg-rose-950 text-rose-300 border border-rose-500/30'
+                      ? 'bg-gradient-to-b from-rose-500 to-rose-700 text-white shadow-[0_4px_12px_rgba(220,38,38,0.3)]'
                       : isSpecial
-                      ? 'bg-zinc-900 border border-white/10 text-[#FF5F1F]'
+                      ? 'bg-gradient-to-b from-[#333] to-[#222] border border-white/10 text-[#FF5F1F] shadow-[0_2px_8px_rgba(0,0,0,0.4)]'
                       : isOperator
-                      ? 'bg-zinc-800 text-white'
-                      : 'bg-zinc-950 border border-white/5 text-zinc-200 hover:bg-zinc-900'
+                      ? 'bg-gradient-to-b from-[#444] to-[#333] text-white shadow-[0_2px_8px_rgba(0,0,0,0.4)]'
+                      : 'bg-gradient-to-b from-[#555] to-[#444] text-white shadow-[0_2px_8px_rgba(0,0,0,0.4)]'
                   }`}
+                  style={{ 
+                    backgroundImage: btn !== '=' && !isSpecial && !isOperator && btn !== 'C' 
+                      ? 'linear-gradient(to bottom, #666 0%, #444 100%)' 
+                      : undefined 
+                  }}
                 >
                   {btn}
                 </button>
@@ -131,8 +136,8 @@ export const ScientificCalculator: React.FC = () => {
 
       {/* Calculation History */}
       {history.length > 0 && (
-        <div className="bg-zinc-950 p-3 rounded-2xl border border-white/10 space-y-1 text-xs font-mono">
-          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Recent Calculations</p>
+        <div className="bg-gradient-to-b from-[#111] to-[#0a0a0a] p-3 rounded-2xl border border-white/10 space-y-1 text-xs font-mono shadow-inner">
+          <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Recent Calculations</p>
           {history.map((h, i) => (
             <p key={i} className="text-zinc-400">{h}</p>
           ))}
