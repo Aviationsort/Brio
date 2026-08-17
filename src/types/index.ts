@@ -6,39 +6,6 @@
 export type LanguageCode =
   | 'en' // English
   | 'fr' // French
-  | 'fr-CA' // Quebecois
-  | 'fr-BE' // Belgian French
-  | 'fr-MC' // Monégasque
-  | 'nl' // Dutch
-  | 'nl-BE' // Flemish
-  | 'el' // Greek
-  | 'el-CY' // Cypriot Greek
-  | 'it' // Italian
-  | 'it-LI' // Ligurian
-  | 'ar-ARABIZI' // Arabizi
-  | 'iu' // Inuit
-  | 'hy' // Armenian
-  | 'ja' // Japanese
-  | 'de' // German
-  | 'de-AT' // Austrian German
-  | 'ms' // Malay
-  | 'es' // Spanish
-  | 'zh-CN' // Mandarin Chinese
-  | 'zh-TW' // Traditional Chinese
-  | 'zh-HK' // Cantonese
-  | 'id' // Indonesian
-  | 'tr' // Turkish
-  | 'tr-CY' // Cypriot Turkish
-  | 'pl' // Polish
-  | 'ko' // Korean
-  | 'mt' // Maltese
-  | 'da' // Danish
-  | 'tl' // Filipino
-  | 'ar' // Arabic
-  | 'ru' // Russian
-  | 'rm' // Romansh
-  | 'hi' // Hindi
-  | 'pt' // Portuguese
   | 'auto'; // Auto Detect
 
 export type HubId = 'connect' | 'media' | 'arcade' | 'office' | 'telemetry' | 'home';
