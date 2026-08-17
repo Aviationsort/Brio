@@ -118,10 +118,10 @@ export const Header: React.FC = () => {
             <button
               onClick={() => setShowLanguagePicker(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-sky-500/20 to-blue-600/30 hover:from-sky-400/30 hover:to-blue-500/40 border border-sky-300/40 rounded-xl text-xs font-bold text-sky-200 transition-all shadow-md active:scale-95 cursor-pointer"
-              title="Open 5x5 Language Welcome Screen"
+              title={t.openLanguageScreen}
             >
               <Globe className="w-4 h-4 text-sky-300 animate-pulse" />
-              <span className="hidden lg:inline">Language IFE</span>
+              <span className="hidden lg:inline">{t.languageIFE}</span>
             </button>
 
             {/* Locale Dropdown */}

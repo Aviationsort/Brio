@@ -15,10 +15,7 @@ export interface LanguageMeta {
 
 export const SUPPORTED_LANGUAGES: LanguageMeta[] = [
   { code: 'en', name: 'English', nativeName: 'English', flag: '🇬🇧' },
-  { code: 'fr', name: 'Standard French', nativeName: 'Français', flag: '🇫🇷', parentFamily: 'French' },
-  { code: 'fr-CA', name: 'Canadian French', nativeName: 'Français Canadien', flag: '🇨🇦', parentFamily: 'French' },
-  { code: 'fr-BE', name: 'Belgian French', nativeName: 'Français Belge', flag: '🇧🇪', parentFamily: 'French' },
-  { code: 'fr-MC', name: 'Monégasque French', nativeName: 'Français Monégasque', flag: '🇲🇨', parentFamily: 'French' },
+  { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
 ];
 
 export interface UIStrings {
@@ -391,6 +388,13 @@ export interface UIStrings {
   tuneFeedAlgorithm: string;
   feedAlgorithmParameters: string;
   officeProductivitySuite: string;
+  automotiveSystemLocale: string;
+  confirmProceedToHome: string;
+  systemLocaleConfigured: string;
+  pleaseSignInToAccess: string;
+  selectedLabel: string;
+  languageIFE: string;
+  openLanguageScreen: string;
 }
 
 const DEFAULT_EN: UIStrings = {
@@ -738,6 +742,13 @@ const DEFAULT_EN: UIStrings = {
   tuneFeedAlgorithm: 'Tune Feed Algorithm',
   feedAlgorithmParameters: 'Feed Algorithm Parameters',
   officeProductivitySuite: 'Office Productivity Suite',
+  automotiveSystemLocale: 'Automotive System Locale',
+  confirmProceedToHome: 'Confirm & Proceed to Home',
+  systemLocaleConfigured: 'System Locale Configured',
+  pleaseSignInToAccess: 'Please sign in to access encrypted Brio Home.',
+  selectedLabel: 'Selected:',
+  languageIFE: 'Language IFE',
+  openLanguageScreen: 'Open 5x5 Language Welcome Screen',
   clearedOnAppRestart: 'Cleared on app restart.',
   restoresAutomatically: 'Restores automatically!',
   quickDialer: 'Quick Dialer',
@@ -1112,6 +1123,13 @@ const DEFAULT_FR: UIStrings = {
   tuneFeedAlgorithm: 'Ajuster l\'algorithme du fil',
   feedAlgorithmParameters: 'Paramètres de l\'algorithme du fil',
   officeProductivitySuite: 'Suite bureautique',
+  automotiveSystemLocale: 'Paramètres régionaux du système automobile',
+  confirmProceedToHome: 'Confirmer et accéder à l\'accueil',
+  systemLocaleConfigured: 'Paramètres régionaux configurés',
+  pleaseSignInToAccess: 'Veuillez vous connecter pour accéder à l\'accueil chiffré de Brio.',
+  selectedLabel: 'Sélectionné :',
+  languageIFE: 'Langue IFE',
+  openLanguageScreen: 'Ouvrir l\'écran de bienvenue des langues 5x5',
   quickDialer: 'Composeur rapide',
   recentNotes: 'Notes récentes',
   nowPlaying: 'En cours de lecture',
@@ -1140,40 +1158,6 @@ const DEFAULT_FR: UIStrings = {
 export const TRANSLATIONS: Record<LanguageCode, UIStrings> = {
   en: DEFAULT_EN,
   fr: DEFAULT_FR,
-  'fr-CA': DEFAULT_FR,
-  'fr-BE': DEFAULT_FR,
-  'fr-MC': DEFAULT_FR,
-  'nl-BE': DEFAULT_EN,
-  'it-LI': DEFAULT_EN,
-  pt: DEFAULT_EN,
-  nl: DEFAULT_EN,
-  el: DEFAULT_EN,
-  'el-CY': DEFAULT_EN,
-  it: DEFAULT_EN,
-  'ar-ARABIZI': DEFAULT_EN,
-  iu: DEFAULT_EN,
-  hy: DEFAULT_EN,
-  ja: DEFAULT_EN,
-  de: DEFAULT_EN,
-  'de-AT': DEFAULT_EN,
-  ms: DEFAULT_EN,
-  es: DEFAULT_EN,
-  'zh-CN': DEFAULT_EN,
-  'zh-TW': DEFAULT_EN,
-  'zh-HK': DEFAULT_EN,
-  id: DEFAULT_EN,
-  tr: DEFAULT_EN,
-  'tr-CY': DEFAULT_EN,
-  pl: DEFAULT_EN,
-  ko: DEFAULT_EN,
-  mt: DEFAULT_EN,
-  da: DEFAULT_EN,
-  tl: DEFAULT_EN,
-  ar: DEFAULT_EN,
-  ru: DEFAULT_EN,
-  rm: DEFAULT_EN,
-  hi: DEFAULT_EN,
-  auto: DEFAULT_EN,
 };
 
 export function detectSystemLanguage(): LanguageCode {

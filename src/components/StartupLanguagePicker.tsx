@@ -19,7 +19,7 @@ interface LanguageGridItem {
 }
 
 export const StartupLanguagePicker: React.FC = () => {
-  const { setLanguage, setShowLanguagePicker, setShowAuthModal, setActiveHub, showToast, setAuthRequired } = useApp();
+  const { setLanguage, setShowLanguagePicker, setShowAuthModal, setActiveHub, showToast, setAuthRequired, t } = useApp();
   const [selectedLang, setSelectedLang] = useState<LanguageCode>('en');
 
   const playTactileClick = () => {
@@ -66,8 +66,8 @@ export const StartupLanguagePicker: React.FC = () => {
 
     const found = SUPPORTED_LANGUAGES.find((l) => l.code === selectedLang);
     showToast(
-      'System Locale Configured',
-      `Set to ${found?.nativeName || selectedLang}. Please sign in to access encrypted Brio Home.`,
+      t.systemLocaleConfigured,
+      `${t.selectedLabel} ${found?.nativeName || selectedLang}. ${t.pleaseSignInToAccess}`,
       'success'
     );
   };
@@ -111,10 +111,10 @@ export const StartupLanguagePicker: React.FC = () => {
         <div className="text-center space-y-1">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1b5e50]/15 text-[#1b5e50] text-xs font-bold font-mono">
             <Globe className="w-4 h-4 animate-spin" />
-            <span>SELECT SYSTEM LANGUAGE</span>
+            <span>{t.selectSystemLanguage}</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#162e28]">
-            Automotive System Locale
+            {t.automotiveSystemLocale}
           </h2>
         </div>
 
@@ -161,7 +161,7 @@ export const StartupLanguagePicker: React.FC = () => {
 
         <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-400/40">
           <div className="text-xs font-mono text-[#1d352e] flex items-center gap-2">
-            <span className="font-bold">Selected:</span>
+            <span className="font-bold">{t.selectedLabel}</span>
             <span className="px-2.5 py-1 bg-[#1b5e50]/10 border border-[#1b5e50]/30 rounded-lg font-bold text-[#1b5e50]">
               {GRID_ITEMS.find((i) => i.code === selectedLang)?.nativeName || selectedLang}
             </span>
@@ -172,7 +172,7 @@ export const StartupLanguagePicker: React.FC = () => {
             className="w-full sm:w-auto px-7 py-3 rounded-xl bg-gradient-to-r from-[#1b5e50] via-[#1f7362] to-[#278e79] hover:from-[#154c41] hover:to-[#1e6f5e] text-white font-extrabold text-xs uppercase tracking-wider shadow-[0_6px_20px_rgba(27,94,80,0.4)] border-t border-emerald-300/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <Sparkles className="w-4 h-4 text-emerald-200" />
-            <span>Confirm & Proceed to Home</span>
+            <span>{t.confirmProceedToHome}</span>
             <ArrowRight className="w-4 h-4 text-white" />
           </button>
         </div>

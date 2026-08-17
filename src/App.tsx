@@ -11,7 +11,6 @@ import { AuthModal } from './components/Layout/AuthModal';
 import { InfotainmentMainMenu } from './components/InfotainmentMainMenu';
 import { StartupLanguagePicker } from './components/StartupLanguagePicker';
 import { MobileWindowsPhoneGUI } from './components/MobileWindowsPhoneGUI';
-import { TabletIFETabletGUI } from './components/TabletIFETabletGUI';
 
 const MainAppContent: React.FC = () => {
   const {
@@ -22,8 +21,6 @@ const MainAppContent: React.FC = () => {
     setShowAuthModal,
     showMobileGUI,
     setShowMobileGUI,
-    showTabletGUI,
-    setShowTabletGUI,
     user,
     authRequired,
   } = useApp();
@@ -44,14 +41,7 @@ const MainAppContent: React.FC = () => {
 
       {/* Main Automotive, Tablet IFE, or Mobile Phone Display Container */}
       <main className="flex-1 w-full max-w-7xl mx-auto p-2 sm:p-4 md:p-6 overflow-x-hidden box-border flex flex-col justify-center my-auto">
-        {showTabletGUI ? (
-          <div className="flex flex-col items-center">
-            <TabletIFETabletGUI
-              onNavigateTab={handleNavigateFromInfotainment}
-              onCloseTabletView={() => setShowTabletGUI(false)}
-            />
-          </div>
-        ) : showMobileGUI ? (
+        {showMobileGUI ? (
           <div className="flex flex-col items-center">
             <MobileWindowsPhoneGUI
               onNavigateTab={handleNavigateFromInfotainment}
