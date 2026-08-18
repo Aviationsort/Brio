@@ -111,7 +111,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
   } = useApp();
 
   // Screen States: 'HOME' | 'APP_DRAWER' | 'SEARCH' | 'ACCOUNT_OVERLAY' | 'QR_ACCOUNT' | 'FEATURE'
-  const [screenMode, setScreenMode] = useState<'HOME' | 'APP_DRAWER' | 'SEARCH' | 'ACCOUNT_OVERLAY' | 'QR_ACCOUNT' | 'FEATURE' | 'connect' | 'media' | 'arcade' | 'office' | 'telemetry' | 'profile'>('HOME');
+  const [screenMode, setScreenMode] = useState<'HOME' | 'APP_DRAWER' | 'SEARCH' | 'ACCOUNT_OVERLAY' | 'FEATURE' | 'connect' | 'media' | 'arcade' | 'office' | 'telemetry' | 'profile'>('HOME');
   const [activeOverlay, setActiveOverlay] = useState<'NONE' | 'WEATHER' | 'CLOCK'>('NONE');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentTime, setCurrentTime] = useState('2:55 PM');
@@ -701,22 +701,6 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                     </div>
                   </div>
 
-                  {/* QR Code Button */}
-                  {user && (
-                    <button
-                      onClick={generateAccountQR}
-                      className="liquid-glass-btn w-full p-3 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-xl text-left transition-all cursor-pointer flex items-center gap-2.5"
-                    >
-                      <div className="p-2 bg-[#FF5F1F]/20 rounded-lg border border-[#FF5F1F]/30">
-                        <QrCode className="w-5 h-5 text-[#FF5F1F]" />
-                      </div>
-                      <div>
-                        <span className="text-xs font-bold text-white block">{t.accountQRCode}</span>
-                         <span className="text-[9px] text-zinc-400 font-mono">{t.scanToOpenBrioProfile}</span>
-                      </div>
-                    </button>
-                  )}
-
                   {/* Encryption Security Key Input */}
                   <div className="p-2.5 bg-zinc-900 rounded-xl border border-zinc-800 space-y-2">
                     <div className="flex items-center gap-2 text-xs font-bold text-emerald-400">
@@ -741,79 +725,6 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                 </div>
               )}
 
-              {/* VIEW 5: QR ACCOUNT INFO */}
-              {screenMode === 'QR_ACCOUNT' && (
-                <div className="bg-zinc-950/95 border border-zinc-700 rounded-2xl p-3 shadow-2xl space-y-3 max-h-[460px] overflow-y-auto">
-                  <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
-                    <span className="text-xs font-bold text-white">{t.accountInfoMyPlanePics}</span>
-                    <button
-                      onClick={() => setScreenMode('ACCOUNT_OVERLAY')}
-                      className="liquid-glass-btn p-1 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white"
-                    >
-                      <X className="liquid-glass-btn w-4 h-4" />
-                    </button>
-                  </div>
-
-                   <div className="p-3 bg-zinc-900 rounded-xl border border-zinc-800 space-y-3">
-                     <div className="flex items-center gap-3">
-                       <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-sky-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
-                         {user ? user.username.charAt(0).toUpperCase() : '?'}
-                       </div>
-                       <div>
-                         <h4 className="text-sm font-bold text-white">{user ? user.username : 'Guest'}</h4>
-                         <p className="text-[10px] text-zinc-400 font-mono">{user ? user.email : 'operator@brio.vault'}</p>
-                         <span className="text-[9px] text-emerald-400 font-mono">{t.brioDroidAccountActive}</span>
-                       </div>
-                     </div>
-
-                     <div className="p-4 bg-white rounded-xl flex items-center justify-center">
-                       {qrDataUrl ? (
-                         <img src={qrDataUrl} alt="Account QR Code" className="w-48 h-48" />
-                       ) : (
-                         <div className="text-zinc-400 text-xs font-mono">{t.qrCodeWillAppearHere}</div>
-                       )}
-                     </div>
-
-                     <div className="text-[10px] text-zinc-400 font-mono text-center">
-                       {t.scanToOpenBrioProfile}
-                     </div>
-
-                     <button
-                       onClick={() => setScreenMode('profile')}
-                       className="liquid-glass-btn w-full py-2 bg-[#FF5F1F] hover:bg-[#FF5F1F]/90 text-black font-bold text-xs rounded-lg flex items-center justify-center gap-2"
-                     >
-                       <User className="w-4 h-4" /> {t.viewFullProfile}
-                     </button>
-                   </div>
-
-                  {myPlanePics.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-[10px] font-mono text-zinc-400 font-bold uppercase tracking-wider">{t.myplanePicsAlbum} ({myPlanePics.length})</p>
-                      <div className="grid grid-cols-3 gap-2">
-                        {myPlanePics.slice(0, 9).map((photo) => (
-                          <div key={photo.id} className="relative aspect-square rounded-xl overflow-hidden bg-black border border-white/10">
-                            {photo.mediaType === 'video' && photo.videoUrl ? (
-                              <video src={photo.videoUrl} className="w-full h-full object-cover" muted />
-                            ) : (
-                              <img src={photo.thumbnailUrl || photo.imageUrl} alt={photo.registration} className="w-full h-full object-cover" />
-                            )}
-                            <div className="absolute bottom-1 left-1 right-1 bg-black/70 text-[8px] font-mono text-white text-center truncate">
-                              {photo.registration}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                   <button
-                     onClick={() => setScreenMode('HOME')}
-                     className="liquid-glass-btn w-full py-2 bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs rounded-lg"
-                   >
-                     {t.backToHome}
-                   </button>
-                 </div>
-               )}
 
                {/* VIEW 6: FEATURE SCREENS */}
                {screenMode === 'FEATURE' && (
@@ -1020,9 +931,62 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                    {/* Recent Photos Feature */}
                    {currentFeature === 'photos' && (
                      <div className="space-y-3">
-                       <p className="text-[10px] font-mono text-zinc-400 font-bold uppercase tracking-wider">
-                         {t.myplanePicsAlbum} ({myPlanePics.length})
-                       </p>
+                       <div className="flex items-center justify-between">
+                         <p className="text-[10px] font-mono text-zinc-400 font-bold uppercase tracking-wider">
+                           {t.myplanePicsAlbum} ({myPlanePics.length})
+                         </p>
+                         {myPlanePics.length > 0 && (
+                           <button
+                             onClick={async () => {
+                               try {
+                                 const { jsPDF } = await import('jspdf');
+                                 const doc = new jsPDF();
+                                 
+                                 // Add title
+                                 doc.setFontSize(16);
+                                 doc.text('MyPlanePics Album', 105, 15, { align: 'center' });
+                                 doc.setFontSize(10);
+                                 doc.text(`Total Photos: ${myPlanePics.length}`, 105, 22, { align: 'center' });
+                                 doc.text(`Generated: ${new Date().toLocaleDateString()}`, 105, 28, { align: 'center' });
+                                 
+                                 // Add statistics
+                                 doc.setDrawColor(200);
+                                 doc.line(20, 32, 190, 32);
+                                 doc.setFontSize(12);
+                                 doc.text('Statistics', 20, 40);
+                                 doc.setFontSize(10);
+                                 doc.text(`• Total Media: ${myPlanePics.length}`, 20, 48);
+                                 const videos = myPlanePics.filter(p => p.mediaType === 'video').length;
+                                 const photos = myPlanePics.length - videos;
+                                 doc.text(`• Photos: ${photos}`, 20, 55);
+                                 doc.text(`• Videos: ${videos}`, 20, 62);
+                                 
+                                 // List all registrations
+                                 doc.setDrawColor(200);
+                                 doc.line(20, 70, 190, 70);
+                                 doc.setFontSize(12);
+                                 doc.text('Aircraft Registrations', 20, 78);
+                                 doc.setFontSize(8);
+                                 const regs = myPlanePics.map(p => p.registration);
+                                 const uniqueRegs = [...new Set(regs)];
+                                 uniqueRegs.forEach((reg, idx) => {
+                                   if (85 + idx * 5 < 280) {
+                                     doc.text(`• ${reg}`, 20, 85 + idx * 5);
+                                   }
+                                 });
+                                 
+                                 doc.save('myplanepics-album.pdf');
+                                 showToast(t.exportSuccessful, t.albumExportedAsPdf, 'success');
+                               } catch (err) {
+                                 showToast(t.exportFailed, t.unableToExportAlbum, 'error');
+                               }
+                             }}
+                             className="liquid-glass-btn px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-[9px] rounded-lg flex items-center gap-1"
+                           >
+                             <FileText className="w-3 h-3" /> {t.exportPdf}
+                           </button>
+                         )}
+                       </div>
                        {myPlanePics.length === 0 ? (
                          <div className="text-center py-8">
                            <Camera className="w-8 h-8 text-zinc-600 mx-auto mb-2" />

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { Camera, Award, BarChart3, User, Mail, ShieldCheck, QrCode, ArrowLeft } from 'lucide-react';
+import { Camera, Award, BarChart3, User, Mail, ShieldCheck, ArrowLeft } from 'lucide-react';
 import { computeAirlineRankings, computeAircraftModelRankings, computeLiveStats } from '../data/planePicsData';
 
 interface ProfilePageProps {

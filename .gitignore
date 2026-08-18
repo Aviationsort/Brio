@@ -5,28 +5,25 @@ node_modules/
 # Build artifacts
 dist/
 build/
-target/
+*.js.map
 
 # Environment variables
 .env
 .env.local
-.env.*
+*.env.*
 
-# IDE specific
+# Editors
 .vscode/
 .idea/
 
-# Python specific
+# Logs
+*.log
+
+# Python cache (if any Python files exist in the project)
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-*.py.class
-*.py.obj
-*.py.out
-
-# Logs
-*.log
 
 # Coverage reports
 coverage/
@@ -35,7 +32,6 @@ htmlcov/
 
 # Temporary files
 *.tmp
-*.temp
 *.swp
 *.swo
 
@@ -43,15 +39,17 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
-# Testing
-.mypy_cache/
-.pytest_cache/
-.nyc_output/
-coverage.xml
-*.gcda
-*.gcno
+# Compiled files
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.a
+*.out
+*.class
 
-# Compressed files
+# Compression artifacts
 *.zip
 *.gz
 *.tar

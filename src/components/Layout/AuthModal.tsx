@@ -50,75 +50,75 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
-      <div className="relative w-full max-w-md bg-slate-900 border border-slate-700/60 rounded-2xl p-6 shadow-2xl text-slate-100 overflow-hidden">
-        <div className="absolute -top-12 -right-12 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-12 -left-12 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative w-full max-w-md aero-panel p-6 shadow-2xl text-slate-800 overflow-hidden">
+        <div className="absolute -top-12 -right-12 w-40 h-40 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-12 -left-12 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div className="flex items-center justify-between pb-4 border-b border-white/40">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+            <div className="p-2 rounded-xl bg-white/40 border border-white/60 text-blue-700 shadow-inner">
               <Shield className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold tracking-wide">
+              <h3 className="text-lg font-bold tracking-wide text-blue-900 drop-shadow-sm">
                 {isSignUp ? t.createEncryptedAccount : t.easyLoginUnlock}
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-blue-700/80 font-medium">
                 {t.aesGCM256Cryptography}
               </p>
             </div>
           </div>
           <button
             onClick={handleClose}
-            className={`liquid-glass-btn p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors ${authRequired ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`skeuo-button p-1.5 rounded-lg text-white ${authRequired ? 'opacity-50 cursor-not-allowed' : ''}`}
             disabled={authRequired}
           >
-            <X className="liquid-glass-btn w-5 h-5" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-5 space-y-4">
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">{t.usernameOperatorCall}</label>
+            <label className="block text-xs font-medium text-blue-900 mb-1 drop-shadow-sm">{t.usernameOperatorCall}</label>
             <input
               type="text"
               required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="e.g. CaptainVance or BrioAgent"
-              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors"
+              className="w-full px-3.5 py-2.5 flash-panel text-sm text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all font-medium"
             />
           </div>
 
           {isSignUp && (
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">{t.emailAddressOptional}</label>
+              <label className="block text-xs font-medium text-blue-900 mb-1 drop-shadow-sm">{t.emailAddressOptional}</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="operator@brio.vault"
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors"
+                className="w-full px-3.5 py-2.5 flash-panel text-sm text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all font-medium"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">
+            <label className="block text-xs font-medium text-blue-900 mb-1 drop-shadow-sm">
               {t.vaultMasterPassphrasePBKDF2}
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
+              <Lock className="absolute left-3 top-3 w-4 h-4 text-blue-600" />
               <input
                 type="password"
                 required
                 value={passphrase}
                 onChange={(e) => setPassphrase(e.target.value)}
                 placeholder={t.enterMasterSecretPassphrase}
-                className="w-full pl-9 pr-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors"
+                className="w-full pl-9 pr-3.5 py-2.5 flash-panel text-sm text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all font-medium"
               />
             </div>
-            <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+            <p className="text-[11px] text-blue-700/90 mt-1 flex items-center gap-1 font-medium">
               {t.passphraseGeneratesClientSideKey}
             </p>
           </div>
@@ -126,7 +126,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           <button
             type="submit"
             disabled={loading}
-            className="liquid-glass-btn w-full py-3 bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-semibold text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
+            className="skeuo-button w-full py-3 text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
           >
             {loading ? (
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -142,7 +142,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             <button
               type="button"
               onClick={() => setIsSignUp(!isSignUp)}
-              className="liquid-glass-btn text-xs text-cyan-400 hover:underline"
+              className="text-xs text-blue-700 hover:underline font-semibold hover:text-blue-900 transition-colors"
             >
               {isSignUp ? t.alreadyHavePassphrase : t.firstTimeCreateNewVault}
             </button>
