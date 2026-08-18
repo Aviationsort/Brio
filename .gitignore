@@ -5,35 +5,33 @@ node_modules/
 # Build artifacts
 dist/
 build/
-target/
+*.js.map
 
-# Python
+# Environment variables
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Python cache (if any Python files exist in the project)
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-*.py.class
-.Python
-env/
-venv/
-.venv/
-.ENV
-.ENV.local
-
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
 # Coverage
 coverage/
 htmlcov/
 .coverage
 
-# IDE
-.vscode/
-.idea/
+# Temporary files
+*.tmp
 *.swp
 *.swo
 *~
@@ -42,28 +40,17 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
-# Environment
-.env
-.env.local
-.env.*
-!.env.example
+# Compiled files
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.a
+*.out
+*.class
 
-# Cache
-.cache/
-.mypy_cache/
-.pytest_cache/
-.gradle/
-.npm
-.yarn
-
-# Temp
-*.tmp
-*.temp
-*~
-.DS_Store
-Thumbs.db
-
-# Archives
+# Compression artifacts
 *.zip
 *.tar.gz
 *.tar.bz2
