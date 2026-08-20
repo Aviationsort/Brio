@@ -109,3 +109,171 @@
   background: rgba(37, 99, 235, 0.4);
   border-color: rgba(37, 99, 235, 0.7);
 }
+
+/* Frutiger Aero / Aurora / Nightcore / Flash Styles */
+.aero-panel {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(200, 230, 255, 0.8) 50%, rgba(150, 200, 255, 0.9) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1),
+    0 10px 30px rgba(0, 100, 200, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.aero-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(180deg, 
+    rgba(255, 255, 255, 0.6) 0%, 
+    rgba(255, 255, 255, 0.2) 49%, 
+    rgba(255, 255, 255, 0) 50%, 
+    rgba(255, 255, 255, 0.1) 100%);
+  border-radius: 16px 16px 0 0;
+  pointer-events: none;
+}
+
+.aurora-bg {
+  background: linear-gradient(135deg, #00f260 0%, #0575e6 50%, #00c6ff 100%);
+  position: relative;
+}
+
+.aurora-bg::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+  animation: aurora-shimmer 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes aurora-shimmer {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(10%, 10%) rotate(5deg); }
+}
+
+.nightcore-panel {
+  background: linear-gradient(135deg, #1a0a2e 0%, #16213e 50%, #0f3460 100%);
+  border: 2px solid rgba(255, 0, 204, 0.5);
+  border-radius: 12px;
+  box-shadow: 
+    0 0 20px rgba(255, 0, 204, 0.3),
+    inset 0 0 20px rgba(51, 51, 153, 0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.nightcore-panel::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 0, 204, 0.2), transparent);
+  animation: nightcore-scan 3s linear infinite;
+}
+
+@keyframes nightcore-scan {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.flash-panel {
+  background: linear-gradient(180deg, #ffffff 0%, #f0f0f0 49%, #e0e0e0 50%, #d0d0d0 100%);
+  border: 1px solid #cccccc;
+  border-radius: 8px;
+  box-shadow: 
+    inset 0 1px 0 #ffffff,
+    inset 0 -1px 0 #b0b0b0,
+    0 4px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.flash-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 30%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.2) 100%);
+  border-radius: 8px 8px 0 0;
+  pointer-events: none;
+}
+
+.skeuo-button {
+  background: linear-gradient(180deg, #4a90d9 0%, #357abd 50%, #2a5f8f 51%, #357abd 100%);
+  border: 1px solid #1a4a7a;
+  border-radius: 8px;
+  box-shadow: 
+    inset 0 1px 0 rgba(255,255,255,0.4),
+    inset 0 -1px 0 rgba(0,0,0,0.2),
+    0 2px 4px rgba(0,0,0,0.3),
+    0 1px 0 rgba(255,255,255,0.2);
+  color: white;
+  font-weight: bold;
+  text-shadow: 0 -1px 0 rgba(0,0,0,0.3);
+  transition: all 0.1s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.skeuo-button:hover {
+  background: linear-gradient(180deg, #5a9ee9 0%, #458acd 50%, #3a6f9f 51%, #458acd 100%);
+  box-shadow: 
+    inset 0 1px 0 rgba(255,255,255,0.5),
+    inset 0 -1px 0 rgba(0,0,0,0.2),
+    0 3px 6px rgba(0,0,0,0.4),
+    0 1px 0 rgba(255,255,255,0.2);
+}
+
+.skeuo-button:active {
+  background: linear-gradient(180deg, #2a5f8f 0%, #357abd 50%, #4a90d9 51%, #357abd 100%);
+  box-shadow: 
+    inset 0 2px 4px rgba(0,0,0,0.3),
+    0 1px 0 rgba(255,255,255,0.2);
+  transform: translateY(1px);
+}
+
+.glossy-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 16px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255,255,255,0.4),
+    inset 0 -1px 0 rgba(0,0,0,0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.glossy-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, 
+    rgba(255,255,255,0.4) 0%, 
+    rgba(255,255,255,0.1) 49%, 
+    rgba(255,255,255,0) 50%, 
+    rgba(255,255,255,0.05) 100%);
+  border-radius: 16px 16px 0 0;
+  pointer-events: none;
+}

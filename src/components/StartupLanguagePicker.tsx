@@ -61,13 +61,12 @@ export const StartupLanguagePicker: React.FC = () => {
     setLanguage(selectedLang);
     setShowLanguagePicker(false);
     setActiveHub('home');
-    setAuthRequired(true);
-    setShowAuthModal(true);
+    // Do not show auth modal - user can access app directly and login later if needed
 
     const found = SUPPORTED_LANGUAGES.find((l) => l.code === selectedLang);
     showToast(
       t.systemLocaleConfigured,
-      `${t.selectedLabel} ${found?.nativeName || selectedLang}. ${t.pleaseSignInToAccess}`,
+      `${t.selectedLabel} ${found?.nativeName || selectedLang}.`,
       'success'
     );
   };
@@ -84,24 +83,6 @@ export const StartupLanguagePicker: React.FC = () => {
       name: 'French',
       nativeName: 'Français',
       flag: '🇫🇷',
-    },
-    {
-      code: 'fr-CA',
-      name: 'Canadian French',
-      nativeName: 'Français Canadien',
-      flag: '🇨🇦',
-    },
-    {
-      code: 'fr-BE',
-      name: 'Belgian French',
-      nativeName: 'Français Belge',
-      flag: '🇧🇪',
-    },
-    {
-      code: 'fr-MC',
-      name: 'Monégasque French',
-      nativeName: 'Français Monégasque',
-      flag: '🇲🇨',
     },
   ];
 

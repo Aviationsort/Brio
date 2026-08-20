@@ -34,7 +34,7 @@ import {
 } from 'lucide-react';
 
 export const RSSReader: React.FC = () => {
-  const { showToast } = useApp();
+  const { showToast, t } = useApp();
 
   const [activeTab, setActiveTab] = useState<'all' | 'aviation' | 'world' | 'saved'>('all');
   const [articles, setArticles] = useState<NewsItem[]>([]);
@@ -45,6 +45,10 @@ export const RSSReader: React.FC = () => {
     total: 0,
     sourceName: '',
   });
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(9);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -201,6 +205,17 @@ export const RSSReader: React.FC = () => {
     }),
     searchQuery
   );
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredArticles.length / itemsPerPage);
+  const paginatedArticles = filteredArticles.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const goToPage = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
 
   const successfulSources = sources.filter((s) => s.status === 'success');
   const failedSources = sources.filter((s) => s.status === 'failed');
@@ -379,7 +394,7 @@ export const RSSReader: React.FC = () => {
 
       {/* Articles Grid / Rich Visual Feed */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredArticles.map((art) => {
+        {paginatedArticles.map((art) => {
           const isSaved = savedArticles.some((a) => a.id === art.id);
 
           // Extract domain for favicon provider logo
@@ -487,6 +502,43 @@ export const RSSReader: React.FC = () => {
           );
         })}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-6">
+          <button
+            onClick={() => goToPage(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="liquid-glass-btn px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl border border-slate-700 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+          
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => goToPage(page)}
+                className={`liquid-glass-btn w-10 h-10 rounded-xl border transition-all cursor-pointer ${
+                  currentPage === page
+                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 border-purple-500/50 text-white shadow-lg'
+                    : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white hover:bg-slate-700'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
+          
+          <button
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="liquid-glass-btn px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl border border-slate-700 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
+        </div>
+      )}
 
       {/* Empty State */}
       {!loading && filteredArticles.length === 0 && (
