@@ -10,10 +10,10 @@ class EncryptionService {
   private defaultPassphrase = 'brio-secure-vault-master-key-2026';
   private useFallback = false;
 
-  private ensureWebCrypto(): SubtleCrypto {
+  private ensureWebCrypto(): SubtleCrypto | null {
     if (typeof window === 'undefined' || !window.crypto || !window.crypto.subtle) {
       this.useFallback = true;
-      throw new Error('Browser WebCrypto support required. Please use a modern browser over HTTPS or localhost.');
+      return null;
     }
     return window.crypto.subtle;
   }
@@ -95,6 +95,10 @@ class EncryptionService {
       const saltBuffer = encoder.encode(saltString);
 
       const subtle = this.ensureWebCrypto();
+      if (!subtle) {
+        return null as any;
+      }
+
       const baseKey = await subtle.importKey(
         'raw',
         passphraseBuffer,
@@ -119,25 +123,34 @@ class EncryptionService {
       return derivedKey;
     } catch (error) {
       console.error('Key derivation failed:', error);
-      throw new Error('Cryptographic key derivation failed. Browser WebCrypto support required.');
+      this.useFallback = true;
+      return null as any;
     }
   }
 
   /**
-   * Set Master Passphrase
-   */
+    * Set Master Passphrase
+    */
   public async setMasterPassphrase(passphrase: string): Promise<void> {
-    this.masterCryptoKey = await this.deriveKey(passphrase);
+    try {
+      this.masterCryptoKey = await this.deriveKey(passphrase);
+    } catch (error) {
+      console.error('Failed to set master passphrase:', error);
+    }
   }
 
   /**
-   * Get Active Master Key
-   */
+    * Get Active Master Key
+    */
   private async getMasterKey(): Promise<CryptoKey> {
     if (!this.masterCryptoKey) {
-      this.masterCryptoKey = await this.deriveKey(this.defaultPassphrase);
+      try {
+        this.masterCryptoKey = await this.deriveKey(this.defaultPassphrase);
+      } catch {
+        // fallback mode
+      }
     }
-    return this.masterCryptoKey;
+    return this.masterCryptoKey as CryptoKey;
   }
 
   /**

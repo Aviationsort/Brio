@@ -9,14 +9,12 @@ import { AppProvider, useApp } from './context/AppContext';
 import { ToastContainer } from './components/Layout/ToastContainer';
 import { AuthModal } from './components/Layout/AuthModal';
 import { InfotainmentMainMenu } from './components/InfotainmentMainMenu';
-import { StartupLanguagePicker } from './components/StartupLanguagePicker';
 import { MobileWindowsPhoneGUI } from './components/MobileWindowsPhoneGUI';
 
 const MainAppContent: React.FC = () => {
   const {
     activeHub,
     setActiveHub,
-    showLanguagePicker,
     showAuthModal,
     setShowAuthModal,
     showMobileGUI,
@@ -33,9 +31,6 @@ const MainAppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#060606] text-white font-sans selection:bg-[#FF5F1F] selection:text-black flex flex-col max-w-full overflow-x-hidden">
-      {/* Startup Language Selection Overlay - shown first */}
-      {showLanguagePicker && <StartupLanguagePicker />}
-
       {/* Main Automotive, Tablet IFE, or Mobile Phone Display Container */}
       <main className="flex-1 w-full max-w-7xl mx-auto p-2 sm:p-4 md:p-6 overflow-x-hidden box-border flex flex-col justify-center my-auto">
         {showMobileGUI ? (

@@ -1,21 +1,16 @@
 /**
- * Top Header Component with Branding, Master Lock Indicator, Language Switcher (24 Locales), Auth, and Clock
+ * Top Header Component with Branding, Master Lock Indicator, Auth, and Clock
  */
 
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { SUPPORTED_LANGUAGES } from '../../utils/translations';
-import { LanguageCode } from '../../types';
-import { ShieldCheck, Lock, Unlock, Globe, User, Radio, Smartphone } from 'lucide-react';
+import { ShieldCheck, Lock, Unlock, User, Radio, Smartphone } from 'lucide-react';
 import { AuthModal } from './AuthModal';
 
 export const Header: React.FC = () => {
   const {
     user,
     masterKeySet,
-    language,
-    setLanguage,
-    setShowLanguagePicker,
     showMobileGUI,
     setShowMobileGUI,
     t,
@@ -79,7 +74,7 @@ export const Header: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Controls: 25-Language Selector & Auth */}
+          {/* Right Controls: Auth */}
           <div className="flex items-center gap-2">
             {/* Show device view toggle only if explicitly in mobile mode */}
             {showMobileGUI && (
@@ -93,33 +88,6 @@ export const Header: React.FC = () => {
                 <span className="hidden sm:inline">{t.mobileMode || 'WP7 Mobile'}</span>
               </button>
             )}
-
-            {/* Launch IFE Welcome Screen Button */}
-            <button
-              onClick={() => setShowLanguagePicker(true)}
-              className="liquid-glass-btn flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-sky-500/20 to-blue-600/30 hover:from-sky-400/30 hover:to-blue-500/40 border border-sky-300/40 rounded-xl text-xs font-bold text-sky-200 transition-all shadow-md active:scale-95 cursor-pointer"
-              title={t.openLanguageScreen}
-            >
-              <Globe className="w-4 h-4 text-sky-300 animate-pulse" />
-              <span className="hidden lg:inline">{t.languageIFE}</span>
-            </button>
-
-            {/* Locale Dropdown */}
-            <div className="relative flex items-center">
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value as LanguageCode)}
-                className="px-2.5 py-1.5 bg-gradient-to-b from-slate-900 to-sky-950 border border-sky-400/30 hover:border-sky-300 rounded-xl text-xs font-medium text-sky-100 focus:outline-none focus:border-sky-300 transition-colors cursor-pointer appearance-none shadow-md"
-              >
-                {SUPPORTED_LANGUAGES.filter(
-                  (l) => l.parentFamily === 'French' || l.code === 'en' || !l.parentFamily
-                ).map((lang) => (
-                  <option key={lang.code} value={lang.code} className="bg-slate-900 text-white">
-                    {lang.flag} {lang.nativeName} ({lang.name})
-                  </option>
-                ))}
-              </select>
-            </div>
 
             {/* Auth Button */}
             <button

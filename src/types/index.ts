@@ -2,12 +2,6 @@
  * Brio Application Type Definitions
  */
 
-// All Supported Languages & Dialects
-export type LanguageCode =
-  | 'en' // English
-  | 'fr' // French
-  | 'auto'; // Auto Detect
-
 export type HubId = 'connect' | 'media' | 'arcade' | 'office' | 'telemetry' | 'home';
 
 export interface UserAccount {

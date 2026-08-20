@@ -82,9 +82,21 @@ export const MyPlanePicsSuite: React.FC = () => {
   const singleInputRef = useRef<HTMLInputElement | null>(null);
   const folderInputRef = useRef<HTMLInputElement | null>(null);
 
+  // Photo Upload Metadata Modal State
+  const [pendingUploadFile, setPendingUploadFile] = useState<File | null>(null);
+  const [showUploadMetadataModal, setShowUploadMetadataModal] = useState(false);
+  const [uploadFormData, setUploadFormData] = useState({
+    registration: '',
+    airline: '',
+    aircraftModel: '',
+    specialLivery: '',
+    dateCaptured: '',
+  });
+
   // Folder Storage Strategy Modal State
   const [pendingFolderFiles, setPendingFolderFiles] = useState<File[]>([]);
   const [showFolderChoiceModal, setShowFolderChoiceModal] = useState(false);
+  const [showFolderStructureModal, setShowFolderStructureModal] = useState(false);
 
   // Import Progress State
   const [importProgress, setImportProgress] = useState<number>(0);
@@ -95,12 +107,29 @@ export const MyPlanePicsSuite: React.FC = () => {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxMedia, setLightboxMedia] = useState<PlanePhoto | null>(null);
 
+  useEffect(() => {
+    if (!isLightboxOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsLightboxOpen(false);
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        const currentIndex = filteredPhotos.findIndex(p => p.id === lightboxMedia?.id);
+        if (currentIndex === -1) return;
+        const nextIndex = e.key === 'ArrowRight'
+          ? (currentIndex + 1) % filteredPhotos.length
+          : (currentIndex - 1 + filteredPhotos.length) % filteredPhotos.length;
+        if (filteredPhotos[nextIndex]) setLightboxMedia(filteredPhotos[nextIndex]);
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [isLightboxOpen, lightboxMedia, filteredPhotos]);
+
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState('');
   const [filterFormat, setFilterFormat] = useState<string>('all');
   const [filterAirline, setFilterAirline] = useState<string>('all');
 
-  // Folder Input Trigger
+  // Folder Input Trigger (shows structure preview first)
   const handleFolderInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -123,6 +152,17 @@ export const MyPlanePicsSuite: React.FC = () => {
 
     setPendingFolderFiles(mediaFiles);
     setShowFolderChoiceModal(true);
+  };
+
+  // Show folder structure preview before opening picker
+  const handleFolderImportClick = () => {
+    setShowFolderStructureModal(true);
+  };
+
+  // Continue from structure preview to open folder picker
+  const continueToFolderSelect = () => {
+    setShowFolderStructureModal(false);
+    folderInputRef.current?.click();
   };
 
   // Execute Folder Upload (Permanent vs Temporary Choice)
@@ -388,7 +428,7 @@ export const MyPlanePicsSuite: React.FC = () => {
     try {
       const parsed = parsePlaneFilename(newFilename);
       if (!parsed.isValid) {
-        showToast(t.filenameParseError, parsed.errorMessage || t.invalidFormatPattern, 'error');
+        showToast(t.validationWarning, t.invalidFormatPattern, 'warning');
         return;
       }
 
@@ -426,6 +466,96 @@ export const MyPlanePicsSuite: React.FC = () => {
       showToast(t.photoVaulted, `${parsed.registration} (${parsed.formatPattern})`, 'success');
     } catch (err: any) {
       showToast(t.vaultError, `${t.failedToEncryptPhotoMetadata}: ${err.message}`, 'error');
+    }
+  };
+
+  // Process single upload with user-provided metadata
+  const processUploadWithMetadata = async () => {
+    if (!pendingUploadFile) return;
+
+    const file = pendingUploadFile;
+    const isVideo = file.type.startsWith('video/');
+
+    setIsImporting(true);
+    setImportProgress(0);
+    setImportStatusText(t.loading || 'Processing...');
+
+    try {
+      const dataUrl = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve((e.target?.result as string) || '');
+        reader.onerror = () =>
+          resolve(isVideo ? '' : 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&fit=crop');
+        reader.readAsDataURL(file);
+      });
+
+      const thumbnailUrl = !isVideo ? await generateThumbnail(file) : '';
+
+      const encryptedPayload = await encryptionService.encrypt(
+        JSON.stringify({
+          notes: `Manual upload: ${file.name}`,
+          size: file.size,
+          lastModified: file.lastModified,
+          timestamp: new Date().toISOString(),
+          registration: uploadFormData.registration,
+          airline: uploadFormData.airline,
+          aircraftModel: uploadFormData.aircraftModel,
+          specialLivery: uploadFormData.specialLivery,
+          dateCaptured: uploadFormData.dateCaptured,
+        })
+      );
+
+      const newPhoto: PlanePhoto = {
+        id: `photo-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+        filename: file.name,
+        imageUrl: dataUrl || 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&fit=crop',
+        mediaType: isVideo ? 'video' : 'image',
+        videoUrl: isVideo ? dataUrl : undefined,
+        thumbnailUrl: thumbnailUrl || undefined,
+        registration: uploadFormData.registration || 'Unknown',
+        specialLivery: uploadFormData.specialLivery || 'None',
+        dateCaptured: uploadFormData.dateCaptured || undefined,
+        formattedDate: uploadFormData.dateCaptured || undefined,
+        formatPattern: 'Manual',
+        isRangeFormat: false,
+        isAutoCorrected: false,
+        location: 'Local Spotting Vault',
+        aircraftModel: uploadFormData.aircraftModel || 'Commercial Airliner',
+        airline: uploadFormData.airline || 'Vault Import',
+        spotterName: user?.username || 'Local Spotter',
+        isEncrypted: true,
+        encryptedData: encryptedPayload,
+        rating: 5,
+        notes: `Manually uploaded: ${file.name}`,
+      };
+
+      setMyPlanePics((prev) => [newPhoto, ...prev]);
+      setLightboxMedia(newPhoto);
+      showToast(t.photoVaulted, `${newPhoto.registration} — AES-256 Encrypted`, 'success');
+    } catch (err: any) {
+      showToast(t.vaultError, `${t.failedToEncryptPhotoMetadata}: ${err.message}`, 'error');
+    } finally {
+      setIsImporting(false);
+      setImportProgress(0);
+      setImportStatusText('');
+      setPendingUploadFile(null);
+      setShowUploadMetadataModal(false);
+      setUploadFormData({
+        registration: '',
+        airline: '',
+        aircraftModel: '',
+        specialLivery: '',
+        dateCaptured: '',
+      });
+    }
+  };
+
+  const handleClearAll = () => {
+    if (window.confirm(`Clear all ${myPlanePics.length} photos from vault? This cannot be undone.`)) {
+      setMyPlanePics([]);
+      setLightboxMedia(null);
+      setIsLightboxOpen(false);
+      showToast(t.vaultLocked, 'All photos cleared from vault.', 'info');
     }
   };
 
@@ -530,25 +660,45 @@ export const MyPlanePicsSuite: React.FC = () => {
         </div>
       </div>
 
-       {/* Hidden File Inputs for Upload */}
-       <input
-         type="file"
-         ref={singleInputRef}
-         accept="*/*"
-         className="hidden"
-         onChange={(e) => processUploadedFiles(e.target.files)}
-       />
-       <input
-         type="file"
-         ref={folderInputRef}
-         accept="*/*"
-         // @ts-ignore
-         webkitdirectory=""
-         directory=""
-         multiple
-         className="hidden"
-         onChange={handleFolderInputChange}
-       />
+        {/* Hidden File Inputs for Upload */}
+        <input
+          type="file"
+          ref={singleInputRef}
+          accept="*/*"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            const ext = file.name.split('.').pop()?.toLowerCase() || '';
+            const isImage = file.type.startsWith('image/') || ['jpg','jpeg','png','gif','bmp','tiff','tif','webp','heic','heif','raw','dng','svg','avif','jxl'].includes(ext);
+            const isVideo = file.type.startsWith('video/') || ['mp4','mov','avi','mkv','flv','wmv','webm','m4v','3gp'].includes(ext);
+            if (!isImage && !isVideo) {
+              showToast(t.noValidMedia, t.noValidMediaSelectedDesc, 'warning');
+              return;
+            }
+            const parsed = parsePlaneFilename(file.name);
+            setUploadFormData({
+              registration: parsed.registration || '',
+              airline: '',
+              aircraftModel: parsed.isRangeFormat ? 'Military Aircraft Range' : 'Commercial Airliner',
+              specialLivery: parsed.specialLivery || '',
+              dateCaptured: parsed.dateCaptured || '',
+            });
+            setPendingUploadFile(file);
+            setShowUploadMetadataModal(true);
+          }}
+        />
+        <input
+          type="file"
+          ref={folderInputRef}
+          accept="*/*"
+          // @ts-ignore
+          webkitdirectory=""
+          directory=""
+          multiple
+          className="hidden"
+          onChange={handleFolderInputChange}
+        />
 
        {/* Global Import Progress Bar */}
        {isImporting && (
@@ -667,7 +817,7 @@ export const MyPlanePicsSuite: React.FC = () => {
                 </button>
 
                 <button
-                  onClick={() => folderInputRef.current?.click()}
+                  onClick={() => handleFolderImportClick()}
                   className="liquid-glass-btn px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-sky-300 border border-sky-500/30 font-extrabold text-xs rounded-xl shadow-lg transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <Layers className="w-4 h-4" />
@@ -1149,6 +1299,185 @@ export const MyPlanePicsSuite: React.FC = () => {
                 <span className="text-slate-400">Model: <span className="liquid-glass-btn text-white font-bold">{lightboxMedia.aircraftModel || 'N/A'}</span></span>
               </div>
               <span className="text-slate-400">Location: <span className="liquid-glass-btn text-white font-bold">{lightboxMedia.location || 'N/A'}</span></span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* FOLDER STRUCTURE PREVIEW MODAL */}
+      {showFolderStructureModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-fadeIn">
+          <div className="relative w-full max-w-lg bg-slate-900 border-2 border-[#FF5F1F]/50 rounded-3xl p-6 shadow-2xl space-y-5 text-white">
+            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-2xl bg-[#FF5F1F]/20 border border-[#FF5F1F]/40 text-[#FF5F1F]">
+                  <FolderIcon className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black tracking-wide">
+                    {t.expectedFolderStructure}
+                  </h3>
+                  <p className="text-xs text-slate-400 font-mono">
+                    {t.folderStructureHint}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowFolderStructureModal(false)}
+                className="liquid-glass-btn p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white"
+              >
+                <X className="liquid-glass-btn w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-950 border border-white/10 space-y-3 font-mono text-xs text-slate-300">
+              <p className="text-sky-300 font-bold flex items-center gap-2">
+                <Info className="w-4 h-4" />
+                {t.folderStructureHint}
+              </p>
+              <div className="flex flex-col gap-1.5 text-slate-400">
+                <span>📁 FOLDER_NAME/</span>
+                <span className="pl-4">📁 AIRLINE/</span>
+                <span className="pl-8">📁 AIRCRAFT_TYPE/</span>
+                <span className="pl-12">🖼️ filename.jpg</span>
+              </div>
+              <p className="text-[10px] text-slate-500">
+                Example: SELECTED_FOLDER/Emirates/Boeing 777-300ER/A6-EGM.png
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setShowFolderStructureModal(false)}
+                className="liquid-glass-btn p-4 bg-slate-800 hover:bg-slate-700 border border-white/10 rounded-2xl text-center transition-all cursor-pointer"
+              >
+                <span className="font-extrabold text-sm text-slate-300">{t.exit}</span>
+              </button>
+              <button
+                onClick={continueToFolderSelect}
+                className="liquid-glass-btn p-4 bg-gradient-to-r from-[#FF5F1F] to-orange-500 hover:from-[#ff7236] hover:to-orange-400 text-black font-extrabold text-sm rounded-2xl shadow-lg transition-all cursor-pointer"
+              >
+                {t.continueToSelectFolder}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* UPLOAD PHOTO METADATA MODAL */}
+      {showUploadMetadataModal && pendingUploadFile && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-fadeIn">
+          <div className="relative w-full max-w-lg bg-slate-900 border-2 border-[#FF5F1F]/50 rounded-3xl p-6 shadow-2xl space-y-5 text-white">
+            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-2xl bg-[#FF5F1F]/20 border border-[#FF5F1F]/40 text-[#FF5F1F]">
+                  <Camera className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black tracking-wide">
+                    {t.uploadPhotoDetails}
+                  </h3>
+                  <p className="text-xs text-slate-400 font-mono truncate max-w-[200px]">
+                    {pendingUploadFile.name}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowUploadMetadataModal(false);
+                  setPendingUploadFile(null);
+                }}
+                className="liquid-glass-btn p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white"
+              >
+                <X className="liquid-glass-btn w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-950 border border-white/10 space-y-4">
+              <div className="grid grid-cols-1 gap-3">
+                <div>
+                  <label className="text-xs font-mono text-slate-300 font-bold block mb-1">
+                    {t.extractedRegistration}
+                  </label>
+                  <input
+                    type="text"
+                    value={uploadFormData.registration}
+                    onChange={(e) => setUploadFormData({ ...uploadFormData, registration: e.target.value })}
+                    placeholder={t.placeholderRegistration}
+                    className="w-full px-3 py-2 bg-slate-900 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-[#FF5F1F] font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-mono text-slate-300 font-bold block mb-1">
+                    {t.airline}
+                  </label>
+                  <input
+                    type="text"
+                    value={uploadFormData.airline}
+                    onChange={(e) => setUploadFormData({ ...uploadFormData, airline: e.target.value })}
+                    placeholder={t.placeholderAirline}
+                    className="w-full px-3 py-2 bg-slate-900 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-[#FF5F1F] font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-mono text-slate-300 font-bold block mb-1">
+                    {t.aircraftType}
+                  </label>
+                  <input
+                    type="text"
+                    value={uploadFormData.aircraftModel}
+                    onChange={(e) => setUploadFormData({ ...uploadFormData, aircraftModel: e.target.value })}
+                    placeholder={t.placeholderAircraftType}
+                    className="w-full px-3 py-2 bg-slate-900 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-[#FF5F1F] font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-mono text-slate-300 font-bold block mb-1">
+                    {t.specialLiveryOptional}
+                  </label>
+                  <input
+                    type="text"
+                    value={uploadFormData.specialLivery}
+                    onChange={(e) => setUploadFormData({ ...uploadFormData, specialLivery: e.target.value })}
+                    placeholder={t.placeholderSpecialLivery}
+                    className="w-full px-3 py-2 bg-slate-900 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-[#FF5F1F] font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-mono text-slate-300 font-bold block mb-1">
+                    {t.dateCaptured}
+                  </label>
+                  <input
+                    type="date"
+                    value={uploadFormData.dateCaptured}
+                    onChange={(e) => setUploadFormData({ ...uploadFormData, dateCaptured: e.target.value })}
+                    className="w-full px-3 py-2 bg-slate-900 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-[#FF5F1F] font-mono"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => {
+                  setShowUploadMetadataModal(false);
+                  setPendingUploadFile(null);
+                }}
+                disabled={isImporting}
+                className="liquid-glass-btn p-4 bg-slate-800 hover:bg-slate-700 border border-white/10 rounded-2xl text-center transition-all cursor-pointer disabled:opacity-50"
+              >
+                <span className="font-extrabold text-sm text-slate-300">{t.cancel}</span>
+              </button>
+              <button
+                onClick={processUploadWithMetadata}
+                disabled={isImporting}
+                className="liquid-glass-btn p-4 bg-gradient-to-r from-[#FF5F1F] to-orange-500 hover:from-[#ff7236] hover:to-orange-400 text-black font-extrabold text-sm rounded-2xl shadow-lg transition-all cursor-pointer disabled:opacity-50"
+              >
+                <span className="flex items-center justify-center gap-2">
+                  <ShieldCheck className="w-4 h-4" />
+                  {t.saveToVault}
+                </span>
+              </button>
             </div>
           </div>
         </div>

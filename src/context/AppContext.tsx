@@ -5,7 +5,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import {
   HubId,
-  LanguageCode,
   UserAccount,
   ChatMessage,
   SocialPost,
@@ -18,7 +17,7 @@ import {
   SystemTelemetryData,
   PlanePhoto,
 } from '../types';
-import { getUIStrings, UIStrings } from '../utils/translations';
+import { t } from '../utils/translations';
 import { encryptionService } from '../utils/crypto';
 import { dbManager } from '../utils/dbManager';
 
@@ -33,15 +32,11 @@ interface ToastMessage {
 interface AppContextType {
   activeHub: HubId;
   setActiveHub: (hub: HubId) => void;
-  language: LanguageCode;
-  setLanguage: (lang: LanguageCode) => void;
-  showLanguagePicker: boolean;
-  setShowLanguagePicker: (show: boolean) => void;
   showAuthModal: boolean;
   setShowAuthModal: (show: boolean) => void;
   showMobileGUI: boolean;
   setShowMobileGUI: (show: boolean) => void;
-  t: UIStrings;
+  t: typeof t;
 
   user: UserAccount | null;
   masterKeySet: boolean;
@@ -116,8 +111,6 @@ const INITIAL_IPTV: IPTVChannel[] = [];
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeHub, setActiveHub] = useState<HubId>('home');
-  const [language, setLanguage] = useState<LanguageCode>('en');
-  const [showLanguagePicker, setShowLanguagePicker] = useState<boolean>(true);
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [showMobileGUI, setShowMobileGUI] = useState<boolean>(false);
   const [user, setUser] = useState<UserAccount | null>(null);
@@ -151,9 +144,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (!masterKeySet) return;
         const db = await dbManager.loadDatabase();
         if (db && db.data) {
-          if (db.data.settings?.language) {
-            setLanguage(db.data.settings.language as LanguageCode);
-          }
           if (db.data.settings?.masterKeySet) {
             setMasterKeySet(true);
           }
@@ -278,7 +268,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     activeThreads: 4,
     systemLogs: [
       { timestamp: new Date().toLocaleTimeString(), level: 'info', message: 'Brio Cryptographic Vault Initialized.' },
-      { timestamp: new Date().toLocaleTimeString(), level: 'info', message: 'Multi-language dictionary loaded (2 locales).' },
+      { timestamp: new Date().toLocaleTimeString(), level: 'info', message: 'UI strings loaded.' },
     ],
   });
 
@@ -303,14 +293,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       myPlanePics: picsForDb,
       settings: {
         user,
-        language,
         masterKeySet,
         authRequired,
         algorithmSettings,
         nightcorePitch,
       },
     });
-  }, [user, language, masterKeySet, authRequired, messages, socialPosts, stickers, currentTrack, iptvChannels, notes, todos, myPlanePics, algorithmSettings, nightcorePitch, saveDb]);
+  }, [user, masterKeySet, authRequired, messages, socialPosts, stickers, currentTrack, iptvChannels, notes, todos, myPlanePics, algorithmSettings, nightcorePitch, saveDb]);
 
   useEffect(() => {
     let frameCount = 0;
@@ -573,17 +562,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setTodos((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  const t = getUIStrings(language);
-
   return (
     <AppContext.Provider
       value={{
         activeHub,
         setActiveHub,
-        language,
-        setLanguage,
-        showLanguagePicker,
-        setShowLanguagePicker,
         showAuthModal,
         setShowAuthModal,
         showMobileGUI,

@@ -67,11 +67,13 @@ import {
   SignalLow,
   SignalMedium,
   SignalHigh,
+  Rss,
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import { fetchAccurateWeather } from '../utils/weatherService';
 import { ConnectSocialHub } from './Hub1_ConnectSocial/ConnectSocialHub';
 import { MediaStreamingHub } from './Hub2_MediaStreaming/MediaStreamingHub';
+import { RSSReader } from './Hub2_MediaStreaming/RSSReader';
 import { ArcadeGamesHub } from './Hub3_ArcadeGames/ArcadeGamesHub';
 import { ProductivityOfficeHub } from './Hub4_ProductivityOffice/ProductivityOfficeHub';
 import { AviationTelemetryHub } from './Hub5_AviationTelemetry/AviationTelemetryHub';
@@ -90,11 +92,9 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
   const {
     t,
     showToast,
-    language,
     user,
     logoutUser,
     setShowAuthModal,
-    setShowLanguagePicker,
     setMasterPassphrase,
     authRequired,
     myPlanePics,
@@ -111,7 +111,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
   } = useApp();
 
   // Screen States: 'HOME' | 'APP_DRAWER' | 'SEARCH' | 'ACCOUNT_OVERLAY' | 'QR_ACCOUNT' | 'FEATURE'
-  const [screenMode, setScreenMode] = useState<'HOME' | 'APP_DRAWER' | 'SEARCH' | 'ACCOUNT_OVERLAY' | 'FEATURE' | 'connect' | 'media' | 'arcade' | 'office' | 'telemetry' | 'profile'>('HOME');
+  const [screenMode, setScreenMode] = useState<'HOME' | 'APP_DRAWER' | 'SEARCH' | 'ACCOUNT_OVERLAY' | 'FEATURE' | 'connect' | 'media' | 'arcade' | 'office' | 'telemetry' | 'rss' | 'profile'>('HOME');
   const [activeOverlay, setActiveOverlay] = useState<'NONE' | 'WEATHER' | 'CLOCK'>('NONE');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentTime, setCurrentTime] = useState('2:55 PM');
@@ -319,7 +319,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
     { name: 'IPTV Live TV Streams', hub: 'media', icon: Tv, category: 'Media' },
     { name: 'Nightcore Audio Player', hub: 'media', icon: Radio, category: 'Media' },
     { name: 'Audio Equalizer Synthesizer', hub: 'media', icon: Sliders, category: 'Media' },
-    { name: 'RSS News Vault', hub: 'media', icon: Globe, category: 'Media' },
+    { name: 'RSS News Vault', hub: 'rss', icon: Rss, category: 'Media' },
 
     { name: 'Arcade & Games Hub', hub: 'arcade', icon: Gamepad2, category: 'Arcade' },
     { name: 'Space Invaders Arcade', hub: 'arcade', icon: Gamepad2, category: 'Arcade' },
@@ -340,7 +340,6 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
 
     { name: 'Account Settings', hub: 'account', icon: Settings, category: 'Account' },
     { name: 'AES-256 Vault Security', hub: 'account', icon: ShieldCheck, category: 'Account' },
-    { name: 'Language Selector', hub: 'account', icon: Languages, category: 'Account' },
   ];
 
   const filteredDrawerApps = drawerApps.filter(
@@ -1054,7 +1053,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                 )}
 
                {/* VIEW 7: HUB NAVIGATION BAR */}
-               {['connect', 'media', 'arcade', 'office', 'telemetry'].includes(screenMode) && (
+               {['connect', 'media', 'arcade', 'office', 'telemetry', 'rss'].includes(screenMode) && (
                  <div className="flex items-center gap-2 mb-3 p-2 bg-zinc-900/90 border border-zinc-700 rounded-xl">
                    <button
                      onClick={() => setScreenMode('HOME')}
@@ -1068,6 +1067,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                      {screenMode === 'arcade' && 'Arcade & Games'}
                      {screenMode === 'office' && 'Productivity & Office'}
                      {screenMode === 'telemetry' && 'Aviation & Telemetry'}
+                     {screenMode === 'rss' && 'RSS News'}
                    </span>
                  </div>
                )}
@@ -1078,6 +1078,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                {screenMode === 'arcade' && <ArcadeGamesHub />}
                {screenMode === 'office' && <ProductivityOfficeHub />}
                {screenMode === 'telemetry' && <AviationTelemetryHub />}
+               {screenMode === 'rss' && <RSSReader />}
 
              </div>
 
