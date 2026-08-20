@@ -2,63 +2,62 @@
 # Dependencies
 node_modules/
 
-# Build artifacts
+# Build outputs
 dist/
 build/
 *.js.map
+
+# Logs
+*.log
 
 # Environment variables
 .env
 .env.local
 *.env.*
 
-# Editors
+# Editor/IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+*.tmp
 
-# Logs
-*.log
-
-# Python cache (if any Python files exist in the project)
+# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-
-# Coverage
-coverage/
-htmlcov/
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.mypy_cache/
 .coverage
+coverage/
 
-# Temporary files
-*.tmp
-*.swp
-*.swo
-*~
+# Node.js
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # OS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
-# Compiled files
-*.o
-*.obj
-*.exe
-*.dll
-*.so
-*.a
-*.out
-*.class
-
-# Compression artifacts
+# Archives
 *.zip
 *.tar.gz
 *.tar.bz2
 *.tar.xz
-*.7z
-*.rar
 *.gz
-*.bz2
-*.xz
-*.zst
+*.rar
+*.7z
 ```
