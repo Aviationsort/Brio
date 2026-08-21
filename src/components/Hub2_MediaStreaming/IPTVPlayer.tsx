@@ -1,7 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { IPTVChannel } from '../../types';
-import { Tv, Play, Plus, RefreshCw, Radio, Search, Upload, CheckCircle2, ShieldCheck, Filter, Trash2 } from 'lucide-react';
+import { Tv, Play, Plus, RefreshCw, Radio, Search, Upload, CheckCircle2, ShieldCheck, Filter, Trash2, Globe } from 'lucide-react';
 
 export const IPTVPlayer: React.FC = () => {
   const { iptvChannels, setIptvChannels, selectedIPTVChannel, setSelectedIPTVChannel, showToast } = useApp();
@@ -9,6 +9,7 @@ export const IPTVPlayer: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isLoadingFile, setIsLoadingFile] = useState(false);
+  const [isLoadingDefault, setIsLoadingDefault] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // M3U Playlist Parser Logic
@@ -25,31 +26,26 @@ export const IPTVPlayer: React.FC = () => {
       const line = lines[i].trim();
 
       if (line.startsWith('#EXTINF:')) {
-        // Extract group-title/category
         const groupMatch = line.match(/group-title="([^"]+)"/i);
         if (groupMatch && groupMatch[1]) {
           currentCategory = groupMatch[1];
         }
 
-        // Extract tvg-logo
         const logoMatch = line.match(/tvg-logo="([^"]+)"/i);
         if (logoMatch && logoMatch[1]) {
           currentLogo = logoMatch[1];
         }
 
-        // Extract tvg-country
         const countryMatch = line.match(/tvg-country="([^"]+)"/i);
         if (countryMatch && countryMatch[1]) {
           currentCountry = countryMatch[1];
         }
 
-        // Extract Channel Name (after last comma)
         const commaIndex = line.lastIndexOf(',');
         if (commaIndex !== -1) {
           currentName = line.substring(commaIndex + 1).trim();
         }
       } else if (line.length > 0 && !line.startsWith('#')) {
-        // Line is a stream URL!
         const streamUrl = line;
         parsedChannels.push({
           id: `iptv-${Date.now()}-${parsedChannels.length}-${Math.random().toString(36).substring(2, 6)}`,
@@ -61,7 +57,6 @@ export const IPTVPlayer: React.FC = () => {
           isFavorite: false,
         });
 
-        // Reset metadata defaults for next entry
         currentName = 'Live Channel';
         currentCategory = 'General';
         currentLogo = '📺';
@@ -70,6 +65,28 @@ export const IPTVPlayer: React.FC = () => {
     }
 
     return parsedChannels;
+  };
+
+  const handleLoadDefaultM3U = async () => {
+    setIsLoadingDefault(true);
+    try {
+      showToast('Loading Playlist', 'Fetching default iptv-org playlist...', 'info');
+      const res = await fetch('https://iptv-org.github.io/iptv/index.m3u');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+      const newChannels = parseM3UContent(text);
+      if (newChannels.length > 0) {
+        setIptvChannels((prev) => [...newChannels, ...prev]);
+        if (!selectedIPTVChannel) setSelectedIPTVChannel(newChannels[0]);
+        showToast('Default Playlist Loaded', `Imported ${newChannels.length} channels from iptv-org`, 'success');
+      } else {
+        showToast('Parse Warning', 'No channels found in default playlist', 'warning');
+      }
+    } catch (err: any) {
+      showToast('Load Error', `Failed to load default playlist: ${err.message}`, 'error');
+    } finally {
+      setIsLoadingDefault(false);
+    }
   };
 
   const handleImportM3uText = (e: React.FormEvent) => {
@@ -120,28 +137,12 @@ export const IPTVPlayer: React.FC = () => {
     reader.readAsText(file);
   };
 
-  const handleLoadDemoM3U = () => {
-    const sampleM3u = `#EXTM3U
-#EXTINF:-1 tvg-logo="🎬" group-title="Movie Streams" tvg-country="Global", Big Buck Bunny HD Test Stream
-https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4
-#EXTINF:-1 tvg-logo="🚀" group-title="Tech & Science" tvg-country="Global", Tears of Steel 4K Stream
-https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4
-#EXTINF:-1 tvg-logo="🎥" group-title="Animation" tvg-country="Global", Elephants Dream Surround Stream
-https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4`;
-
-    const newChannels = parseM3UContent(sampleM3u);
-    setIptvChannels((prev) => [...newChannels, ...prev]);
-    if (!selectedIPTVChannel) setSelectedIPTVChannel(newChannels[0]);
-    showToast('Demo Playlist Loaded', `Pasted ${newChannels.length} live channels onto list`, 'info');
-  };
-
   const handleClearChannels = () => {
     setIptvChannels([]);
     setSelectedIPTVChannel(null);
     showToast('IPTV Cleared', 'Removed all loaded channels.', 'info');
   };
 
-  // Filter channels by search and category
   const filteredChannels = iptvChannels.filter((ch) => {
     const matchesCategory = selectedCategory === 'all' || ch.category.toLowerCase() === selectedCategory.toLowerCase();
     const matchesSearch =
@@ -164,38 +165,55 @@ https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-base font-bold text-white">Live Custom IPTV Stream Tuner</h3>
+              <h3 className="text-base font-bold text-white">Live IPTV Stream Tuner</h3>
               <span className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono rounded flex items-center gap-1 font-semibold">
                 <ShieldCheck className="w-3 h-3" /> Real-time M3U Parser
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              Paste custom .m3u stream playlists or upload .m3u/.m3u8 files to populate live channel grid
+              Paste .m3u playlists, upload files, or load the default iptv-org directory
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
           <button
-            onClick={handleLoadDemoM3U}
-            className="liquid-glass-btn px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+            onClick={handleLoadDefaultM3U}
+            disabled={isLoadingDefault}
+            className="liquid-glass-btn px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span>Load Sample Stream</span>
+            <Globe className="w-3.5 h-3.5" />
+            <span>{isLoadingDefault ? 'Loading...' : 'Load Default Playlist'}</span>
+          </button>
+
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="liquid-glass-btn px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+          >
+            <Upload className="w-3.5 h-3.5" />
+            <span>Upload .m3u</span>
           </button>
 
           {iptvChannels.length > 0 && (
             <button
               onClick={handleClearChannels}
-              className="liquid-glass-btn px-3 py-2 bg-rose-950/60 hover:bg-rose-900 border border-rose-500/30 text-rose-300 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
+              className="liquid-glass-btn px-3 py-2 bg-rose-950/60 hover:bg-rose-900 border border-rose-500/30 text-rose-300 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
               title="Clear all loaded IPTV channels"
             >
-              <Trash2 className="liquid-glass-btn w-3.5 h-3.5" />
-              <span>Clear List</span>
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Clear</span>
             </button>
           )}
         </div>
       </div>
+
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept=".m3u,.m3u8,.txt"
+        className="hidden"
+        onChange={handleFileUpload}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Video Player Display */}
@@ -231,7 +249,7 @@ https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream
                 <Radio className="w-14 h-14 mx-auto text-purple-500/40 animate-pulse" />
                 <h4 className="text-sm font-bold text-white">IPTV Stream Waiting Room</h4>
                 <p className="text-xs font-mono max-w-sm mx-auto text-slate-400">
-                  Upload an .m3u playlist file or paste playlist content on the right panel to populate channels.
+                  Load the default playlist, upload an .m3u file, or paste playlist content to populate channels.
                 </p>
               </div>
             )}
@@ -242,29 +260,10 @@ https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream
         <div className="space-y-4">
           {/* M3U Loader Form & File Upload */}
           <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-                <Plus className="w-4 h-4 text-purple-400" />
-                <span>Load Custom M3U Playlist</span>
-              </h4>
-
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="liquid-glass-btn px-2.5 py-1 bg-purple-950 border border-purple-500/40 text-purple-300 hover:text-white rounded-lg text-[10px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer"
-              >
-                <Upload className="w-3 h-3" />
-                <span>{isLoadingFile ? 'Reading...' : 'Upload .m3u File'}</span>
-              </button>
-            </div>
-
-            <input
-              type="file"
-              ref={fileInputRef}
-              accept=".m3u,.m3u8,.txt"
-              className="hidden"
-              onChange={handleFileUpload}
-            />
+            <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+              <Plus className="w-4 h-4 text-purple-400" />
+              <span>Load Custom M3U Playlist</span>
+            </h4>
 
             <form onSubmit={handleImportM3uText} className="space-y-2">
               <textarea
@@ -279,7 +278,7 @@ https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream
                 disabled={!m3uText.trim()}
                 className="liquid-glass-btn w-full py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-extrabold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
-                <CheckCircle2 className="liquid-glass-btn w-4 h-4" />
+                <CheckCircle2 className="w-4 h-4" />
                 <span>Parse & Append Channels</span>
               </button>
             </form>
@@ -376,7 +375,7 @@ https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream
                 <div className="p-6 text-center text-slate-500 space-y-1">
                   <Filter className="w-6 h-6 mx-auto text-slate-600" />
                   <p className="text-xs font-mono font-bold">No Channels Loaded</p>
-                  <p className="text-[10px]">Upload an M3U file above or click "Load Sample Stream".</p>
+                  <p className="text-[10px]">Load the default playlist, upload an M3U file, or paste playlist content.</p>
                 </div>
               )}
             </div>

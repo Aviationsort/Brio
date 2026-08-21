@@ -229,6 +229,7 @@ export interface UIStrings {
   monthlySpottingTrends: string;
   temporarySessionUpload: string;
   permanentFolderLinkSave: string;
+  permanentlyLinksFolderLocation: string;
   chooseFolderImportStorageMode: string;
   aircraftImagesDetected: string;
   currentSessionOnly: string;
@@ -422,6 +423,7 @@ export interface UIStrings {
   exportFailed: string;
   albumExportedAsPdf: string;
   exportPdf: string;
+  unableToExportAlbum: string;
 }
 
 export const t: UIStrings = {
@@ -845,4 +847,5 @@ export const t: UIStrings = {
   exportFailed: 'Export Failed',
   albumExportedAsPdf: 'Album exported as PDF',
   exportPdf: 'Export PDF',
+  unableToExportAlbum: 'Unable to export album',
 };

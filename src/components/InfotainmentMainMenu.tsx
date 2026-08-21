@@ -120,29 +120,29 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
 
   // Live Weather State
   const [weatherSearchInput, setWeatherSearchInput] = useState('');
-  const [weatherStationData, setWeatherStationData] = useState({
-    airportName: 'John F. Kennedy Intl Airport (New York)',
-    icao: 'KJFK',
+  const [weatherData, setWeatherData] = useState({
+    city: 'New York',
+    country: 'US',
     tempC: 22,
     tempF: 72,
     condition: 'Partly Cloudy',
     humidity: 58,
     windSpeedKts: 14,
     windDirection: '240° SW',
-    aqi: 28,
-    aqiStatus: 'Good / Clean Air',
-    metar: 'KJFK 101100Z 24014KT 10SM FEW250 22/14 A3012 RMK AO2 SLP201',
-    taf: 'TAF KJFK 101130Z 1012/1112 24014KT P6SM SKC FM101800 25018G24KT P6SM BKN200',
+    description: 'scattered clouds',
+    icon: '03d',
+    isRealTime: false,
+    lastUpdated: '',
   });
 
-  const loadWeatherForStation = async (icaoCode: string) => {
+  const loadWeatherForCity = async (city: string) => {
     try {
-      showToast('Weather Station', `Fetching NOAA METAR & live weather for ${icaoCode}...`, 'info');
-      const liveData = await fetchAccurateWeather(icaoCode);
-      setWeatherStationData(liveData);
-      showToast('Live Weather Updated', `Loaded live weather for ${liveData.airportName}`, 'success');
+      showToast('Weather', `Fetching live weather for ${city}...`, 'info');
+      const liveData = await fetchAccurateWeather(city);
+      setWeatherData(liveData);
+      showToast('Live Weather Updated', `Loaded live weather for ${liveData.city}`, 'success');
     } catch {
-      showToast('Weather Error', 'Failed to retrieve live weather METAR', 'error');
+      showToast('Weather Error', 'Failed to retrieve live weather data', 'error');
     }
   };
 
@@ -192,7 +192,7 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
   };
 
   useEffect(() => {
-    loadWeatherForStation('KJFK');
+    loadWeatherForCity('New York');
   }, []);
 
   // Sync with global activeHub if changed externally
@@ -317,7 +317,7 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
             className={`liquid-glass-btn group flex flex-col items-center gap-1 transition-all cursor-pointer ${
               activeOverlay === 'WEATHER' ? 'text-sky-400' : 'text-zinc-400 hover:text-sky-400'
             }`}
-            title="Live Weather METAR Station"
+             title="Live Global Weather"
           >
             <div className="w-11 h-11 rounded-xl bg-zinc-900 border border-white/10 group-hover:border-sky-400 flex items-center justify-center shadow-md">
               <CloudSun className="w-5 h-5 text-sky-400" />
@@ -376,11 +376,11 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
             <button
               onClick={() => setActiveOverlay('WEATHER')}
               className="liquid-glass-btn flex items-center gap-2 bg-sky-950/80 hover:bg-sky-900 border border-sky-400/40 px-3 py-1.5 rounded-xl shadow transition-all cursor-pointer"
-              title="Open Live NOAA Weather"
+              title="Open Live Weather"
             >
               <CloudSun className="w-4 h-4 text-sky-400" />
               <span className="text-xs font-bold text-sky-200">
-                {weatherStationData.icao}: {weatherStationData.tempC}°C ({weatherStationData.tempF}°F) • {weatherStationData.condition}
+                {weatherData.city}: {weatherData.tempC}°C ({weatherData.tempF}°F) • {weatherData.condition}
               </span>
             </button>
 
@@ -644,7 +644,7 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <div className="flex items-center gap-2 text-sky-400">
                 <CloudSun className="w-6 h-6" />
-                <h2 className="text-xl font-bold">Aviation Weather & METAR Station</h2>
+                <h2 className="text-xl font-bold">Live Global Weather</h2>
               </div>
               <button
                 onClick={() => setActiveOverlay('NONE')}
@@ -654,19 +654,45 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
               </button>
             </div>
 
-            {/* Airport station selector */}
+            {/* City search input */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (weatherSearchInput.trim()) {
+                  loadWeatherForCity(weatherSearchInput.trim());
+                }
+              }}
+              className="flex gap-2"
+            >
+              <input
+                type="text"
+                value={weatherSearchInput}
+                onChange={(e) => setWeatherSearchInput(e.target.value)}
+                placeholder="Search city or country..."
+                className="flex-1 px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-sky-400 placeholder-slate-500"
+              />
+              <button
+                type="submit"
+                disabled={!weatherSearchInput.trim()}
+                className="liquid-glass-btn px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-xl transition-all disabled:opacity-50"
+              >
+                Search
+              </button>
+            </form>
+
+            {/* Quick city buttons */}
             <div className="flex gap-2 overflow-x-auto pb-2">
-              {['KJFK', 'EGLL', 'RJTT', 'OMDB', 'LFPB'].map((icao) => (
+              {['New York', 'London', 'Tokyo', 'Dubai', 'Paris', 'Los Angeles', 'San Francisco', 'Frankfurt'].map((city) => (
                 <button
-                  key={icao}
-                  onClick={() => loadWeatherForStation(icao)}
-                  className={`liquid-glass-btn px-4 py-2 rounded-xl text-xs font-bold font-mono transition-all ${
-                    weatherStationData.icao === icao
+                  key={city}
+                  onClick={() => loadWeatherForCity(city)}
+                  className={`liquid-glass-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    weatherData.city === city
                       ? 'bg-sky-500 text-black font-extrabold shadow-lg'
                       : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
                   }`}
                 >
-                  {icao}
+                  {city}
                 </button>
               ))}
             </div>
@@ -675,38 +701,51 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
             <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-bold text-white">{weatherStationData.airportName}</h3>
-                  <p className="text-xs text-sky-400 font-mono">ICAO Code: {weatherStationData.icao}</p>
+                  <h3 className="text-lg font-bold text-white">{weatherData.city}</h3>
+                  <p className="text-xs text-sky-400 font-mono">{weatherData.country ? `${weatherData.country} • ` : ''}{weatherData.description}</p>
                 </div>
                 <div className="text-right">
-                  <span className="text-3xl font-black text-sky-300">{weatherStationData.tempC}°C</span>
-                  <p className="text-xs text-slate-400">{weatherStationData.tempF}°F</p>
+                  <span className="text-3xl font-black text-sky-300">{weatherData.tempC}°C</span>
+                  <p className="text-xs text-slate-400">{weatherData.tempF}°F</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
                 <div className="p-3 bg-slate-900 rounded-xl border border-slate-800">
                   <span className="text-slate-400 block">Condition</span>
-                  <span className="font-bold text-white">{weatherStationData.condition}</span>
+                  <span className="font-bold text-white">{weatherData.condition}</span>
                 </div>
                 <div className="p-3 bg-slate-900 rounded-xl border border-slate-800">
                   <span className="text-slate-400 block">Humidity</span>
-                  <span className="font-bold text-white">{weatherStationData.humidity}%</span>
+                  <span className="font-bold text-white">{weatherData.humidity}%</span>
                 </div>
                 <div className="p-3 bg-slate-900 rounded-xl border border-slate-800">
                   <span className="text-slate-400 block">Wind Speed</span>
-                  <span className="font-bold text-white">{weatherStationData.windSpeedKts} kts ({weatherStationData.windDirection})</span>
+                  <span className="font-bold text-white">{weatherData.windSpeedKts} kts ({weatherData.windDirection})</span>
                 </div>
                 <div className="p-3 bg-slate-900 rounded-xl border border-slate-800">
-                  <span className="text-slate-400 block">Air Quality</span>
-                  <span className="font-bold text-emerald-400">AQI {weatherStationData.aqi}</span>
+                  <span className="text-slate-400 block">Pressure</span>
+                  <span className="font-bold text-white">{weatherData.pressure} hPa</span>
                 </div>
               </div>
 
-              <div className="space-y-2 pt-2 border-t border-slate-800">
-                <p className="text-xs font-mono text-slate-400"><strong className="liquid-glass-btn text-sky-300">METAR:</strong> {weatherStationData.metar}</p>
-                <p className="text-xs font-mono text-slate-400"><strong className="liquid-glass-btn text-sky-300">TAF:</strong> {weatherStationData.taf}</p>
+              <div className="grid grid-cols-2 gap-3 text-xs font-mono">
+                <div className="p-3 bg-slate-900 rounded-xl border border-slate-800">
+                  <span className="text-slate-400 block">Feels Like</span>
+                  <span className="font-bold text-white">{weatherData.feelsLikeC}°C</span>
+                </div>
+                <div className="p-3 bg-slate-900 rounded-xl border border-slate-800">
+                  <span className="text-slate-400 block">Visibility</span>
+                  <span className="font-bold text-white">{(weatherData.visibility / 1000).toFixed(1)} km</span>
+                </div>
               </div>
+
+              {weatherData.isRealTime && (
+                <div className="flex items-center gap-2 text-[10px] font-mono text-emerald-400 pt-2 border-t border-slate-800">
+                  <Activity className="w-3 h-3 animate-pulse" />
+                  <span>Live data from OpenWeatherMap • Updated: {weatherData.lastUpdated}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -1,5 +1,6 @@
 /**
  * RSSReader Component: Live RSS & News Aggregator with AES-GCM 256 Encryption & Offline Vault Caching
+ * Cleaned up GUI layout
  */
 
 import React, { useState, useEffect } from 'react';
@@ -46,7 +47,6 @@ export const RSSReader: React.FC = () => {
     sourceName: '',
   });
 
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(9);
 
@@ -55,18 +55,15 @@ export const RSSReader: React.FC = () => {
   const [customFeedUrl, setCustomFeedUrl] = useState('');
   const [addingFeed, setAddingFeed] = useState(false);
 
-  // Encrypted Saved Articles Storage
   const [savedArticles, setSavedArticles] = useState<NewsItem[]>([]);
   const [savedEncryptedPayloads, setSavedEncryptedPayloads] = useState<Record<string, EncryptedPayload<NewsItem>>>(
     {}
   );
 
-  // Load news feeds on mount or tab change
   useEffect(() => {
     loadNews(activeTab);
   }, [activeTab]);
 
-  // Load saved encrypted articles on mount
   useEffect(() => {
     const loadEncryptedVault = async () => {
       try {
@@ -75,7 +72,6 @@ export const RSSReader: React.FC = () => {
           const parsed = JSON.parse(raw) as Record<string, EncryptedPayload<NewsItem>>;
           setSavedEncryptedPayloads(parsed);
 
-          // Decrypt all saved articles safely
           const decryptedList: NewsItem[] = [];
           for (const key of Object.keys(parsed)) {
             try {
@@ -195,7 +191,6 @@ export const RSSReader: React.FC = () => {
     }
   };
 
-  // Filtered display list
   const currentList = activeTab === 'saved' ? savedArticles : articles;
 
   const filteredArticles = searchArticles(
@@ -206,7 +201,6 @@ export const RSSReader: React.FC = () => {
     searchQuery
   );
 
-  // Pagination logic
   const totalPages = Math.ceil(filteredArticles.length / itemsPerPage);
   const paginatedArticles = filteredArticles.slice(
     (currentPage - 1) * itemsPerPage,
@@ -221,35 +215,35 @@ export const RSSReader: React.FC = () => {
   const failedSources = sources.filter((s) => s.status === 'failed');
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Top Header & Feed Connector */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl flex flex-col lg:flex-row items-center justify-between gap-6">
-        <div className="flex items-center gap-4">
+      <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-2xl flex flex-col lg:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
           <div className="p-3 bg-gradient-to-br from-pink-500/20 to-purple-500/20 border border-pink-500/30 rounded-2xl text-pink-400">
-            <Rss className="w-6 h-6 animate-pulse" />
+            <Rss className="w-5 h-5 animate-pulse" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-base font-bold text-white">Live Global RSS Intelligence Hub</h3>
+              <h3 className="text-sm font-bold text-white">Live Global RSS Intelligence Hub</h3>
               <span className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono rounded flex items-center gap-1 font-semibold">
                 <ShieldCheck className="w-3 h-3" /> Encrypted Vault
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Multi-source real-time RSS aggregator with CORS proxying and AES-256 local caching
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              Multi-source real-time RSS aggregator with AES-256 local caching
             </p>
           </div>
         </div>
 
         {/* Custom Feed URL Form */}
         <form onSubmit={handleAddCustomFeed} className="flex items-center gap-2 w-full lg:w-auto">
-          <div className="relative flex-1 lg:w-72">
+          <div className="relative flex-1 lg:w-64">
             <input
               type="text"
               value={customFeedUrl}
               onChange={(e) => setCustomFeedUrl(e.target.value)}
               placeholder="Paste RSS/Atom Feed XML URL..."
-              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-2xl text-xs text-white focus:outline-none focus:border-pink-500 placeholder-slate-500"
+              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500 placeholder-slate-500"
             />
           </div>
           <button
@@ -264,7 +258,7 @@ export const RSSReader: React.FC = () => {
       </div>
 
       {/* Tabs & Controls Bar */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-slate-900/60 p-2 border border-slate-800 rounded-2xl">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-slate-900/60 p-2 border border-slate-800 rounded-2xl">
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveTab('all')}
@@ -316,7 +310,6 @@ export const RSSReader: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Refresh button */}
           <button
             onClick={() => loadNews(activeTab)}
             disabled={loading}
@@ -329,8 +322,8 @@ export const RSSReader: React.FC = () => {
       </div>
 
       {/* Search & Category Filter Bar */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="relative w-full md:w-96">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-3">
+        <div className="relative w-full md:w-80">
           <Search className="absolute left-3.5 top-3 w-4 h-4 text-slate-500" />
           <input
             type="text"
@@ -342,7 +335,7 @@ export const RSSReader: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto no-scrollbar">
-          <span className="text-xs text-slate-500 font-mono shrink-0">Lean / Category:</span>
+          <span className="text-xs text-slate-500 font-mono shrink-0">Category:</span>
           {['all', 'Centrist', 'Left-wing', 'Right-wing', 'State-Controlled'].map((cat) => (
             <button
               key={cat}
@@ -361,7 +354,7 @@ export const RSSReader: React.FC = () => {
 
       {/* Feed Status Summary Banner */}
       {sources.length > 0 && activeTab !== 'saved' && (
-        <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 text-xs font-mono">
+        <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
           <div className="flex items-center gap-3">
             <Activity className="w-4 h-4 text-pink-400 animate-pulse" />
             <span className="text-slate-300">
@@ -393,11 +386,10 @@ export const RSSReader: React.FC = () => {
       )}
 
       {/* Articles Grid / Rich Visual Feed */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {paginatedArticles.map((art) => {
           const isSaved = savedArticles.some((a) => a.id === art.id);
 
-          // Extract domain for favicon provider logo
           let domain = '';
           try {
             domain = new URL(art.url).hostname.replace('www.', '');
@@ -407,7 +399,6 @@ export const RSSReader: React.FC = () => {
 
           const providerLogo = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
 
-          // Default fallback imagery if art.imageUrl is absent
           const fallbackImage =
             art.category === 'State-Controlled' || activeTab === 'aviation'
               ? 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600&auto=format&fit=crop'
@@ -421,7 +412,7 @@ export const RSSReader: React.FC = () => {
               className="bg-slate-900/90 border border-slate-800 hover:border-pink-500/50 rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between transition-all group duration-300"
             >
               {/* Cover Image */}
-              <div className="relative h-44 overflow-hidden bg-slate-950">
+              <div className="relative h-40 overflow-hidden bg-slate-950">
                 <img
                   src={cardImg}
                   alt={art.title}
@@ -433,20 +424,20 @@ export const RSSReader: React.FC = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
 
                 {/* Category Pill */}
-                <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-slate-950/80 backdrop-blur-md border border-white/10 text-[10px] font-mono font-bold text-pink-300">
+                <span className="absolute top-3 left-3 px-2 py-0.5 rounded-full bg-slate-950/80 backdrop-blur-md border border-white/10 text-[10px] font-mono font-bold text-pink-300">
                   {art.category}
                 </span>
 
                 {/* Provider Logo Header */}
-                <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-950/90 backdrop-blur-md border border-white/20 text-white text-[10px] font-bold">
+                <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-950/90 backdrop-blur-md border border-white/20 text-white text-[10px] font-bold">
                   <img src={providerLogo} alt={domain} className="w-3.5 h-3.5 rounded-full object-contain" />
-                  <span className="truncate max-w-[90px]">{art.source}</span>
+                  <span className="truncate max-w-[80px]">{art.source}</span>
                 </div>
               </div>
 
               {/* Card Body */}
-              <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
-                <div className="space-y-2">
+              <div className="p-4 flex-1 flex flex-col justify-between space-y-2">
+                <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
                     <span className="flex items-center gap-1">
                       <Clock className="w-3 h-3 text-pink-400" />
@@ -463,37 +454,37 @@ export const RSSReader: React.FC = () => {
                     {art.title}
                   </h4>
 
-                  <p className="text-xs text-slate-400 leading-relaxed line-clamp-3">{art.summary}</p>
+                  <p className="text-xs text-slate-400 leading-relaxed line-clamp-2">{art.summary}</p>
                 </div>
 
                 {/* Card Footer */}
-                <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <img src={providerLogo} alt={domain} className="w-4 h-4 rounded-full" />
-                    <span className="text-[11px] font-semibold text-slate-300 truncate max-w-[120px]">{domain}</span>
+                    <img src={providerLogo} alt={domain} className="w-3.5 h-3.5 rounded-full" />
+                    <span className="text-[10px] font-semibold text-slate-300 truncate max-w-[100px]">{domain}</span>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => toggleSaveArticle(art)}
-                      className={`liquid-glass-btn p-2 rounded-xl border transition-all cursor-pointer ${
+                      className={`liquid-glass-btn p-1.5 rounded-lg border transition-all cursor-pointer ${
                         isSaved
-                          ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400 shadow-lg'
+                          ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
                           : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
                       }`}
                       title={isSaved ? 'Saved in AES Vault' : 'Save to AES Encrypted Vault'}
                     >
-                      {isSaved ? <Check className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
+                      {isSaved ? <Check className="w-3.5 h-3.5" /> : <Bookmark className="w-3.5 h-3.5" />}
                     </button>
 
                     <a
                       href={art.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-2 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-xl border border-slate-700 transition-all cursor-pointer"
+                      className="p-1.5 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-lg border border-slate-700 transition-all cursor-pointer"
                       title="Read full story on provider site"
                     >
-                      <ExternalLink className="w-4 h-4" />
+                      <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   </div>
                 </div>
@@ -505,7 +496,7 @@ export const RSSReader: React.FC = () => {
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-6">
+        <div className="flex items-center justify-center gap-2 mt-4">
           <button
             onClick={() => goToPage(currentPage - 1)}
             disabled={currentPage === 1}
@@ -513,13 +504,13 @@ export const RSSReader: React.FC = () => {
           >
             Previous
           </button>
-          
+
           <div className="flex items-center gap-1">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <button
                 key={page}
                 onClick={() => goToPage(page)}
-                className={`liquid-glass-btn w-10 h-10 rounded-xl border transition-all cursor-pointer ${
+                className={`liquid-glass-btn w-9 h-9 rounded-xl border transition-all cursor-pointer ${
                   currentPage === page
                     ? 'bg-gradient-to-r from-purple-600 to-pink-600 border-purple-500/50 text-white shadow-lg'
                     : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white hover:bg-slate-700'
@@ -529,7 +520,7 @@ export const RSSReader: React.FC = () => {
               </button>
             ))}
           </div>
-          
+
           <button
             onClick={() => goToPage(currentPage + 1)}
             disabled={currentPage === totalPages}
@@ -542,7 +533,7 @@ export const RSSReader: React.FC = () => {
 
       {/* Empty State */}
       {!loading && filteredArticles.length === 0 && (
-        <div className="p-12 text-center bg-slate-900/60 border border-dashed border-slate-800 rounded-3xl space-y-3">
+        <div className="p-10 text-center bg-slate-900/60 border border-dashed border-slate-800 rounded-3xl space-y-2">
           <AlertCircle className="w-8 h-8 text-slate-600 mx-auto" />
           <h4 className="text-sm font-bold text-white">No Articles Found</h4>
           <p className="text-xs text-slate-400 max-w-md mx-auto">

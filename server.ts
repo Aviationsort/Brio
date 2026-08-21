@@ -48,7 +48,7 @@ function getLanAddresses(): string[] {
 
 async function startServer() {
   const app = express();
-  const PORT = process.env.PORT || 3000;
+  const PORT = Number(process.env.PORT) || 3000;
   const HOST = '0.0.0.0'; // Listen on all interfaces
 
   // Middleware to parse JSON and handle CORS

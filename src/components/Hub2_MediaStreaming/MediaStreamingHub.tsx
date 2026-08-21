@@ -27,7 +27,7 @@ export const MediaStreamingHub: React.FC = () => {
           }`}
         >
           <Music className="w-4 h-4" />
-          <span>{t.nightcoreMusicPlayer}</span>
+          <span>{t.nightcorePlayer}</span>
         </button>
 
         <button
@@ -39,7 +39,7 @@ export const MediaStreamingHub: React.FC = () => {
           }`}
         >
           <Tv className="w-4 h-4" />
-          <span>{t.iptvLiveStreams}</span>
+          <span>{t.iptvPlayer}</span>
         </button>
 
         <button
@@ -51,7 +51,7 @@ export const MediaStreamingHub: React.FC = () => {
           }`}
         >
           <Rss className="w-4 h-4" />
-          <span>{t.rssNewsReader}</span>
+          <span>{t.rssReader}</span>
         </button>
       </div>
 

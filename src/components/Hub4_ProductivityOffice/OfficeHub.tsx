@@ -1,9 +1,9 @@
 /**
  * OfficeHub Component: Encrypted Notes & Todolist Suite with AI Assistant
- * Styled in Bento Grid aesthetic
+ * Styled in Neumorphism aesthetic with additional features
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { encryptionService } from '../../utils/crypto';
 import { TodoItem } from '../../types';
@@ -21,6 +21,14 @@ import {
   Sparkles,
   Send,
   Bot,
+  Calendar,
+  StickyNote,
+  Type,
+  Bold,
+  Italic,
+  Underline,
+  List,
+  AlignLeft,
 } from 'lucide-react';
 
 export const OfficeHub: React.FC = () => {
@@ -39,21 +47,25 @@ export const OfficeHub: React.FC = () => {
   // Todo State
   const [todoText, setTodoText] = useState('');
   const [todoPriority, setTodoPriority] = useState<'low' | 'medium' | 'high' | 'critical'>('high');
-  
+
   // AI Assistant State
   const [showAIAssistant, setShowAIAssistant] = useState(false);
   const [aiMessages, setAiMessages] = useState<{role: 'user' | 'assistant', content: string}[]>([]);
   const [aiInput, setAiInput] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
 
+  // Sticky Notes State
+  const [stickyNotes, setStickyNotes] = useState<{id: string, text: string, color: string}[]>([]);
+  const [newStickyText, setNewStickyText] = useState('');
+
   const handleAISend = async () => {
     if (!aiInput.trim()) return;
-    
+
     const userMessage = aiInput.trim();
     setAiInput('');
     setAiMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setAiLoading(true);
-    
+
     try {
       const response = await AIProvider.chat([...aiMessages, { role: 'user', content: userMessage }]);
       setAiMessages(prev => [...prev, { role: 'assistant', content: response }]);
@@ -69,17 +81,17 @@ export const OfficeHub: React.FC = () => {
       showToast('No Note Selected', 'Please select a note to summarize', 'warning');
       return;
     }
-    
+
     const note = notes.find(n => n.id === selectedNote);
     if (!note) return;
-    
+
     setAiLoading(true);
     try {
       let content = note.content;
       if (note.isEncrypted && note.encryptedData) {
         content = await encryptionService.decrypt(note.encryptedData);
       }
-      
+
       const summary = AIProvider.summarizeText(content);
       setAiMessages([{ role: 'assistant', content: `**Summary of "${note.title}":**\n\n${summary}` }]);
       setShowAIAssistant(true);
@@ -140,18 +152,32 @@ export const OfficeHub: React.FC = () => {
     }
   };
 
+  const handleAddSticky = () => {
+    if (!newStickyText.trim()) return;
+    const colors = ['bg-yellow-200 text-yellow-900', 'bg-green-200 text-green-900', 'bg-blue-200 text-blue-900', 'bg-pink-200 text-pink-900'];
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    setStickyNotes(prev => [...prev, { id: `sticky-${Date.now()}`, text: newStickyText, color }]);
+    setNewStickyText('');
+    showToast('Sticky Added', 'Quick note added to board', 'success');
+  };
+
   const filteredNotes = notes.filter(
     (n) =>
       n.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       n.tags.some((t) => t.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+  // Neumorphism helpers
+  const neuBase = 'bg-[#141414] border border-white/10';
+  const neuShadow = 'shadow-[inset_2px_2px_4px_rgba(255,255,255,0.03),inset_-2px_-2px_4px_rgba(0,0,0,0.5)]';
+  const neuInput = `${neuBase} ${neuShadow} rounded-xl text-white text-xs focus:outline-none focus:border-[#FF5F1F]`;
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
       {/* Notes Column */}
       <div className="lg:col-span-7 space-y-6">
         {/* Create Note Bento Card */}
-        <div className="bg-[#141414] border border-white/10 rounded-3xl p-6 shadow-2xl space-y-4">
+        <div className={`${neuBase} ${neuShadow} rounded-3xl p-6 space-y-4`}>
           <div className="flex items-center justify-between pb-3 border-b border-white/10">
             <div className="flex items-center gap-3">
               <span className="p-2.5 bg-[#FF5F1F]/10 border border-[#FF5F1F]/20 rounded-xl text-[#FF5F1F]">
@@ -182,7 +208,7 @@ export const OfficeHub: React.FC = () => {
               placeholder="Note Title..."
               value={noteTitle}
               onChange={(e) => setNoteTitle(e.target.value)}
-              className="w-full px-4 py-2.5 bg-zinc-900 border border-white/10 rounded-xl text-xs font-medium text-white placeholder-zinc-500 focus:outline-none focus:border-[#FF5F1F]"
+              className={neuInput}
             />
 
             <textarea
@@ -190,7 +216,7 @@ export const OfficeHub: React.FC = () => {
               rows={3}
               value={noteContent}
               onChange={(e) => setNoteContent(e.target.value)}
-              className="w-full px-4 py-2.5 bg-zinc-900 border border-white/10 rounded-xl text-xs font-medium text-white placeholder-zinc-500 focus:outline-none focus:border-[#FF5F1F] resize-none"
+              className={neuInput}
             />
 
             <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
@@ -201,7 +227,7 @@ export const OfficeHub: React.FC = () => {
                   placeholder="Tags (comma separated)..."
                   value={noteTags}
                   onChange={(e) => setNoteTags(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-zinc-900 border border-white/10 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#FF5F1F]"
+                  className={`w-full pl-9 pr-3 py-2 ${neuInput}`}
                 />
               </div>
 
@@ -216,7 +242,7 @@ export const OfficeHub: React.FC = () => {
         </div>
 
         {/* Existing Notes List */}
-        <div className="bg-[#141414] border border-white/10 rounded-3xl p-6 shadow-2xl space-y-4">
+        <div className={`${neuBase} ${neuShadow} rounded-3xl p-6 space-y-4`}>
           <div className="flex items-center justify-between gap-4">
             <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Saved Notes ({filteredNotes.length})</h4>
             <div className="relative w-48">
@@ -226,7 +252,7 @@ export const OfficeHub: React.FC = () => {
                 placeholder="Search..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 bg-zinc-900 border border-white/10 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#FF5F1F]"
+                className={`w-full pl-8 pr-3 py-1.5 ${neuInput}`}
               />
             </div>
           </div>
@@ -281,7 +307,7 @@ export const OfficeHub: React.FC = () => {
 
           {/* Decrypt Viewer */}
           {selectedNote && (
-            <div className="p-4 bg-zinc-950 border border-white/10 rounded-2xl space-y-2 mt-2">
+            <div className={`p-4 ${neuInput} space-y-2 mt-2`}>
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono font-bold text-[#FF5F1F]">Decryption Viewer</span>
                 <div className="flex gap-2">
@@ -306,14 +332,14 @@ export const OfficeHub: React.FC = () => {
               </div>
 
               <div className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-xs font-mono text-zinc-300 min-h-[60px] whitespace-pre-wrap">
-                {decryptedText || '🔒 Press Decrypt Payload to unlock raw decrypted contents.'}
+                {decryptedText || 'Press Decrypt Payload to unlock raw decrypted contents.'}
               </div>
             </div>
           )}
 
           {/* AI Assistant Panel */}
           {showAIAssistant && (
-            <div className="bg-[#141414] border border-purple-500/20 rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className={`${neuBase} ${neuShadow} rounded-3xl p-6 space-y-4`}>
               <div className="flex items-center justify-between pb-3 border-b border-purple-500/20">
                 <div className="flex items-center gap-3">
                   <span className="p-2.5 bg-purple-600/10 border border-purple-500/30 rounded-xl text-purple-400">
@@ -384,7 +410,7 @@ export const OfficeHub: React.FC = () => {
 
       {/* Todos Column Bento Card */}
       <div className="lg:col-span-5 space-y-6">
-        <div className="bg-[#141414] border border-white/10 rounded-3xl p-6 shadow-2xl space-y-5">
+        <div className={`${neuBase} ${neuShadow} rounded-3xl p-6 space-y-5`}>
           <div className="flex items-center justify-between pb-3 border-b border-white/10">
             <div className="flex items-center gap-3">
               <span className="p-2.5 bg-[#FF5F1F]/10 border border-[#FF5F1F]/20 rounded-xl text-[#FF5F1F]">
@@ -407,14 +433,14 @@ export const OfficeHub: React.FC = () => {
               placeholder="Add urgent task..."
               value={todoText}
               onChange={(e) => setTodoText(e.target.value)}
-              className="w-full px-4 py-2.5 bg-zinc-900 border border-white/10 rounded-xl text-xs font-medium text-white placeholder-zinc-500 focus:outline-none focus:border-[#FF5F1F]"
+              className={neuInput}
             />
 
             <div className="flex items-center gap-2">
               <select
                 value={todoPriority}
                 onChange={(e) => setTodoPriority(e.target.value as TodoItem['priority'])}
-                className="px-3 py-2 bg-zinc-900 border border-white/10 rounded-xl text-xs font-medium text-white focus:outline-none focus:border-[#FF5F1F]"
+                className={`px-3 py-2 ${neuInput}`}
               >
                 <option value="low">Low Priority</option>
                 <option value="medium">Medium Priority</option>
@@ -479,6 +505,92 @@ export const OfficeHub: React.FC = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Sticky Notes Widget */}
+        <div className={`${neuBase} ${neuShadow} rounded-3xl p-6 space-y-4`}>
+          <div className="flex items-center justify-between pb-3 border-b border-white/10">
+            <div className="flex items-center gap-3">
+              <span className="p-2.5 bg-yellow-500/10 border border-yellow-500/20 rounded-xl text-yellow-400">
+                <StickyNote className="w-5 h-5" />
+              </span>
+              <div>
+                <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Quick Notes</p>
+                <h3 className="text-base font-bold text-white">Sticky Board</h3>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            {stickyNotes.map((note) => (
+              <div key={note.id} className={`p-3 rounded-xl ${note.color} text-xs font-medium shadow-sm flex justify-between items-start`}>
+                <span>{note.text}</span>
+                <button
+                  onClick={() => setStickyNotes(prev => prev.filter(n => n.id !== note.id))}
+                  className="text-black/50 hover:text-black ml-2"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={newStickyText}
+              onChange={(e) => setNewStickyText(e.target.value)}
+              placeholder="Add quick sticky note..."
+              className={`flex-1 px-3 py-2 ${neuInput}`}
+            />
+            <button
+              onClick={handleAddSticky}
+              disabled={!newStickyText.trim()}
+              className="liquid-glass-btn px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-xs rounded-xl transition-all disabled:opacity-50"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Simple Text Editor Widget */}
+        <div className={`${neuBase} ${neuShadow} rounded-3xl p-6 space-y-4`}>
+          <div className="flex items-center justify-between pb-3 border-b border-white/10">
+            <div className="flex items-center gap-3">
+              <span className="p-2.5 bg-cyan-500/10 border border-cyan-500/20 rounded-xl text-cyan-400">
+                <Type className="w-5 h-5" />
+              </span>
+              <div>
+                <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Draft</p>
+                <h3 className="text-base font-bold text-white">Quick Text Editor</h3>
+              </div>
+            </div>
+          </div>
+
+          <div className={`${neuInput} p-3 rounded-xl min-h-[120px]`}>
+            <textarea
+              placeholder="Type your draft here..."
+              className="w-full bg-transparent border-none outline-none resize-none text-xs text-white placeholder-zinc-500 h-full"
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button className="liquid-glass-btn p-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-lg border border-white/10 transition-all">
+              <Bold className="w-3.5 h-3.5" />
+            </button>
+            <button className="liquid-glass-btn p-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-lg border border-white/10 transition-all">
+              <Italic className="w-3.5 h-3.5" />
+            </button>
+            <button className="liquid-glass-btn p-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-lg border border-white/10 transition-all">
+              <Underline className="w-3.5 h-3.5" />
+            </button>
+            <button className="liquid-glass-btn p-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-lg border border-white/10 transition-all">
+              <List className="w-3.5 h-3.5" />
+            </button>
+            <button className="liquid-glass-btn p-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-lg border border-white/10 transition-all">
+              <AlignLeft className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
       </div>

@@ -5,7 +5,7 @@
  * Enhanced with 3D depth effects, liquid glassmorphism, and intuitive UX.
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useApp } from '../../context/AppContext';
 import { parsePlaneFilename } from '../../utils/planePicsParser';
 import {
@@ -46,6 +46,11 @@ import {
   Video,
   ArrowLeft,
   ArrowRight,
+  Trash2,
+  Copy,
+  Download,
+  Grid3x3,
+  List,
 } from 'lucide-react';
 
 const generateThumbnail = (file: File, maxWidth = 400, maxHeight = 300): Promise<string> => {
@@ -107,6 +112,104 @@ export const MyPlanePicsSuite: React.FC = () => {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxMedia, setLightboxMedia] = useState<PlanePhoto | null>(null);
 
+  // Filters & Search
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterFormat, setFilterFormat] = useState<string>('all');
+  const [filterAirline, setFilterAirline] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'registration' | 'airline'>('newest');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // Paging state
+  const [page, setPage] = useState(0);
+  const [perPage, setPerPage] = useState(12);
+  const [airlineRankingPage, setAirlineRankingPage] = useState(0);
+  const [modelRankingPage, setModelRankingPage] = useState(0);
+  const [rankingPerPage, setRankingPerPage] = useState(10);
+  const [statsPage, setStatsPage] = useState(0);
+  const [statsPerPage, setStatsPerPage] = useState(8);
+
+  // Filtered photos
+  const filteredPhotos = useMemo(() => {
+    return myPlanePics.filter((p) => {
+      const matchesSearch =
+        p.registration.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.specialLivery.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (p.airline && p.airline.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (p.location && p.location.toLowerCase().includes(searchQuery.toLowerCase()));
+
+      const matchesFormat =
+        filterFormat === 'all'
+          ? true
+          : filterFormat === 'range'
+          ? p.isRangeFormat
+          : filterFormat === 'autocorrect'
+          ? p.isAutoCorrected
+          : true;
+
+      const matchesAirline = filterAirline === 'all' ? true : p.airline === filterAirline;
+
+      return matchesSearch && matchesFormat && matchesAirline;
+    });
+  }, [myPlanePics, searchQuery, filterFormat, filterAirline]);
+
+  const sortedPhotos = useMemo(() => {
+    return [...filteredPhotos].sort((a, b) => {
+      if (sortBy === 'newest') return (b.dateSpotted || '').localeCompare(a.dateSpotted || '') || b.id.localeCompare(a.id);
+      if (sortBy === 'oldest') return (a.dateSpotted || '').localeCompare(b.dateSpotted || '') || a.id.localeCompare(b.id);
+      if (sortBy === 'registration') return a.registration.localeCompare(b.registration);
+      if (sortBy === 'airline') return (a.airline || '').localeCompare(b.airline || '');
+      return 0;
+    });
+  }, [filteredPhotos, sortBy]);
+
+  const liveStats = useMemo(() => computeLiveStats(myPlanePics), [myPlanePics]);
+  const airlineRankings = useMemo(() => computeAirlineRankings(myPlanePics), [myPlanePics]);
+  const aircraftModelRankings = useMemo(() => computeAircraftModelRankings(myPlanePics), [myPlanePics]);
+
+  // Filename Parser Tester State
+  const [testFilename, setTestFilename] = useState('HU.26-31A Special Livery (7.30.25).jpg');
+
+  const parsedLiveResult = useMemo(() => parsePlaneFilename(testFilename), [testFilename]);
+
+  const pageCount = useMemo(() => Math.max(1, Math.ceil(sortedPhotos.length / perPage)), [sortedPhotos.length, perPage]);
+
+  const paginatedPhotos = useMemo(() => {
+    const start = page * perPage;
+    return sortedPhotos.slice(start, start + perPage);
+  }, [sortedPhotos, page, perPage]);
+
+  const goToPage = useCallback((next: number) => {
+    setPage((prev) => {
+      const clamped = Math.max(0, Math.min(pageCount - 1, next));
+      return clamped;
+    });
+  }, [pageCount]);
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const deleteSelected = () => {
+    if (selectedIds.size === 0) return;
+    if (!window.confirm(`Delete ${selectedIds.size} selected photo(s) from vault?`)) return;
+    setMyPlanePics((prev) => prev.filter((p) => !selectedIds.has(p.id)));
+    setSelectedIds(new Set());
+    showToast('Photos Deleted', `${selectedIds.size} photo(s) removed from vault.`, 'info');
+  };
+
+  useEffect(() => {
+    setPage(0);
+    setAirlineRankingPage(0);
+    setModelRankingPage(0);
+    setStatsPage(0);
+  }, [searchQuery, filterFormat, filterAirline, sortBy, myPlanePics.length]);
+
   useEffect(() => {
     if (!isLightboxOpen) return;
     const handleKey = (e: KeyboardEvent) => {
@@ -123,11 +226,6 @@ export const MyPlanePicsSuite: React.FC = () => {
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [isLightboxOpen, lightboxMedia, filteredPhotos]);
-
-  // Filters & Search
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterFormat, setFilterFormat] = useState<string>('all');
-  const [filterAirline, setFilterAirline] = useState<string>('all');
 
   // Folder Input Trigger (shows structure preview first)
   const handleFolderInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -387,9 +485,6 @@ export const MyPlanePicsSuite: React.FC = () => {
     }
   };
 
-  // Filename Parser Tester State
-  const [testFilename, setTestFilename] = useState('HU.26-31A Special Livery (7.30.25).jpg');
-
   // Add Custom Photo Modal
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newFilename, setNewFilename] = useState('G-NLPD Retro (8.09.26).jpg');
@@ -397,11 +492,6 @@ export const MyPlanePicsSuite: React.FC = () => {
   const [newAirline, setNewAirline] = useState('British Airways');
   const [newLocation, setNewLocation] = useState('LHR / London Heathrow');
   const [newNotes, setNewNotes] = useState('Spotted on short final into LHR 27R.');
-
-  // Computed Live Standings based on Album Photos
-  const liveStats = computeLiveStats(myPlanePics);
-  const airlineRankings = computeAirlineRankings(myPlanePics);
-  const aircraftModelRankings = computeAircraftModelRankings(myPlanePics);
 
   const PRESET_SAMPLES = [
     { name: '1. Basic', file: 'G-NLPD (7.30.25).jpg' },
@@ -415,8 +505,6 @@ export const MyPlanePicsSuite: React.FC = () => {
     { name: '9. Range + Livery', file: 'HU.26-31A Special Livery (7.30.25).jpg' },
     { name: '10. Range 4-Digit', file: 'HU.26-31A (7.30.2025).jpg' },
   ];
-
-  const parsedLiveResult = parsePlaneFilename(testFilename);
 
   const handleAddPhotoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -558,28 +646,6 @@ export const MyPlanePicsSuite: React.FC = () => {
       showToast(t.vaultLocked, 'All photos cleared from vault.', 'info');
     }
   };
-
-  // Filtered photos
-  const filteredPhotos = myPlanePics.filter((p) => {
-    const matchesSearch =
-      p.registration.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.specialLivery.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (p.airline && p.airline.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (p.location && p.location.toLowerCase().includes(searchQuery.toLowerCase()));
-
-    const matchesFormat =
-      filterFormat === 'all'
-        ? true
-        : filterFormat === 'range'
-        ? p.isRangeFormat
-        : filterFormat === 'autocorrect'
-        ? p.isAutoCorrected
-        : true;
-
-    const matchesAirline = filterAirline === 'all' ? true : p.airline === filterAirline;
-
-    return matchesSearch && matchesFormat && matchesAirline;
-  });
 
   return (
     <div className="space-y-6">
@@ -773,7 +839,7 @@ export const MyPlanePicsSuite: React.FC = () => {
               />
             </div>
 
-            {/* Filters */}
+            {/* Filters & Sort */}
             <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
               <div className="flex items-center gap-1.5 text-xs text-slate-300 font-mono">
                 <Filter className="w-3.5 h-3.5 text-[#FF5F1F]" />
@@ -806,6 +872,45 @@ export const MyPlanePicsSuite: React.FC = () => {
                 </select>
               </div>
 
+              <div className="flex items-center gap-1.5 text-xs text-slate-300 font-mono">
+                <span className="font-bold">Sort:</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="bg-slate-950 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#FF5F1F] font-mono cursor-pointer"
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                  <option value="registration">Registration A-Z</option>
+                  <option value="airline">Airline A-Z</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-1 bg-slate-950 border border-white/10 rounded-xl p-0.5">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-1.5 rounded-lg transition-all cursor-pointer ${viewMode === 'grid' ? 'bg-[#FF5F1F] text-black' : 'text-slate-400 hover:text-white'}`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-1.5 rounded-lg transition-all cursor-pointer ${viewMode === 'list' ? 'bg-[#FF5F1F] text-black' : 'text-slate-400 hover:text-white'}`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+                </button>
+              </div>
+
+              {selectedIds.size > 0 && (
+                <button
+                  onClick={deleteSelected}
+                  className="liquid-glass-btn px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Delete ({selectedIds.size})
+                </button>
+              )}
+
               {/* Upload Buttons */}
               <div className="flex items-center gap-2">
                 <button
@@ -827,25 +932,48 @@ export const MyPlanePicsSuite: React.FC = () => {
             </div>
           </div>
 
-          {/* Liquid 3D Photo Grid */}
-          {filteredPhotos.length === 0 ? (
+          {/* Liquid 3D Photo Grid / List */}
+          {sortedPhotos.length === 0 ? (
             <div className="text-center py-16 rounded-3xl border-2 border-dashed border-white/10 bg-slate-900/30">
               <Camera className="w-12 h-12 text-slate-600 mx-auto mb-3" />
               <p className="text-sm font-bold text-slate-400">{t.noPhotosMatchFilters}</p>
               <p className="text-xs text-slate-500 mt-1">{t.tryAdjustingSearchOrUpload}</p>
             </div>
-          ) : (
+          ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              {filteredPhotos.map((photo) => {
+              {paginatedPhotos.map((photo) => {
+                const isSelected = selectedIds.has(photo.id);
                 return (
                   <div
                     key={photo.id}
-                    onClick={() => {
-                      setLightboxMedia(photo);
-                      setIsLightboxOpen(true);
+                    onClick={(e) => {
+                      if (e.shiftKey || e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        toggleSelect(photo.id);
+                      } else {
+                        setLightboxMedia(photo);
+                        setIsLightboxOpen(true);
+                      }
                     }}
-                    className="relative group rounded-3xl overflow-hidden bg-slate-900/60 backdrop-blur-xl border transition-all duration-300 cursor-pointer flex flex-col justify-between hover:-translate-y-1.5 shadow-xl border-white/15 hover:border-white/30 hover:shadow-[0_15px_30px_rgba(0,0,0,0.5)]"
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      toggleSelect(photo.id);
+                    }}
+                    className={`relative group rounded-3xl overflow-hidden bg-slate-900/60 backdrop-blur-xl border transition-all duration-300 cursor-pointer flex flex-col justify-between hover:-translate-y-1.5 shadow-xl hover:shadow-[0_15px_30px_rgba(0,0,0,0.5)] ${isSelected ? 'border-[#FF5F1F] shadow-[0_0_20px_rgba(255,95,31,0.3)]' : 'border-white/15 hover:border-white/30'}`}
                   >
+                    {/* Selection Checkbox */}
+                    <div className="absolute top-3 left-3 z-30">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleSelect(photo.id);
+                        }}
+                        className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-[#FF5F1F] border-[#FF5F1F]' : 'bg-black/40 border-white/40 hover:border-white/80'}`}
+                      >
+                        {isSelected && <Check className="w-3 h-3 text-white" />}
+                      </button>
+                    </div>
+
                     {/* Glossy Reflective Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/40 pointer-events-none z-10" />
 
@@ -867,7 +995,7 @@ export const MyPlanePicsSuite: React.FC = () => {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-black/40 z-10" />
 
                       {/* Top Pattern Badges */}
-                      <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-20">
+                      <div className="absolute top-3 left-10 right-3 flex items-center justify-between z-20">
                         {photo.isRangeFormat && (
                           <span className="px-2 py-0.5 rounded-full bg-purple-950/90 backdrop-blur-md border border-purple-500/40 text-[9px] font-mono font-bold text-purple-300 shadow-lg">
                             {t.militaryRangeFormats}
@@ -917,6 +1045,99 @@ export const MyPlanePicsSuite: React.FC = () => {
                   </div>
                 );
               })}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {paginatedPhotos.map((photo) => {
+                const isSelected = selectedIds.has(photo.id);
+                return (
+                  <div
+                    key={photo.id}
+                    onClick={(e) => {
+                      if (e.shiftKey || e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        toggleSelect(photo.id);
+                      } else {
+                        setLightboxMedia(photo);
+                        setIsLightboxOpen(true);
+                      }
+                    }}
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      toggleSelect(photo.id);
+                    }}
+                    className={`flex items-center gap-4 p-3 rounded-2xl bg-slate-900/60 backdrop-blur-xl border transition-all cursor-pointer hover:bg-slate-800/60 ${isSelected ? 'border-[#FF5F1F] shadow-[0_0_15px_rgba(255,95,31,0.2)]' : 'border-white/10'}`}
+                  >
+                    <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-black shrink-0">
+                      <img
+                        src={photo.thumbnailUrl || photo.imageUrl}
+                        alt={photo.registration}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-black text-white font-mono tracking-wider">{photo.registration}</h4>
+                        {photo.isRangeFormat && (
+                          <span className="px-1.5 py-0.5 rounded-full bg-purple-950/80 border border-purple-500/40 text-[9px] font-mono font-bold text-purple-300">RNG</span>
+                        )}
+                        {photo.isAutoCorrected && (
+                          <span className="px-1.5 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-[9px] font-mono font-bold text-emerald-300">AUTO</span>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-400 font-mono truncate">{photo.airline || 'Commercial Fleet'} • {photo.aircraftModel}</p>
+                      <p className="text-[10px] text-slate-500 font-mono">{photo.formattedDate} • {photo.location}</p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleSelect(photo.id);
+                        }}
+                        className={`p-2 rounded-xl border transition-all cursor-pointer ${isSelected ? 'bg-[#FF5F1F] border-[#FF5F1F] text-black' : 'bg-slate-800 border-white/10 text-slate-400 hover:text-white'}`}
+                      >
+                        <Check className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {sortedPhotos.length > 0 && (
+            <div className="flex items-center justify-between pt-2">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-slate-400 font-mono">Per page</span>
+                <select
+                  value={perPage}
+                  onChange={(e) => { setPerPage(Number(e.target.value)); setPage(0); }}
+                  className="bg-slate-950 border border-white/10 rounded-lg px-2 py-1 text-[10px] text-white font-mono focus:outline-none focus:border-[#FF5F1F]"
+                >
+                  <option value="8">8</option>
+                  <option value="12">12</option>
+                  <option value="24">24</option>
+                  <option value="48">48</option>
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => goToPage(page - 1)}
+                  disabled={page === 0}
+                  className="liquid-glass-btn px-3 py-1.5 bg-slate-800 rounded-lg text-white text-xs disabled:opacity-30 flex items-center gap-1"
+                >
+                  <ArrowLeft className="w-3 h-3" /> {t.previous}
+                </button>
+                <span className="text-[10px] text-slate-400 font-mono">
+                  {t.page} {page + 1} {t.of} {pageCount}
+                </span>
+                <button
+                  onClick={() => goToPage(page + 1)}
+                  disabled={page >= pageCount - 1}
+                  className="liquid-glass-btn px-3 py-1.5 bg-slate-800 rounded-lg text-white text-xs disabled:opacity-30 flex items-center gap-1"
+                >
+                  {t.next} <ArrowRight className="w-3 h-3" />
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -972,9 +1193,18 @@ export const MyPlanePicsSuite: React.FC = () => {
                     >
                       {sample.name}
                     </button>
-                  ))}
+              ))}
+            </div>
+            {airlineRankings.length > rankingPerPage && (
+              <div className="flex items-center justify-between pt-2">
+                <span className="text-[10px] text-slate-400 font-mono">Page {airlineRankingPage + 1} of {Math.ceil(airlineRankings.length / rankingPerPage)}</span>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setAirlineRankingPage(p => Math.max(0, p - 1))} disabled={airlineRankingPage === 0} className="liquid-glass-btn px-2 py-1 bg-slate-800 rounded text-white text-xs disabled:opacity-30"><ArrowLeft className="w-3 h-3" /></button>
+                  <button onClick={() => setAirlineRankingPage(p => Math.min(Math.ceil(airlineRankings.length / rankingPerPage) - 1, p + 1))} disabled={airlineRankingPage >= Math.ceil(airlineRankings.length / rankingPerPage) - 1} className="liquid-glass-btn px-2 py-1 bg-slate-800 rounded text-white text-xs disabled:opacity-30"><ArrowRight className="w-3 h-3" /></button>
                 </div>
               </div>
+            )}
+          </div>
             </div>
 
             {/* Live Tokenizer Breakdown & Extraction Result */}
@@ -1027,7 +1257,18 @@ export const MyPlanePicsSuite: React.FC = () => {
                       ? 'Auto-Corrected (Parentheses & Spacing sanitized)'
                       : 'Standard Compliant Format'}
                   </p>
-                  <p className="text-slate-300 text-[11px] truncate">Normalized: {parsedLiveResult.correctedFilename}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-slate-300 text-[11px] truncate flex-1">Normalized: {parsedLiveResult.correctedFilename}</p>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(parsedLiveResult.correctedFilename);
+                        showToast('Copied', 'Corrected filename copied to clipboard.', 'success');
+                      }}
+                      className="p-1.5 rounded-lg bg-slate-800 border border-white/10 text-slate-400 hover:text-white hover:border-white/30 transition-all cursor-pointer shrink-0"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1065,7 +1306,7 @@ export const MyPlanePicsSuite: React.FC = () => {
                   </div>
 
             <div className="space-y-3">
-              {airlineRankings.map((item) => (
+              {airlineRankings.slice(airlineRankingPage * rankingPerPage, (airlineRankingPage + 1) * rankingPerPage).map((item) => (
                 <div
                   key={item.airline}
                   className="p-4 bg-slate-950/80 border border-white/10 hover:border-amber-400/50 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 transition-all shadow-md"
@@ -1101,10 +1342,19 @@ export const MyPlanePicsSuite: React.FC = () => {
                       <p className="text-lg font-black text-emerald-400">{item.rarityScore}/100</p>
                     </div>
                   </div>
+                  </div>
+                ))}
+              </div>
+              {liveStats.topAirlines.length > statsPerPage && (
+                <div className="flex items-center justify-between pt-2">
+                  <span className="text-[10px] text-slate-400 font-mono">Page {statsPage + 1} of {Math.ceil(liveStats.topAirlines.length / statsPerPage)}</span>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => setStatsPage(p => Math.max(0, p - 1))} disabled={statsPage === 0} className="liquid-glass-btn px-2 py-1 bg-slate-800 rounded text-white text-xs disabled:opacity-30"><ArrowLeft className="w-3 h-3" /></button>
+                    <button onClick={() => setStatsPage(p => Math.min(Math.ceil(liveStats.topAirlines.length / statsPerPage) - 1, p + 1))} disabled={statsPage >= Math.ceil(liveStats.topAirlines.length / statsPerPage) - 1} className="liquid-glass-btn px-2 py-1 bg-slate-800 rounded text-white text-xs disabled:opacity-30"><ArrowRight className="w-3 h-3" /></button>
+                  </div>
                 </div>
-              ))}
+              )}
             </div>
-          </div>
 
           {/* SECTION 2: TOP AIRCRAFT MODEL RANKING */}
           <div className="space-y-4 pt-4 border-t border-white/10">
@@ -1116,7 +1366,7 @@ export const MyPlanePicsSuite: React.FC = () => {
                   </div>
 
             <div className="space-y-3">
-              {aircraftModelRankings.map((item) => (
+              {aircraftModelRankings.slice(modelRankingPage * rankingPerPage, (modelRankingPage + 1) * rankingPerPage).map((item) => (
                 <div
                   key={item.aircraftModel}
                   className="p-4 bg-slate-950/80 border border-white/10 hover:border-sky-400/50 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 transition-all shadow-md"
@@ -1155,6 +1405,15 @@ export const MyPlanePicsSuite: React.FC = () => {
                 </div>
               ))}
             </div>
+            {aircraftModelRankings.length > rankingPerPage && (
+              <div className="flex items-center justify-between pt-2">
+                <span className="text-[10px] text-slate-400 font-mono">Page {modelRankingPage + 1} of {Math.ceil(aircraftModelRankings.length / rankingPerPage)}</span>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setModelRankingPage(p => Math.max(0, p - 1))} disabled={modelRankingPage === 0} className="liquid-glass-btn px-2 py-1 bg-slate-800 rounded text-white text-xs disabled:opacity-30"><ArrowLeft className="w-3 h-3" /></button>
+                  <button onClick={() => setModelRankingPage(p => Math.min(Math.ceil(aircraftModelRankings.length / rankingPerPage) - 1, p + 1))} disabled={modelRankingPage >= Math.ceil(aircraftModelRankings.length / rankingPerPage) - 1} className="liquid-glass-btn px-2 py-1 bg-slate-800 rounded text-white text-xs disabled:opacity-30"><ArrowRight className="w-3 h-3" /></button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -1190,7 +1449,7 @@ export const MyPlanePicsSuite: React.FC = () => {
                 Top Airlines in Vault
               </h4>
               <div className="space-y-3 font-mono text-xs">
-                {liveStats.topAirlines.map((item) => (
+                {liveStats.topAirlines.slice(statsPage * statsPerPage, (statsPage + 1) * statsPerPage).map((item) => (
                   <div key={item.airline} className="space-y-1">
                     <div className="flex justify-between text-slate-200">
                       <span>{item.airline}</span>
@@ -1240,10 +1499,10 @@ export const MyPlanePicsSuite: React.FC = () => {
               <div className="flex items-center gap-3 font-mono">
                 <button
                   onClick={() => {
-                    const currentIndex = filteredPhotos.findIndex(p => p.id === lightboxMedia.id);
-                    const prevIndex = (currentIndex - 1 + filteredPhotos.length) % filteredPhotos.length;
-                    if (filteredPhotos[prevIndex]) {
-                      setLightboxMedia(filteredPhotos[prevIndex]);
+                    const currentIndex = sortedPhotos.findIndex(p => p.id === lightboxMedia.id);
+                    const prevIndex = (currentIndex - 1 + sortedPhotos.length) % sortedPhotos.length;
+                    if (sortedPhotos[prevIndex]) {
+                      setLightboxMedia(sortedPhotos[prevIndex]);
                     }
                   }}
                   className="liquid-glass-btn p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all cursor-pointer"
@@ -1256,10 +1515,10 @@ export const MyPlanePicsSuite: React.FC = () => {
                 </div>
                 <button
                   onClick={() => {
-                    const currentIndex = filteredPhotos.findIndex(p => p.id === lightboxMedia.id);
-                    const nextIndex = (currentIndex + 1) % filteredPhotos.length;
-                    if (filteredPhotos[nextIndex]) {
-                      setLightboxMedia(filteredPhotos[nextIndex]);
+                    const currentIndex = sortedPhotos.findIndex(p => p.id === lightboxMedia.id);
+                    const nextIndex = (currentIndex + 1) % sortedPhotos.length;
+                    if (sortedPhotos[nextIndex]) {
+                      setLightboxMedia(sortedPhotos[nextIndex]);
                     }
                   }}
                   className="liquid-glass-btn p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all cursor-pointer"
@@ -1276,21 +1535,40 @@ export const MyPlanePicsSuite: React.FC = () => {
               </button>
             </div>
 
-            <div className="relative rounded-2xl overflow-hidden bg-black max-h-[60vh] flex items-center justify-center">
-              {lightboxMedia.mediaType === 'video' && lightboxMedia.videoUrl ? (
-                <video
-                  src={lightboxMedia.videoUrl}
-                  controls
-                  autoPlay
-                  className="w-full h-full object-contain max-h-[60vh]"
-                />
-              ) : (
-                <img
-                  src={lightboxMedia.imageUrl}
-                  alt={lightboxMedia.registration}
-                  className="w-full h-full object-contain max-h-[60vh]"
-                />
-              )}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 relative rounded-2xl overflow-hidden bg-black max-h-[60vh] flex items-center justify-center">
+                {lightboxMedia.mediaType === 'video' && lightboxMedia.videoUrl ? (
+                  <video
+                    src={lightboxMedia.videoUrl}
+                    controls
+                    autoPlay
+                    className="w-full h-full object-contain max-h-[60vh]"
+                  />
+                ) : (
+                  <img
+                    src={lightboxMedia.imageUrl}
+                    alt={lightboxMedia.registration}
+                    className="w-full h-full object-contain max-h-[60vh]"
+                  />
+                )}
+              </div>
+
+              <div className="space-y-4 text-xs font-mono">
+                <div className="p-4 rounded-2xl bg-slate-950 border border-white/10 space-y-3">
+                  <h4 className="text-xs font-black text-[#FF5F1F] uppercase tracking-wider">Photo Metadata</h4>
+                  <div className="space-y-2 text-slate-300">
+                    <div className="flex justify-between"><span>Registration</span><span className="text-white font-bold">{lightboxMedia.registration}</span></div>
+                    <div className="flex justify-between"><span>Airline</span><span className="text-white font-bold">{lightboxMedia.airline || 'N/A'}</span></div>
+                    <div className="flex justify-between"><span>Model</span><span className="text-white font-bold">{lightboxMedia.aircraftModel || 'N/A'}</span></div>
+                    <div className="flex justify-between"><span>Location</span><span className="text-white font-bold">{lightboxMedia.location || 'N/A'}</span></div>
+                    <div className="flex justify-between"><span>Livery</span><span className="text-[#FF5F1F] font-bold">{lightboxMedia.specialLivery}</span></div>
+                    <div className="flex justify-between"><span>Date</span><span className="text-white font-bold">{lightboxMedia.formattedDate || lightboxMedia.dateCaptured || 'N/A'}</span></div>
+                    <div className="flex justify-between"><span>Format</span><span className="text-cyan-400 font-bold">{lightboxMedia.formatPattern}</span></div>
+                    <div className="flex justify-between"><span>Shot</span><span className="text-white font-bold">{lightboxMedia.shotNumber !== undefined ? `#${lightboxMedia.shotNumber}` : 'Single'}</span></div>
+                    <div className="flex justify-between"><span>Type</span><span className="text-white font-bold">{lightboxMedia.mediaType === 'video' ? t.video : 'Image'}</span></div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="flex items-center justify-between text-xs font-mono text-slate-300">

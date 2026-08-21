@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { encryptionService } from '../utils/crypto';
 import {
@@ -68,6 +68,15 @@ import {
   SignalMedium,
   SignalHigh,
   Rss,
+  Timer,
+  Globe2,
+  Hash,
+  Trash2,
+  Copy,
+  Grid3x3,
+  List,
+  Check,
+  Video,
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import { fetchAccurateWeather } from '../utils/weatherService';
@@ -79,6 +88,7 @@ import { ProductivityOfficeHub } from './Hub4_ProductivityOffice/ProductivityOff
 import { AviationTelemetryHub } from './Hub5_AviationTelemetry/AviationTelemetryHub';
 import { ClockSuiteModal } from './ClockSuiteModal';
 import { ProfilePage } from './ProfilePage';
+import { PlanePhoto } from '../types';
 
 interface MobileWindowsPhoneGUIProps {
   onNavigateTab: (tabKey: string) => void;
@@ -98,6 +108,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
     setMasterPassphrase,
     authRequired,
     myPlanePics,
+    setMyPlanePics,
     notes,
     saveNote,
     currentTrack,
@@ -111,7 +122,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
   } = useApp();
 
   // Screen States: 'HOME' | 'APP_DRAWER' | 'SEARCH' | 'ACCOUNT_OVERLAY' | 'QR_ACCOUNT' | 'FEATURE'
-  const [screenMode, setScreenMode] = useState<'HOME' | 'APP_DRAWER' | 'SEARCH' | 'ACCOUNT_OVERLAY' | 'FEATURE' | 'connect' | 'media' | 'arcade' | 'office' | 'telemetry' | 'rss' | 'profile'>('HOME');
+  const [screenMode, setScreenMode] = useState<'HOME' | 'APP_DRAWER' | 'SEARCH' | 'ACCOUNT_OVERLAY' | 'FEATURE' | 'connect' | 'media' | 'arcade' | 'office' | 'telemetry' | 'rss' | 'profile' | 'QR_ACCOUNT'>('HOME');
   const [activeOverlay, setActiveOverlay] = useState<'NONE' | 'WEATHER' | 'CLOCK'>('NONE');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentTime, setCurrentTime] = useState('2:55 PM');
@@ -129,40 +140,48 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
   const [planePicsPage, setPlanePicsPage] = useState(0);
   const [planePicsPerPage, setPlanePicsPerPage] = useState(12);
 
+  // MyPlanePics enhanced GUI state
+  const [planePicsSearch, setPlanePicsSearch] = useState('');
+  const [planePicsSort, setPlanePicsSort] = useState<'newest' | 'oldest' | 'registration' | 'airline'>('newest');
+  const [planePicsViewMode, setPlanePicsViewMode] = useState<'grid' | 'list'>('grid');
+  const [planePicsSelectedIds, setPlanePicsSelectedIds] = useState<Set<string>>(new Set());
+  const [lightboxPhoto, setLightboxPhoto] = useState<PlanePhoto | null>(null);
+  const [isSelectMode, setIsSelectMode] = useState(false);
+
   // Weather widget state
-  const [weatherIcao, setWeatherIcao] = useState('KJFK');
+  const [weatherCity, setWeatherCity] = useState('New York');
   const [weatherData, setWeatherData] = useState<any>(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
 
   // Live Weather State
   const [weatherStationData, setWeatherStationData] = useState({
-    airportName: 'John F. Kennedy Intl Airport (New York)',
-    icao: 'KJFK',
+    city: 'New York',
+    country: 'US',
     tempC: 22,
     tempF: 72,
     condition: 'Partly Cloudy',
     humidity: 58,
     windSpeedKts: 14,
     windDirection: '240° SW',
-    aqi: 28,
-    aqiStatus: 'Good / Clean Air',
-    metar: 'KJFK 101100Z 24014KT 10SM FEW250 22/14 A3012 RMK AO2 SLP201',
-    taf: 'TAF KJFK 101130Z 1012/1112 24014KT P6SM SKC FM101800 25018G24KT P6SM BKN200',
+    description: 'scattered clouds',
+    icon: '03d',
+    isRealTime: false,
+    lastUpdated: '',
   });
 
-  const loadWeatherForStation = async (icaoCode: string) => {
+  const loadWeatherForCity = async (city: string) => {
     try {
-      showToast('Weather Station', `Fetching NOAA METAR & live weather for ${icaoCode}...`, 'info');
-      const liveData = await fetchAccurateWeather(icaoCode);
+      showToast('Weather', `Fetching live weather for ${city}...`, 'info');
+      const liveData = await fetchAccurateWeather(city);
       setWeatherStationData(liveData);
-      showToast('Live Weather Updated', `Loaded live weather for ${liveData.airportName}`, 'success');
+      showToast('Live Weather Updated', `Loaded live weather for ${liveData.city}`, 'success');
     } catch {
-      showToast('Weather Error', 'Failed to retrieve live weather METAR', 'error');
+      showToast('Weather Error', 'Failed to retrieve live weather data', 'error');
     }
   };
 
   useEffect(() => {
-    loadWeatherForStation('KJFK');
+    loadWeatherForCity('New York');
   }, []);
 
   // Quick dialer state
@@ -172,6 +191,63 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
   // Notes preview state
   const [newNoteTitle, setNewNoteTitle] = useState('');
   const [newNoteBody, setNewNoteBody] = useState('');
+
+  // Calculator state
+  const [calcDisplay, setCalcDisplay] = useState('0');
+  const [calcPrev, setCalcPrev] = useState<string | null>(null);
+  const [calcOp, setCalcOp] = useState<string | null>(null);
+  const [calcNewNumber, setCalcNewNumber] = useState(true);
+
+  // Stopwatch state
+  const [swTime, setSwTime] = useState(0);
+  const [swRunning, setSwRunning] = useState(false);
+  const [swLaps, setSwLaps] = useState<number[]>([]);
+
+  // World Clock state
+  const [worldClocks, setWorldClocks] = useState([
+    { city: 'New York', tz: 'America/New_York' },
+    { city: 'London', tz: 'Europe/London' },
+    { city: 'Dubai', tz: 'Asia/Dubai' },
+    { city: 'Tokyo', tz: 'Asia/Tokyo' },
+  ]);
+
+  // FM Tuner state
+  const [fmFrequency, setFmFrequency] = useState(88.0);
+  const [fmPlaying, setFmPlaying] = useState(false);
+  const [fmStations] = useState([
+    { name: 'Brio FM 88.0', freq: 88.0 },
+    { name: 'Skywave 92.5', freq: 92.5 },
+    { name: 'Cyber Beats 97.1', freq: 97.1 },
+    { name: 'Nightcore 101.3', freq: 101.3 },
+    { name: 'Aviation Radio 107.9', freq: 107.9 },
+  ]);
+
+  const filteredAndSortedPhotos = useMemo(() => {
+    let result = [...myPlanePics];
+    if (planePicsSearch.trim()) {
+      const q = planePicsSearch.toLowerCase();
+      result = result.filter(p =>
+        p.registration.toLowerCase().includes(q) ||
+        (p.airline && p.airline.toLowerCase().includes(q)) ||
+        (p.specialLivery && p.specialLivery.toLowerCase().includes(q)) ||
+        (p.aircraftModel && p.aircraftModel.toLowerCase().includes(q))
+      );
+    }
+    result.sort((a, b) => {
+      if (planePicsSort === 'newest') return (b.dateSpotted || '').localeCompare(a.dateSpotted || '') || b.id.localeCompare(a.id);
+      if (planePicsSort === 'oldest') return (a.dateSpotted || '').localeCompare(b.dateSpotted || '') || a.id.localeCompare(b.id);
+      if (planePicsSort === 'registration') return a.registration.localeCompare(b.registration);
+      if (planePicsSort === 'airline') return (a.airline || '').localeCompare(b.airline || '');
+      return 0;
+    });
+    return result;
+  }, [myPlanePics, planePicsSearch, planePicsSort]);
+
+  useEffect(() => {
+    if (screenMode !== 'FEATURE') {
+      setLightboxPhoto(null);
+    }
+  }, [screenMode]);
 
   // Responsive paging calculation
   useEffect(() => {
@@ -200,6 +276,16 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    let interval: number;
+    if (swRunning) {
+      interval = window.setInterval(() => {
+        setSwTime((t) => t + 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [swRunning]);
+
   // Audio touch tone feedback with error catching
   const playTouchSound = (freq = 520) => {
     try {
@@ -221,14 +307,20 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
     }
   };
 
-  const handleAppClick = (tabKey: string, actionName: string) => {
+  const handleAppClick = (tabKey: string, actionName: string, feature?: string) => {
     try {
       playTouchSound(580);
       if (tabKey === 'account') {
         setScreenMode('ACCOUNT_OVERLAY');
         return;
       }
-      if (['connect', 'media', 'arcade', 'office', 'telemetry'].includes(tabKey)) {
+      if (tabKey === 'feature' && feature) {
+        setCurrentFeature(feature);
+        setScreenMode('FEATURE');
+        showToast(t.brioDroidMobile, `${t.launching} ${actionName}...`, 'info');
+        return;
+      }
+      if (['connect', 'media', 'arcade', 'office', 'telemetry', 'rss'].includes(tabKey)) {
         setScreenMode(tabKey as any);
         showToast(t.brioDroidMobile, `${t.launching} ${actionName}...`, 'info');
         return;
@@ -331,12 +423,16 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
     { name: 'PDF Annotator & Editor', hub: 'office', icon: FileText, category: 'Office' },
     { name: 'Encrypted Markdown Notes', hub: 'office', icon: FileText, category: 'Office' },
     { name: 'Task Checklist Manager', hub: 'office', icon: CheckCircle2, category: 'Office' },
-    { name: 'Graphic Calculator', hub: 'office', icon: Calculator, category: 'Office' },
+    { name: 'Graphic Calculator', hub: 'feature', icon: Calculator, category: 'Office', feature: 'calculator' },
+    { name: 'Stopwatch & Timer', hub: 'feature', icon: Timer, category: 'Office', feature: 'stopwatch' },
 
     { name: 'Aviation & Telemetry Hub', hub: 'telemetry', icon: Plane, category: 'Telemetry' },
     { name: 'MyPlanePics 3D Vault', hub: 'telemetry', icon: Camera, category: 'Telemetry' },
     { name: 'Spotter Airline Rankings', hub: 'telemetry', icon: Award, category: 'Telemetry' },
     { name: 'System Telemetry Monitor', hub: 'telemetry', icon: Zap, category: 'Telemetry' },
+
+    { name: 'FM Radio Tuner', hub: 'feature', icon: Radio, category: 'Media', feature: 'fmTuner' },
+    { name: 'World Clock Matrix', hub: 'feature', icon: Globe2, category: 'Office', feature: 'worldClock' },
 
     { name: 'Account Settings', hub: 'account', icon: Settings, category: 'Account' },
     { name: 'AES-256 Vault Security', hub: 'account', icon: ShieldCheck, category: 'Account' },
@@ -365,9 +461,53 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
         </div>
 
         {/* DIGITAL SCREEN DISPLAY VIEWPORT */}
-        <div className="relative w-full h-[530px] bg-[#1a1c1e] rounded-xl border border-zinc-800 flex flex-col overflow-hidden text-white shadow-2xl">
-          
-          {/* ANDROID 2.x CLASSIC WHITE STATUS BAR */}
+         <div className="relative w-full h-[530px] bg-[#1a1c1e] rounded-xl border border-zinc-800 flex flex-col overflow-hidden text-white shadow-2xl">
+           {lightboxPhoto && currentFeature === 'photos' && (
+             <div className="absolute inset-0 z-50 bg-black/90 flex items-center justify-center p-3" onClick={() => setLightboxPhoto(null)}>
+               <div className="relative max-w-sm w-full bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-700 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                 <div className="relative aspect-video bg-black">
+                   {lightboxPhoto.mediaType === 'video' && lightboxPhoto.videoUrl ? (
+                     <video src={lightboxPhoto.videoUrl} className="w-full h-full object-contain" controls autoPlay />
+                   ) : (
+                     <img src={lightboxPhoto.imageUrl} alt={lightboxPhoto.registration} className="w-full h-full object-contain" />
+                   )}
+                   <button onClick={() => setLightboxPhoto(null)} className="absolute top-2 right-2 p-1 bg-black/50 rounded-full text-white hover:bg-black/70">
+                     <X className="w-4 h-4" />
+                   </button>
+                 </div>
+                 <div className="p-3 space-y-2">
+                   <div className="flex items-center justify-between">
+                     <h3 className="text-sm font-bold text-white">{lightboxPhoto.registration}</h3>
+                     <button
+                       onClick={() => {
+                         try {
+                           navigator.clipboard.writeText(lightboxPhoto.filename);
+                           showToast('Copied', 'Filename copied to clipboard', 'success');
+                         } catch {
+                           showToast('Copy Failed', 'Clipboard access denied', 'error');
+                         }
+                       }}
+                       className="liquid-glass-btn p-1 bg-zinc-800 rounded-lg text-zinc-300 hover:text-white"
+                       title="Copy filename"
+                     >
+                       <Copy className="w-3.5 h-3.5" />
+                     </button>
+                   </div>
+                   <div className="space-y-1 text-[10px] text-zinc-400 max-h-32 overflow-y-auto">
+                     {lightboxPhoto.airline && <p><span className="text-zinc-300 font-bold">Airline:</span> {lightboxPhoto.airline}</p>}
+                     {lightboxPhoto.aircraftModel && <p><span className="text-zinc-300 font-bold">Model:</span> {lightboxPhoto.aircraftModel}</p>}
+                     {lightboxPhoto.specialLivery && <p><span className="text-zinc-300 font-bold">Livery:</span> {lightboxPhoto.specialLivery}</p>}
+                     {lightboxPhoto.dateCaptured && <p><span className="text-zinc-300 font-bold">Date:</span> {lightboxPhoto.dateCaptured}</p>}
+                     {lightboxPhoto.location && <p><span className="text-zinc-300 font-bold">Location:</span> {lightboxPhoto.location}</p>}
+                      <p><span className="text-zinc-300 font-bold">Format:</span> {lightboxPhoto.formatPattern}</p>
+                     {lightboxPhoto.isAutoCorrected && <p className="text-amber-400 font-bold">Auto-corrected filename</p>}
+                   </div>
+                 </div>
+               </div>
+             </div>
+           )}
+           
+           {/* ANDROID 2.x CLASSIC WHITE STATUS BAR */}
           <div className="w-full bg-white text-zinc-900 px-2.5 py-0.5 flex items-center justify-between text-[11px] font-bold font-sans z-30 shadow-sm border-b border-zinc-300">
             <div className="flex items-center gap-1 text-[10px]">
               <span className="font-extrabold text-zinc-800">BRIO 3G</span>
@@ -440,7 +580,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                         <div>
                           <p className="text-[10px] font-mono text-sky-300 uppercase tracking-wider">{t.weatherWidget}</p>
                           <p className="text-lg font-black text-white font-mono">{weatherData ? `${weatherData.temp || '--'}°C` : '--°C'}</p>
-                          <p className="text-[10px] text-sky-200">{weatherData?.name || weatherIcao}</p>
+                           <p className="text-[10px] text-sky-200">{weatherData?.name || weatherStationData.city}</p>
                         </div>
                         <div className="p-2 bg-sky-500/20 rounded-xl border border-sky-400/30">
                           <Cloud className="w-6 h-6 text-sky-300" />
@@ -585,7 +725,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                       return (
                         <button
                           key={idx}
-                          onClick={() => handleAppClick(app.hub, app.name)}
+                          onClick={() => handleAppClick(app.hub, app.name, app.feature)}
                           className="liquid-glass-btn w-full p-2 rounded-xl bg-zinc-900 hover:bg-sky-600/30 border border-zinc-800 flex items-center justify-between transition-colors cursor-pointer text-left"
                         >
                           <div className="flex items-center gap-2.5">
@@ -631,7 +771,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                       return (
                         <button
                           key={idx}
-                          onClick={() => handleAppClick(app.hub, app.name)}
+                          onClick={() => handleAppClick(app.hub, app.name, app.feature)}
                           className="liquid-glass-btn w-full p-2 rounded-xl bg-zinc-900 hover:bg-sky-600/30 border border-zinc-800 flex items-center justify-between text-left cursor-pointer"
                         >
                           <div className="flex items-center gap-2.5">
@@ -738,60 +878,58 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                      </button>
                    </div>
 
-                   {/* Weather Feature */}
-                   {currentFeature === 'weather' && (
-                     <div className="space-y-3">
-                       <div className="p-3 bg-zinc-900 rounded-xl border border-zinc-800 space-y-2">
-                         <div className="flex items-center gap-2">
-                           <input
-                             type="text"
-                             value={weatherIcao}
-                             onChange={(e) => setWeatherIcao(e.target.value.toUpperCase())}
-                             placeholder="ICAO code..."
-                             className="flex-1 bg-black border border-zinc-700 rounded-lg px-2 py-1.5 text-xs text-white font-mono uppercase"
-                           />
-                           <button
-                             onClick={async () => {
-                               setWeatherLoading(true);
-                               try {
-                                 const res = await fetch(`/api/weather?ids=${weatherIcao || 'KJFK'}`);
-                                 const data = await res.json();
-                                 setWeatherData(data[0] || data);
-                               } catch (e) {
-                                 showToast(t.error, String(e), 'error');
-                               } finally {
-                                 setWeatherLoading(false);
-                               }
-                             }}
-                             className="liquid-glass-btn px-3 py-1.5 bg-sky-600 text-white text-xs rounded-lg"
-                           >
-                             {t.refresh}
-                           </button>
-                         </div>
-                         {weatherLoading && <p className="text-[10px] text-zinc-400">{t.loading}...</p>}
-                         {weatherData && (
-                           <div className="grid grid-cols-2 gap-2">
-                             <div className="p-2 bg-black/50 rounded-lg">
-                               <p className="text-[9px] text-zinc-500 uppercase">{t.temperature}</p>
-                               <p className="text-sm font-bold text-white">{weatherData.temp}°C</p>
-                             </div>
-                             <div className="p-2 bg-black/50 rounded-lg">
-                               <p className="text-[9px] text-zinc-500 uppercase">{t.windSpeedLabel}</p>
-                               <p className="text-sm font-bold text-white">{weatherData.wspd} kts</p>
-                             </div>
-                             <div className="p-2 bg-black/50 rounded-lg">
-                               <p className="text-[9px] text-zinc-500 uppercase">{t.humidityLabel}</p>
-                               <p className="text-sm font-bold text-white">{weatherData.dewp}°C</p>
-                             </div>
-                             <div className="p-2 bg-black/50 rounded-lg">
-                               <p className="text-[9px] text-zinc-500 uppercase">{t.condition}</p>
-                               <p className="text-sm font-bold text-white">{weatherData.cover || 'N/A'}</p>
-                             </div>
-                           </div>
-                         )}
-                       </div>
-                     </div>
-                   )}
+                    {/* Weather Feature */}
+                    {currentFeature === 'weather' && (
+                      <div className="space-y-3">
+                        <div className="p-3 bg-zinc-900 rounded-xl border border-zinc-800 space-y-2">
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              value={weatherCity}
+                              onChange={(e) => setWeatherCity(e.target.value)}
+                              placeholder="City name..."
+                              className="flex-1 bg-black border border-zinc-700 rounded-lg px-2 py-1.5 text-xs text-white font-mono"
+                            />
+                            <button
+                              onClick={async () => {
+                                setWeatherLoading(true);
+                                try {
+                                  await loadWeatherForCity(weatherCity || 'New York');
+                                } catch (e) {
+                                  showToast(t.error, String(e), 'error');
+                                } finally {
+                                  setWeatherLoading(false);
+                                }
+                              }}
+                              className="liquid-glass-btn px-3 py-1.5 bg-sky-600 text-white text-xs rounded-lg"
+                            >
+                              {t.refresh}
+                            </button>
+                          </div>
+                          {weatherLoading && <p className="text-[10px] text-zinc-400">{t.loading}...</p>}
+                          {weatherStationData && (
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className="p-2 bg-black/50 rounded-lg">
+                                <p className="text-[9px] text-zinc-500 uppercase">{t.temperature}</p>
+                                <p className="text-sm font-bold text-white">{weatherStationData.tempC}°C</p>
+                              </div>
+                              <div className="p-2 bg-black/50 rounded-lg">
+                                <p className="text-[9px] text-zinc-500 uppercase">{t.windSpeedLabel}</p>
+                                <p className="text-sm font-bold text-white">{weatherStationData.windSpeedKts} kts</p>
+                              </div>
+                              <div className="p-2 bg-black/50 rounded-lg">
+                                <p className="text-[9px] text-zinc-500 uppercase">{t.humidityLabel}</p>
+                                <p className="text-sm font-bold text-white">{weatherStationData.humidity}%</p>
+                              </div>
+                              <div className="p-2 bg-black/50 rounded-lg">
+                                <p className="text-[9px] text-zinc-500 uppercase">{t.condition}</p>
+                                <p className="text-sm font-bold text-white">{weatherStationData.condition || 'N/A'}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
 
                    {/* Quick Dialer Feature */}
                    {currentFeature === 'dialer' && (
@@ -927,126 +1065,408 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                      </div>
                    )}
 
-                   {/* Recent Photos Feature */}
-                   {currentFeature === 'photos' && (
-                     <div className="space-y-3">
-                       <div className="flex items-center justify-between">
-                         <p className="text-[10px] font-mono text-zinc-400 font-bold uppercase tracking-wider">
-                           {t.myplanePicsAlbum} ({myPlanePics.length})
-                         </p>
-                         {myPlanePics.length > 0 && (
-                           <button
-                             onClick={async () => {
-                               try {
-                                 const { jsPDF } = await import('jspdf');
-                                 const doc = new jsPDF();
-                                 
-                                 // Add title
-                                 doc.setFontSize(16);
-                                 doc.text('MyPlanePics Album', 105, 15, { align: 'center' });
-                                 doc.setFontSize(10);
-                                 doc.text(`Total Photos: ${myPlanePics.length}`, 105, 22, { align: 'center' });
-                                 doc.text(`Generated: ${new Date().toLocaleDateString()}`, 105, 28, { align: 'center' });
-                                 
-                                 // Add statistics
-                                 doc.setDrawColor(200);
-                                 doc.line(20, 32, 190, 32);
-                                 doc.setFontSize(12);
-                                 doc.text('Statistics', 20, 40);
-                                 doc.setFontSize(10);
-                                 doc.text(`• Total Media: ${myPlanePics.length}`, 20, 48);
-                                 const videos = myPlanePics.filter(p => p.mediaType === 'video').length;
-                                 const photos = myPlanePics.length - videos;
-                                 doc.text(`• Photos: ${photos}`, 20, 55);
-                                 doc.text(`• Videos: ${videos}`, 20, 62);
-                                 
-                                 // List all registrations
-                                 doc.setDrawColor(200);
-                                 doc.line(20, 70, 190, 70);
-                                 doc.setFontSize(12);
-                                 doc.text('Aircraft Registrations', 20, 78);
-                                 doc.setFontSize(8);
-                                 const regs = myPlanePics.map(p => p.registration);
-                                 const uniqueRegs = [...new Set(regs)];
-                                 uniqueRegs.forEach((reg, idx) => {
-                                   if (85 + idx * 5 < 280) {
-                                     doc.text(`• ${reg}`, 20, 85 + idx * 5);
-                                   }
-                                 });
-                                 
-                                 doc.save('myplanepics-album.pdf');
-                                 showToast(t.exportSuccessful, t.albumExportedAsPdf, 'success');
-                               } catch (err) {
-                                 showToast(t.exportFailed, t.unableToExportAlbum, 'error');
-                               }
-                             }}
-                             className="liquid-glass-btn px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-[9px] rounded-lg flex items-center gap-1"
-                           >
-                             <FileText className="w-3 h-3" /> {t.exportPdf}
-                           </button>
+                    {/* Recent Photos Feature */}
+                    {currentFeature === 'photos' && (
+                      <div className="space-y-2">
+                        {/* Toolbar */}
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => setIsSelectMode(!isSelectMode)}
+                            className={`liquid-glass-btn px-2 py-1 rounded-lg text-[10px] font-bold shrink-0 ${isSelectMode ? 'bg-red-600 text-white' : 'bg-zinc-800 text-zinc-300'}`}
+                          >
+                            {isSelectMode ? 'Cancel' : 'Select'}
+                          </button>
+                          <div className="relative flex-1">
+                            <Search className="absolute left-2 top-1 w-3 h-3 text-zinc-500" />
+                            <input
+                              type="text"
+                              placeholder="Search..."
+                              value={planePicsSearch}
+                              onChange={(e) => setPlanePicsSearch(e.target.value)}
+                              className="w-full pl-7 pr-2 py-1 bg-zinc-900 border border-zinc-800 rounded-lg text-[10px] text-white placeholder-zinc-500 focus:outline-none focus:border-pink-500"
+                            />
+                          </div>
+                          <select
+                            value={planePicsSort}
+                            onChange={(e) => setPlanePicsSort(e.target.value as any)}
+                            className="bg-zinc-900 border border-zinc-800 rounded-lg px-1.5 py-1 text-[10px] text-white focus:outline-none shrink-0"
+                          >
+                            <option value="newest">Newest</option>
+                            <option value="oldest">Oldest</option>
+                            <option value="registration">Reg</option>
+                            <option value="airline">Airline</option>
+                          </select>
+                          <button
+                            onClick={() => setPlanePicsViewMode(v => v === 'grid' ? 'list' : 'grid')}
+                            className="liquid-glass-btn p-1 bg-zinc-800 rounded-lg text-zinc-300 shrink-0"
+                            title={planePicsViewMode === 'grid' ? 'List view' : 'Grid view'}
+                          >
+                            {planePicsViewMode === 'grid' ? <List className="w-3.5 h-3.5" /> : <Grid3x3 className="w-3.5 h-3.5" />}
+                          </button>
+                        </div>
+
+                        {/* Batch Actions */}
+                        {isSelectMode && planePicsSelectedIds.size > 0 && (
+                          <div className="flex items-center justify-between p-2 bg-red-900/20 border border-red-700/50 rounded-lg">
+                            <span className="text-[10px] text-red-300 font-bold">{planePicsSelectedIds.size} selected</span>
+                            <button
+                              onClick={() => {
+                                setMyPlanePics(prev => prev.filter(p => !planePicsSelectedIds.has(p.id)));
+                                setPlanePicsSelectedIds(new Set());
+                                setIsSelectMode(false);
+                                showToast('Deleted', `${planePicsSelectedIds.size} photos removed`, 'info');
+                              }}
+                              className="liquid-glass-btn px-2 py-1 bg-red-600 text-white text-[10px] rounded-lg font-bold flex items-center gap-1"
+                            >
+                              <Trash2 className="w-3 h-3" /> Delete
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Content */}
+                        {filteredAndSortedPhotos.length === 0 ? (
+                          <div className="text-center py-6">
+                            <Camera className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
+                            <p className="text-xs text-zinc-400">{t.noPhotosYet}</p>
+                            <p className="text-[10px] text-zinc-500">{planePicsSearch ? 'No photos match your search' : t.importPhotosToGetStarted}</p>
+                          </div>
+                        ) : (
+                          <>
+                            {planePicsViewMode === 'grid' ? (
+                              <div className="grid grid-cols-3 gap-1.5">
+                                {filteredAndSortedPhotos.slice(planePicsPage * planePicsPerPage, (planePicsPage + 1) * planePicsPerPage).map((photo) => (
+                                  <div
+                                    key={photo.id}
+                                    onClick={() => {
+                                      if (isSelectMode) {
+                                        setPlanePicsSelectedIds(prev => {
+                                          const next = new Set(prev);
+                                          if (next.has(photo.id)) next.delete(photo.id);
+                                          else next.add(photo.id);
+                                          return next;
+                                        });
+                                      } else {
+                                        setLightboxPhoto(photo);
+                                      }
+                                    }}
+                                    className={`relative aspect-square rounded-lg overflow-hidden bg-black border cursor-pointer ${planePicsSelectedIds.has(photo.id) ? 'border-pink-500 ring-1 ring-pink-500' : 'border-white/10'}`}
+                                  >
+                                    {photo.mediaType === 'video' && photo.videoUrl ? (
+                                      <video src={photo.videoUrl} className="w-full h-full object-cover" muted />
+                                    ) : (
+                                      <img src={photo.thumbnailUrl || photo.imageUrl} alt={photo.registration} className="w-full h-full object-cover" />
+                                    )}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                                    <div className="absolute bottom-0.5 left-0.5 right-0.5">
+                                      <p className="text-[8px] font-mono text-white truncate">{photo.registration}</p>
+                                      {photo.airline && <p className="text-[7px] text-zinc-300 truncate">{photo.airline}</p>}
+                                    </div>
+                                    {isSelectMode && (
+                                      <div className="absolute top-1 right-1 w-4 h-4 rounded-full border-2 border-white flex items-center justify-center bg-black/50">
+                                        {planePicsSelectedIds.has(photo.id) && <Check className="w-2.5 h-2.5 text-pink-400" />}
+                                      </div>
+                                    )}
+                                    {photo.mediaType === 'video' && (
+                                      <div className="absolute top-1 left-1 px-1 bg-black/70 rounded text-[7px] text-white font-mono">VIDEO</div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="space-y-1.5">
+                                {filteredAndSortedPhotos.slice(planePicsPage * planePicsPerPage, (planePicsPage + 1) * planePicsPerPage).map((photo) => (
+                                  <div
+                                    key={photo.id}
+                                    onClick={() => {
+                                      if (isSelectMode) {
+                                        setPlanePicsSelectedIds(prev => {
+                                          const next = new Set(prev);
+                                          if (next.has(photo.id)) next.delete(photo.id);
+                                          else next.add(photo.id);
+                                          return next;
+                                        });
+                                      } else {
+                                        setLightboxPhoto(photo);
+                                      }
+                                    }}
+                                    className={`flex items-center gap-2 p-1.5 rounded-lg border cursor-pointer ${planePicsSelectedIds.has(photo.id) ? 'bg-pink-900/20 border-pink-500' : 'bg-zinc-900 border-zinc-800'}`}
+                                  >
+                                    <div className="w-10 h-10 rounded-md overflow-hidden bg-black shrink-0">
+                                      {photo.mediaType === 'video' && photo.videoUrl ? (
+                                        <video src={photo.videoUrl} className="w-full h-full object-cover" muted />
+                                      ) : (
+                                        <img src={photo.thumbnailUrl || photo.imageUrl} alt={photo.registration} className="w-full h-full object-cover" />
+                                      )}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-[10px] font-bold text-white truncate">{photo.registration}</p>
+                                      <p className="text-[9px] text-zinc-400 truncate">{photo.airline || photo.aircraftModel || 'Unknown'}</p>
+                                    </div>
+                                    {photo.mediaType === 'video' && <Video className="w-3 h-3 text-zinc-400 shrink-0" />}
+                                    {isSelectMode && (
+                                      <div className="w-4 h-4 rounded-full border-2 border-white flex items-center justify-center bg-black/50 shrink-0">
+                                        {planePicsSelectedIds.has(photo.id) && <Check className="w-2.5 h-2.5 text-pink-400" />}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </>
+                        )}
+
+                        {/* Pagination & Export */}
+                        {filteredAndSortedPhotos.length > 0 && (
+                          <div className="flex items-center justify-between">
+                            <button
+                              onClick={() => setPlanePicsPage(p => Math.max(0, p - 1))}
+                              disabled={planePicsPage === 0}
+                              className="liquid-glass-btn p-1 bg-zinc-800 rounded-lg text-white disabled:opacity-30"
+                            >
+                              <ArrowLeft className="w-3.5 h-3.5" />
+                            </button>
+                            <span className="text-[10px] text-zinc-400 font-mono">
+                              {t.page} {planePicsPage + 1} {t.of} {Math.ceil(filteredAndSortedPhotos.length / planePicsPerPage)}
+                            </span>
+                            <button
+                              onClick={() => setPlanePicsPage(p => Math.min(Math.ceil(filteredAndSortedPhotos.length / planePicsPerPage) - 1, p + 1))}
+                              disabled={planePicsPage >= Math.ceil(filteredAndSortedPhotos.length / planePicsPerPage) - 1}
+                              className="liquid-glass-btn p-1 bg-zinc-800 rounded-lg text-white disabled:opacity-30"
+                            >
+                              <ArrowRight className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        )}
+
+                        {/* PDF Export */}
+                        {myPlanePics.length > 0 && (
+                          <button
+                            onClick={async () => {
+                              try {
+                                const { jsPDF } = await import('jspdf');
+                                const doc = new jsPDF();
+                                doc.setFontSize(16);
+                                doc.text('MyPlanePics Album', 105, 15, { align: 'center' });
+                                doc.setFontSize(10);
+                                doc.text(`Total Photos: ${myPlanePics.length}`, 105, 22, { align: 'center' });
+                                doc.text(`Generated: ${new Date().toLocaleDateString()}`, 105, 28, { align: 'center' });
+                                doc.setDrawColor(200);
+                                doc.line(20, 32, 190, 32);
+                                doc.setFontSize(12);
+                                doc.text('Statistics', 20, 40);
+                                doc.setFontSize(10);
+                                doc.text(`• Total Media: ${myPlanePics.length}`, 20, 48);
+                                const videos = myPlanePics.filter(p => p.mediaType === 'video').length;
+                                const photos = myPlanePics.length - videos;
+                                doc.text(`• Photos: ${photos}`, 20, 55);
+                                doc.text(`• Videos: ${videos}`, 20, 62);
+                                doc.setDrawColor(200);
+                                doc.line(20, 70, 190, 70);
+                                doc.setFontSize(12);
+                                doc.text('Aircraft Registrations', 20, 78);
+                                doc.setFontSize(8);
+                                const regs = myPlanePics.map(p => p.registration);
+                                const uniqueRegs = [...new Set(regs)];
+                                uniqueRegs.forEach((reg, idx) => {
+                                  if (85 + idx * 5 < 280) {
+                                    doc.text(`• ${reg}`, 20, 85 + idx * 5);
+                                  }
+                                });
+                                doc.save('myplanepics-album.pdf');
+                                showToast(t.exportSuccessful, t.albumExportedAsPdf, 'success');
+                              } catch (err) {
+                                showToast(t.exportFailed, t.unableToExportAlbum, 'error');
+                              }
+                            }}
+                            className="liquid-glass-btn w-full py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] rounded-lg font-bold flex items-center justify-center gap-1"
+                          >
+                            <FileText className="w-3 h-3" /> {t.exportPdf}
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                      {/* News Feature */}
+                     {currentFeature === 'news' && (
+                       <div className="space-y-2 max-h-[350px] overflow-y-auto">
+                         {socialPosts.length === 0 ? (
+                           <p className="text-xs text-zinc-400 text-center py-4">{t.noArticlesFound}</p>
+                         ) : (
+                           socialPosts.slice(0, 10).map((post: any) => (
+                             <div key={post.id} className="p-2.5 bg-zinc-900 rounded-xl border border-zinc-800">
+                               <p className="text-xs text-white line-clamp-3">{post.content}</p>
+                               <p className="text-[9px] text-zinc-500 mt-1 font-mono">{post.timestamp || 'Recent'}</p>
+                             </div>
+                           ))
                          )}
                        </div>
-                       {myPlanePics.length === 0 ? (
-                         <div className="text-center py-8">
-                           <Camera className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
-                           <p className="text-xs text-zinc-400">{t.noPhotosYet}</p>
-                           <p className="text-[10px] text-zinc-500">{t.importPhotosToGetStarted}</p>
-                         </div>
-                       ) : (
-                         <>
-                           <div className="grid grid-cols-3 gap-2">
-                             {myPlanePics.slice(planePicsPage * planePicsPerPage, (planePicsPage + 1) * planePicsPerPage).map((photo) => (
-                               <div key={photo.id} className="relative aspect-square rounded-xl overflow-hidden bg-black border border-white/10">
-                                  {photo.mediaType === 'video' && photo.videoUrl ? (
-                                    <video src={photo.videoUrl} className="w-full h-full object-cover" muted />
-                                  ) : (
-                                    <img src={photo.thumbnailUrl || photo.imageUrl} alt={photo.registration} className="w-full h-full object-cover" />
-                                  )}
-                                 <div className="absolute bottom-1 left-1 right-1 bg-black/70 text-[8px] font-mono text-white text-center truncate">
-                                   {photo.registration}
-                                 </div>
-                               </div>
-                             ))}
-                           </div>
-                           {Math.ceil(myPlanePics.length / planePicsPerPage) > 1 && (
-                             <div className="flex items-center justify-between">
-                               <button
-                                 onClick={() => setPlanePicsPage(p => Math.max(0, p - 1))}
-                                 disabled={planePicsPage === 0}
-                                 className="liquid-glass-btn flex items-center gap-1 px-3 py-1.5 bg-zinc-800 rounded-lg text-white text-xs disabled:opacity-30"
-                               >
-                                 <ArrowLeft className="w-3 h-3" /> {t.previous}
-                               </button>
-                               <span className="text-[10px] text-zinc-400 font-mono">
-                                 {t.page} {planePicsPage + 1} {t.of} {Math.ceil(myPlanePics.length / planePicsPerPage)} • {planePicsPerPage} {t.perPage}
-                               </span>
-                               <button
-                                 onClick={() => setPlanePicsPage(p => Math.min(Math.ceil(myPlanePics.length / planePicsPerPage) - 1, p + 1))}
-                                 disabled={planePicsPage >= Math.ceil(myPlanePics.length / planePicsPerPage) - 1}
-                                 className="liquid-glass-btn flex items-center gap-1 px-3 py-1.5 bg-zinc-800 rounded-lg text-white text-xs disabled:opacity-30"
-                               >
-                                 {t.next} <ArrowRight className="w-3 h-3" />
-                               </button>
-                             </div>
-                           )}
-                         </>
-                       )}
-                     </div>
-                   )}
+                     )}
 
-                    {/* News Feature */}
-                    {currentFeature === 'news' && (
-                      <div className="space-y-2 max-h-[350px] overflow-y-auto">
-                        {socialPosts.length === 0 ? (
-                          <p className="text-xs text-zinc-400 text-center py-4">{t.noArticlesFound}</p>
-                        ) : (
-                          socialPosts.slice(0, 10).map((post: any) => (
-                            <div key={post.id} className="p-2.5 bg-zinc-900 rounded-xl border border-zinc-800">
-                              <p className="text-xs text-white line-clamp-3">{post.content}</p>
-                              <p className="text-[9px] text-zinc-500 mt-1 font-mono">{post.timestamp || 'Recent'}</p>
-                            </div>
-                          ))
+                    {/* Calculator Feature */}
+                    {currentFeature === 'calculator' && (
+                      <div className="space-y-2">
+                        <div className="p-3 bg-zinc-900 rounded-xl border border-zinc-800">
+                          <input
+                            type="text"
+                            readOnly
+                            value={calcDisplay}
+                            className="w-full bg-black border border-zinc-700 rounded-lg px-3 py-2 text-right text-lg font-mono text-white"
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 gap-1.5">
+                          {['7','8','9','/','4','5','6','*','1','2','3','-','0','.','=','+'].map((key) => (
+                            <button
+                              key={key}
+                              onClick={() => {
+                                if (key === '=') {
+                                  try {
+                                    const prev = calcPrev ? parseFloat(calcPrev) : 0;
+                                    const current = parseFloat(calcDisplay);
+                                    let result = current;
+                                    if (calcOp === '+') result = prev + current;
+                                    else if (calcOp === '-') result = prev - current;
+                                    else if (calcOp === '*') result = prev * current;
+                                    else if (calcOp === '/') result = current !== 0 ? prev / current : 0;
+                                    setCalcDisplay(String(result));
+                                    setCalcPrev(null);
+                                    setCalcOp(null);
+                                    setCalcNewNumber(true);
+                                  } catch {
+                                    setCalcDisplay('Error');
+                                    setCalcPrev(null);
+                                    setCalcOp(null);
+                                    setCalcNewNumber(true);
+                                  }
+                                  return;
+                                }
+                                if (['+','-','*','/'].includes(key)) {
+                                  setCalcPrev(calcDisplay);
+                                  setCalcOp(key);
+                                  setCalcNewNumber(true);
+                                  return;
+                                }
+                                setCalcDisplay(calcNewNumber ? key : calcDisplay + key);
+                                setCalcNewNumber(false);
+                              }}
+                              className="liquid-glass-btn p-2.5 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-white font-bold text-sm"
+                            >
+                              {key}
+                            </button>
+                          ))}
+                          <button
+                            onClick={() => { setCalcDisplay('0'); setCalcPrev(null); setCalcOp(null); setCalcNewNumber(true); }}
+                            className="liquid-glass-btn p-2.5 bg-rose-700 hover:bg-rose-600 rounded-lg text-white font-bold text-sm col-span-2"
+                          >
+                            C
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Stopwatch Feature */}
+                    {currentFeature === 'stopwatch' && (
+                      <div className="space-y-3">
+                        <div className="p-4 bg-zinc-900 rounded-xl border border-zinc-800 text-center">
+                          <p className="text-3xl font-mono font-black text-white tracking-widest">
+                            {new Date(swTime * 1000).toISOString().substring(11, 19)}
+                          </p>
+                        </div>
+                        <div className="flex items-center justify-center gap-3">
+                          <button
+                            onClick={() => setSwRunning(!swRunning)}
+                            className="liquid-glass-btn px-4 py-2 rounded-lg text-white text-xs font-bold"
+                          >
+                            {swRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                          </button>
+                          <button
+                            onClick={() => { setSwTime(0); setSwLaps([]); }}
+                            className="liquid-glass-btn px-4 py-2 bg-zinc-800 rounded-lg text-white text-xs font-bold"
+                          >
+                            {t.reset}
+                          </button>
+                          <button
+                            onClick={() => { if (swRunning) setSwLaps([...swLaps, swTime]); }}
+                            disabled={!swRunning}
+                            className="liquid-glass-btn px-4 py-2 bg-zinc-800 rounded-lg text-white text-xs font-bold disabled:opacity-30"
+                          >
+                            Lap
+                          </button>
+                        </div>
+                        {swLaps.length > 0 && (
+                          <div className="space-y-1 max-h-[150px] overflow-y-auto">
+                            {swLaps.slice().reverse().map((lap, idx) => (
+                              <div key={idx} className="flex items-center justify-between p-2 bg-zinc-900 rounded-lg border border-zinc-800 text-xs">
+                                <span className="text-zinc-400">Lap {swLaps.length - idx}</span>
+                                <span className="text-white font-mono">{new Date(lap * 1000).toISOString().substring(11, 19)}</span>
+                              </div>
+                            ))}
+                          </div>
                         )}
+                      </div>
+                    )}
+
+                    {/* World Clock Feature */}
+                    {currentFeature === 'worldClock' && (
+                      <div className="space-y-2">
+                        {worldClocks.map((clock) => {
+                          const time = new Date().toLocaleTimeString('en-US', { timeZone: clock.tz, hour: '2-digit', minute: '2-digit', hour12: true });
+                          const date = new Date().toLocaleDateString('en-US', { timeZone: clock.tz, weekday: 'short', month: 'short', day: 'numeric' });
+                          return (
+                            <div key={clock.city} className="p-3 bg-zinc-900 rounded-xl border border-zinc-800 flex items-center justify-between">
+                              <div>
+                                <p className="text-xs font-bold text-white">{clock.city}</p>
+                                <p className="text-[10px] text-zinc-400">{date}</p>
+                              </div>
+                              <p className="text-lg font-black text-sky-300 font-mono">{time}</p>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* FM Tuner Feature */}
+                    {currentFeature === 'fmTuner' && (
+                      <div className="space-y-3">
+                        <div className="p-3 bg-zinc-900 rounded-xl border border-zinc-800 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] text-zinc-400 uppercase">Frequency</span>
+                            <span className="text-sm font-black text-white font-mono">{fmFrequency.toFixed(1)} MHz</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="88"
+                            max="108"
+                            step="0.1"
+                            value={fmFrequency}
+                            onChange={(e) => setFmFrequency(parseFloat(e.target.value))}
+                            className="w-full"
+                          />
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] text-zinc-500">88.0</span>
+                            <span className="text-[10px] text-zinc-500">108.0</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setFmPlaying(!fmPlaying)}
+                            className="liquid-glass-btn flex-1 py-2 bg-emerald-600 text-black font-bold text-xs rounded-lg"
+                          >
+                            {fmPlaying ? 'Stop' : 'Play'}
+                          </button>
+                        </div>
+                        <div className="space-y-1.5">
+                          <p className="text-[10px] text-zinc-400 uppercase font-bold">Stations</p>
+                          {fmStations.map((station) => (
+                            <button
+                              key={station.freq}
+                              onClick={() => setFmFrequency(station.freq)}
+                              className={`liquid-glass-btn w-full p-2 rounded-lg text-left text-xs ${fmFrequency === station.freq ? 'bg-sky-600 text-white' : 'bg-zinc-800 text-zinc-300'}`}
+                            >
+                              <span className="font-bold">{station.name}</span>
+                              <span className="text-[10px] text-zinc-400 ml-2">{station.freq.toFixed(1)} MHz</span>
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -1173,58 +1593,60 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                    </button>
                  </div>
 
-                 <div className="flex gap-2 overflow-x-auto pb-2">
-                   {['KJFK', 'EGLL', 'RJTT', 'OMDB', 'LFPB'].map((icao) => (
-                     <button
-                       key={icao}
-                       onClick={() => loadWeatherForStation(icao)}
-                       className={`liquid-glass-btn px-3 py-1.5 rounded-lg text-[10px] font-bold font-mono transition-all shrink-0 ${
-                         weatherStationData.icao === icao
-                           ? 'bg-sky-500 text-black font-extrabold'
-                           : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                       }`}
-                     >
-                       {icao}
-                     </button>
-                   ))}
-                 </div>
+                  <div className="flex gap-2 overflow-x-auto pb-2">
+                    {['New York', 'London', 'Tokyo', 'Dubai', 'Paris', 'Los Angeles', 'San Francisco', 'Frankfurt'].map((city) => (
+                      <button
+                        key={city}
+                        onClick={() => loadWeatherForCity(city)}
+                        className={`liquid-glass-btn px-3 py-1.5 rounded-lg text-[10px] font-bold font-mono transition-all shrink-0 ${
+                          weatherStationData.city === city
+                            ? 'bg-sky-500 text-black font-extrabold'
+                            : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                        }`}
+                      >
+                        {city}
+                      </button>
+                    ))}
+                  </div>
 
-                 <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
-                   <div className="flex items-center justify-between">
-                     <div>
-                       <h3 className="text-sm font-bold text-white">{weatherStationData.airportName}</h3>
-                       <p className="text-[10px] text-sky-400 font-mono">ICAO: {weatherStationData.icao}</p>
-                     </div>
-                     <div className="text-right">
-                       <span className="text-2xl font-black text-sky-300">{weatherStationData.tempC}°C</span>
-                       <p className="text-[10px] text-slate-400">{weatherStationData.tempF}°F</p>
-                     </div>
-                   </div>
+                  <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-sm font-bold text-white">{weatherStationData.city}</h3>
+                        <p className="text-[10px] text-sky-400 font-mono">{weatherStationData.country} • {weatherStationData.description}</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-2xl font-black text-sky-300">{weatherStationData.tempC}°C</span>
+                        <p className="text-[10px] text-slate-400">{weatherStationData.tempF}°F</p>
+                      </div>
+                    </div>
 
-                   <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
-                     <div className="p-2 bg-slate-900 rounded-lg border border-slate-800">
-                       <span className="text-slate-400 block">Condition</span>
-                       <span className="font-bold text-white">{weatherStationData.condition}</span>
-                     </div>
-                     <div className="p-2 bg-slate-900 rounded-lg border border-slate-800">
-                       <span className="text-slate-400 block">Humidity</span>
-                       <span className="font-bold text-white">{weatherStationData.humidity}%</span>
-                     </div>
-                     <div className="p-2 bg-slate-900 rounded-lg border border-slate-800">
-                       <span className="text-slate-400 block">Wind</span>
-                       <span className="font-bold text-white">{weatherStationData.windSpeedKts} kts ({weatherStationData.windDirection})</span>
-                     </div>
-                     <div className="p-2 bg-slate-900 rounded-lg border border-slate-800">
-                       <span className="text-slate-400 block">Air Quality</span>
-                       <span className="font-bold text-emerald-400">AQI {weatherStationData.aqi}</span>
-                     </div>
-                   </div>
+                    <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
+                      <div className="p-2 bg-slate-900 rounded-lg border border-slate-800">
+                        <span className="text-slate-400 block">Condition</span>
+                        <span className="font-bold text-white">{weatherStationData.condition}</span>
+                      </div>
+                      <div className="p-2 bg-slate-900 rounded-lg border border-slate-800">
+                        <span className="text-slate-400 block">Humidity</span>
+                        <span className="font-bold text-white">{weatherStationData.humidity}%</span>
+                      </div>
+                      <div className="p-2 bg-slate-900 rounded-lg border border-slate-800">
+                        <span className="text-slate-400 block">Wind</span>
+                        <span className="font-bold text-white">{weatherStationData.windSpeedKts} kts ({weatherStationData.windDirection})</span>
+                      </div>
+                      <div className="p-2 bg-slate-900 rounded-lg border border-slate-800">
+                        <span className="text-slate-400 block">Pressure</span>
+                        <span className="font-bold text-white">{weatherStationData.pressure || '--'} hPa</span>
+                      </div>
+                    </div>
 
-                   <div className="space-y-1 pt-2 border-t border-slate-800">
-                     <p className="text-[10px] font-mono text-slate-400"><strong className="liquid-glass-btn text-sky-300">METAR:</strong> {weatherStationData.metar}</p>
-                     <p className="text-[10px] font-mono text-slate-400"><strong className="liquid-glass-btn text-sky-300">TAF:</strong> {weatherStationData.taf}</p>
-                   </div>
-                 </div>
+                    {weatherStationData.isRealTime && (
+                      <div className="flex items-center gap-2 text-[10px] font-mono text-emerald-400 pt-2 border-t border-slate-800">
+                        <Activity className="w-3 h-3 animate-pulse" />
+                        <span>Live data from OpenWeatherMap • Updated: {weatherStationData.lastUpdated}</span>
+                      </div>
+                    )}
+                  </div>
                </div>
              </div>
            )}
