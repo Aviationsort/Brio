@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { encryptionService } from '../utils/crypto';
-import { fetchAccurateWeather } from '../utils/weatherService';
+import { getWeather, convertCountryCode, type WeatherData } from '../utils/weatherService';
 import { ClockSuiteModal } from './ClockSuiteModal';
 import QRCode from 'qrcode';
 
@@ -51,7 +51,6 @@ import {
   Users,
   Sparkles,
   User,
-  Power,
   MessageSquare,
   Gamepad2,
   Briefcase,
@@ -118,29 +117,38 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const qrCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Live Weather State
+  // Live Weather State with unit toggle
+  type WeatherUnits = 'metric' | 'imperial';
+  const [weatherUnits, setWeatherUnits] = useState<WeatherUnits>('metric');
   const [weatherSearchInput, setWeatherSearchInput] = useState('');
-  const [weatherData, setWeatherData] = useState({
-    city: 'New York',
-    country: 'US',
-    tempC: 22,
-    tempF: 72,
-    condition: 'Partly Cloudy',
-    humidity: 58,
-    windSpeedKts: 14,
-    windDirection: '240° SW',
-    description: 'scattered clouds',
-    icon: '03d',
+  const [weatherData, setWeatherData] = useState<WeatherData>({
+    city: 'London',
+    country: '',
+    countryCode: '',
+    tempC: 18,
+    tempF: 64,
+    tempMinC: 14,
+    tempMaxC: 22,
+    condition: 'Fair / Clear',
+    description: 'clear sky',
+    icon: '01d',
+    humidity: 55,
+    windSpeedMs: 3.5,
+    windSpeedKts: 7,
+    windDirection: '180° S',
+    pressure: 1013,
+    visibility: 10000,
+    feelsLikeC: 17,
     isRealTime: false,
     lastUpdated: '',
+    datetime: '',
+    timezone: 0,
   });
 
   const loadWeatherForCity = async (city: string) => {
     try {
-      showToast('Weather', `Fetching live weather for ${city}...`, 'info');
-      const liveData = await fetchAccurateWeather(city);
+      const liveData = await getWeather(city, weatherUnits);
       setWeatherData(liveData);
-      showToast('Live Weather Updated', `Loaded live weather for ${liveData.city}`, 'success');
     } catch {
       showToast('Weather Error', 'Failed to retrieve live weather data', 'error');
     }
@@ -180,7 +188,6 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
         }
 
         setQrDataUrl(url);
-        showToast('Success', 'Account QR code ready for scanning', 'success');
       } catch (qrErr: any) {
         console.error('QR generation failed:', qrErr);
         showToast('QR Error', `QR generation failed: ${qrErr.message || 'No usable data'}`, 'error');
@@ -192,7 +199,7 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
   };
 
   useEffect(() => {
-    loadWeatherForCity('New York');
+    loadWeatherForCity('London');
   }, []);
 
   // Sync with global activeHub if changed externally
@@ -266,30 +273,12 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
         
         {/* LEFT BEZEL PHYSICAL HARDWARE BUTTONS */}
         <div className="flex md:flex-col items-center justify-between gap-3 p-3 bg-[#0d0e11] rounded-2xl border border-white/10 shadow-inner md:w-20 shrink-0">
-          {/* POWER BUTTON */}
-          <button
-            onClick={() => {
-              playAudioTone(300, 0.15);
-              switchScreenView('home');
-              setActiveOverlay('NONE');
-              showToast('System Reboot', 'Brio Infotainment set to Touch Home', 'info');
-            }}
-            className="liquid-glass-btn group flex flex-col items-center gap-1 text-zinc-400 hover:text-amber-400 transition-all cursor-pointer"
-            title="System Power / Home Reset"
-          >
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-b from-zinc-800 to-zinc-900 border border-white/10 group-hover:border-amber-400/60 flex items-center justify-center shadow-md active:scale-95 transition-all">
-              <Power className="w-5 h-5 text-amber-400" />
-            </div>
-            <span className="text-[9px] font-bold font-mono uppercase tracking-tighter">POWER</span>
-          </button>
-
           {/* HOME BUTTON (Guaranteed to return home) */}
           <button
             onClick={() => {
               playAudioTone(440, 0.1);
               switchScreenView('home');
               setActiveOverlay('NONE');
-              showToast('Home Navigation', 'Returned to Home Menu', 'info');
             }}
             className={`liquid-glass-btn group flex flex-col items-center gap-1 transition-all cursor-pointer ${
               screenView === 'home' && activeOverlay === 'NONE' ? 'text-[#FF5F1F]' : 'text-zinc-400 hover:text-white'
@@ -346,7 +335,6 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
           <button
             onClick={() => {
               setIsDarkMode(!isDarkMode);
-              showToast('Display Mode', !isDarkMode ? 'Night Mode Activated' : 'Day Mode Activated', 'info');
             }}
             className="liquid-glass-btn group flex flex-col items-center gap-1 text-zinc-400 hover:text-amber-400 transition-all cursor-pointer"
             title="Toggle Day / Night Mode"
@@ -380,7 +368,7 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
             >
               <CloudSun className="w-4 h-4 text-sky-400" />
               <span className="text-xs font-bold text-sky-200">
-                {weatherData.city}: {weatherData.tempC}°C ({weatherData.tempF}°F) • {weatherData.condition}
+                {weatherData.city}: {weatherUnits === 'metric' ? `${weatherData.tempC}°C` : `${weatherData.tempF}°F`} • {weatherData.condition}
               </span>
             </button>
 
@@ -448,22 +436,22 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
                         <MessageSquare className="w-7 h-7 text-cyan-400" />
                       </div>
                       <span className="text-xs font-mono text-cyan-300 font-bold bg-cyan-950/80 px-3 py-1 rounded-full border border-cyan-500/40">
-                        P2P Mesh + Dialer
+                        E2E Encrypted
                       </span>
                     </div>
 
                     <div className="z-10 space-y-1">
                       <h2 className="text-xl font-black text-white group-hover:text-cyan-200 transition-colors">
-                        Connect & Mesh Social
+                        Encrypted Messaging
                       </h2>
                       <p className="text-xs text-zinc-400 font-mono">
-                        Encrypted P2P Chat, Algorithmic Social Feed & Phone Dialer
+                        AES-256 encrypted P2P messaging with Bluetooth mesh support
                       </p>
                     </div>
 
                     <div className="z-10 text-xs font-mono text-cyan-400 font-bold flex items-center justify-between pt-3 border-t border-white/10">
-                      <span>Integrated Dialer</span>
-                      <span className="flex items-center gap-1 group-hover:translate-x-1 transition-transform">Launch Hub →</span>
+                      <span>Secure Channels</span>
+                      <span className="flex items-center gap-1 group-hover:translate-x-1 transition-transform">Launch →</span>
                     </div>
                   </div>
 
@@ -654,7 +642,7 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
               </button>
             </div>
 
-            {/* City search input */}
+            {/* City search form */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -662,13 +650,13 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
                   loadWeatherForCity(weatherSearchInput.trim());
                 }
               }}
-              className="flex gap-2"
+              className="flex gap-2 items-center"
             >
               <input
                 type="text"
                 value={weatherSearchInput}
                 onChange={(e) => setWeatherSearchInput(e.target.value)}
-                placeholder="Search city or country..."
+                placeholder="Search city..."
                 className="flex-1 px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-sky-400 placeholder-slate-500"
               />
               <button
@@ -680,13 +668,34 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
               </button>
             </form>
 
+            {/* Unit toggle */}
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Units:</span>
+              <button
+                onClick={() => setWeatherUnits('metric')}
+                className={`liquid-glass-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  weatherUnits === 'metric' ? 'bg-sky-500 text-black shadow-lg' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                }`}
+              >
+                °C / m/s
+              </button>
+              <button
+                onClick={() => setWeatherUnits('imperial')}
+                className={`liquid-glass-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  weatherUnits === 'imperial' ? 'bg-sky-500 text-black shadow-lg' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                }`}
+              >
+                °F / mph
+              </button>
+            </div>
+
             {/* Quick city buttons */}
             <div className="flex gap-2 overflow-x-auto pb-2">
               {['New York', 'London', 'Tokyo', 'Dubai', 'Paris', 'Los Angeles', 'San Francisco', 'Frankfurt'].map((city) => (
                 <button
                   key={city}
                   onClick={() => loadWeatherForCity(city)}
-                  className={`liquid-glass-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  className={`liquid-glass-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     weatherData.city === city
                       ? 'bg-sky-500 text-black font-extrabold shadow-lg'
                       : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
@@ -702,17 +711,34 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-bold text-white">{weatherData.city}</h3>
-                  <p className="text-xs text-sky-400 font-mono">{weatherData.country ? `${weatherData.country} • ` : ''}{weatherData.description}</p>
+                  <p className="text-xs text-sky-400 font-mono">
+                    {weatherData.country ? `${weatherData.country} • ` : ''}{weatherData.datetime || '—'}
+                  </p>
+                  <p className="text-xs text-slate-400 capitalize">{weatherData.description}</p>
                 </div>
-                <div className="text-right">
-                  <span className="text-3xl font-black text-sky-300">{weatherData.tempC}°C</span>
-                  <p className="text-xs text-slate-400">{weatherData.tempF}°F</p>
+                <div className="text-right flex flex-col items-end gap-1">
+                  {weatherData.icon && (
+                    <img
+                      src={`https://openweathermap.org/img/wn/${weatherData.icon}@2x.png`}
+                      alt={weatherData.description}
+                      className="w-14 h-14"
+                    />
+                  )}
+                  <span className="text-3xl font-black text-sky-300">
+                    {weatherUnits === 'metric' ? `${weatherData.tempC}°C` : `${weatherData.tempF}°F`}
+                  </span>
+                  {weatherData.tempMinC !== undefined && (
+                    <span className="text-xs text-slate-400">
+                      H: {weatherUnits === 'metric' ? `${weatherData.tempMaxC}°` : `${Math.round((weatherData.tempMaxC * 9) / 5 + 32)}°`} /
+                      L: {weatherUnits === 'metric' ? `${weatherData.tempMinC}°` : `${Math.round((weatherData.tempMinC * 9) / 5 + 32)}°`}
+                    </span>
+                  )}
                 </div>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
                 <div className="p-3 bg-slate-900 rounded-xl border border-slate-800">
-                  <span className="text-slate-400 block">Condition</span>
+                  <span className="text-slate-400 block">Forecast</span>
                   <span className="font-bold text-white">{weatherData.condition}</span>
                 </div>
                 <div className="p-3 bg-slate-900 rounded-xl border border-slate-800">
@@ -720,8 +746,13 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
                   <span className="font-bold text-white">{weatherData.humidity}%</span>
                 </div>
                 <div className="p-3 bg-slate-900 rounded-xl border border-slate-800">
-                  <span className="text-slate-400 block">Wind Speed</span>
-                  <span className="font-bold text-white">{weatherData.windSpeedKts} kts ({weatherData.windDirection})</span>
+                  <span className="text-slate-400 block">Wind</span>
+                  <span className="font-bold text-white">
+                    {weatherUnits === 'metric'
+                      ? `${weatherData.windSpeedMs.toFixed(1)} m/s`
+                      : `${(weatherData.windSpeedMs * 2.237).toFixed(1)} mph`}
+                    {' '}{weatherData.windDirection}
+                  </span>
                 </div>
                 <div className="p-3 bg-slate-900 rounded-xl border border-slate-800">
                   <span className="text-slate-400 block">Pressure</span>
@@ -731,8 +762,10 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
 
               <div className="grid grid-cols-2 gap-3 text-xs font-mono">
                 <div className="p-3 bg-slate-900 rounded-xl border border-slate-800">
-                  <span className="text-slate-400 block">Feels Like</span>
-                  <span className="font-bold text-white">{weatherData.feelsLikeC}°C</span>
+                  <span className="text-slate-400 block">Real Feel</span>
+                  <span className="font-bold text-white">
+                    {weatherUnits === 'metric' ? `${weatherData.feelsLikeC}°C` : `${Math.round((weatherData.feelsLikeC * 9) / 5 + 32)}°F`}
+                  </span>
                 </div>
                 <div className="p-3 bg-slate-900 rounded-xl border border-slate-800">
                   <span className="text-slate-400 block">Visibility</span>
@@ -809,8 +842,8 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
                 )}
               </div>
            </div>
-         </div>
-       )}
+          </div>
+        )}
 
       {/* CLOCK & CALENDAR SUITE OVERLAY */}
       {activeOverlay === 'CLOCK' && (

@@ -20,17 +20,27 @@ import {
   ShieldCheck,
   ChevronLeft,
   ChevronRight,
+  Search,
+  Sun,
+  Moon,
+  Cake,
 } from 'lucide-react';
 
 interface CalendarEvent {
   id: string;
-  dateStr: string; // YYYY-MM-DD
+  dateStr: string;
   title: string;
   category: 'Meeting' | 'Flight' | 'Reminder' | 'Task' | 'Personal';
   time: string;
   notes?: string;
   completed: boolean;
   isEncrypted: boolean;
+}
+
+interface Birthday {
+  id: string;
+  name: string;
+  dateStr: string;
 }
 
 interface ClockSuiteModalProps {
@@ -40,10 +50,8 @@ interface ClockSuiteModalProps {
 export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => {
   const { t, showToast, user } = useApp();
 
-  // Active Tab: 'ANALOG' | 'STOPWATCH' | 'TIMER' | 'CALENDAR'
   const [activeTab, setActiveTab] = useState<'ANALOG' | 'STOPWATCH' | 'TIMER' | 'CALENDAR'>('ANALOG');
 
-  // --- 1. ANALOG CLOCK STATE ---
   const [now, setNow] = useState(new Date());
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
@@ -58,7 +66,6 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
   const minDeg = ((minutes + seconds / 60) / 60) * 360;
   const hourDeg = (((hours % 12) + minutes / 60) / 12) * 360;
 
-  // --- 2. STOPWATCH STATE ---
   const [swRunning, setSwRunning] = useState(false);
   const [swTimeMs, setSwTimeMs] = useState(0);
   const [swLaps, setSwLaps] = useState<{ id: number; split: number; total: number }[]>([]);
@@ -95,7 +102,6 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${cs.toString().padStart(2, '0')}`;
   };
 
-  // --- 3. TIMER STATE ---
   const [timerInputH, setTimerInputH] = useState(0);
   const [timerInputM, setTimerInputM] = useState(5);
   const [timerInputS, setTimerInputS] = useState(0);
@@ -147,7 +153,6 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
     return `${h > 0 ? h.toString().padStart(2, '0') + ':' : ''}${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  // --- 4. CALENDAR & REMINDERS STATE ---
   const [currentCalDate, setCurrentCalDate] = useState(new Date());
   const [selectedDateStr, setSelectedDateStr] = useState<string>(
     new Date().toISOString().split('T')[0]
@@ -186,7 +191,21 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
     ];
   });
 
-  // Save events on change
+  const [birthdays, setBirthdays] = useState<Birthday[]>(() => {
+    const saved = localStorage.getItem(`brio_birthdays_${user?.id || 'guest'}`);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  });
+
+  const [newBirthdayName, setNewBirthdayName] = useState('');
+  const [newBirthdayDate, setNewBirthdayDate] = useState('');
+
   useEffect(() => {
     localStorage.setItem(
       `brio_calendar_events_${user?.id || 'guest'}`,
@@ -194,7 +213,13 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
     );
   }, [events, user]);
 
-  // Event Input Form
+  useEffect(() => {
+    localStorage.setItem(
+      `brio_birthdays_${user?.id || 'guest'}`,
+      JSON.stringify(birthdays)
+    );
+  }, [birthdays, user]);
+
   const [newEventTitle, setNewEventTitle] = useState('');
   const [newEventCategory, setNewEventCategory] = useState<CalendarEvent['category']>('Reminder');
   const [newEventTime, setNewEventTime] = useState('12:00');
@@ -240,7 +265,28 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
     showToast('Event Deleted', 'Removed from calendar', 'info');
   };
 
-  // Calendar calculations
+  const handleAddBirthday = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newBirthdayName.trim() || !newBirthdayDate) {
+      showToast('Validation Alert', 'Please enter a name and date for the birthday.', 'warning');
+      return;
+    }
+    const newBday: Birthday = {
+      id: `bday-${Date.now()}`,
+      name: newBirthdayName.trim(),
+      dateStr: newBirthdayDate,
+    };
+    setBirthdays((prev) => [...prev, newBday]);
+    setNewBirthdayName('');
+    setNewBirthdayDate('');
+    showToast('Birthday Added', `Added birthday for ${newBday.name}`, 'success');
+  };
+
+  const deleteBirthday = (id: string) => {
+    setBirthdays((prev) => prev.filter((b) => b.id !== id));
+    showToast('Birthday Removed', 'Removed from birthday list', 'info');
+  };
+
   const year = currentCalDate.getFullYear();
   const month = currentCalDate.getMonth();
   const monthName = currentCalDate.toLocaleString('default', { month: 'long' });
@@ -259,14 +305,29 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
     setCurrentCalDate(new Date(year, month + 1, 1));
   };
 
-  // World Clocks
   const timezones = [
-    { city: 'London (GMT)', offset: 1, flag: '🇬🇧' },
-    { city: 'New York (EDT)', offset: -4, flag: '🇺🇸' },
-    { city: 'Tokyo (JST)', offset: 9, flag: '🇯🇵' },
-    { city: 'Dubai (GST)', offset: 4, flag: '🇦🇪' },
-    { city: 'Berlin (CEST)', offset: 2, flag: '🇩🇪' },
+    { city: 'London (GMT)', timeZone: 'Europe/London', flag: '🇬🇧', offset: 'UTC+0' },
+    { city: 'New York (EDT)', timeZone: 'America/New_York', flag: '🇺🇸', offset: 'UTC-4' },
+    { city: 'Tokyo (JST)', timeZone: 'Asia/Tokyo', flag: '🇯🇵', offset: 'UTC+9' },
+    { city: 'Dubai (GST)', timeZone: 'Asia/Dubai', flag: '🇦🇪', offset: 'UTC+4' },
+    { city: 'Berlin (CEST)', timeZone: 'Europe/Berlin', flag: '🇩🇪', offset: 'UTC+2' },
+    { city: 'Sydney (AEST)', timeZone: 'Australia/Sydney', flag: '🇦🇺', offset: 'UTC+10' },
+    { city: 'Mumbai (IST)', timeZone: 'Asia/Kolkata', flag: '🇮🇳', offset: 'UTC+5:30' },
+    { city: 'São Paulo (BRT)', timeZone: 'America/Sao_Paulo', flag: '🇧🇷', offset: 'UTC-3' },
+    { city: 'Cairo (EET)', timeZone: 'Africa/Cairo', flag: '🇪🇬', offset: 'UTC+2' },
+    { city: 'Los Angeles (PDT)', timeZone: 'America/Los_Angeles', flag: '🇺🇸', offset: 'UTC-7' },
+    { city: 'Chicago (CDT)', timeZone: 'America/Chicago', flag: '🇺🇸', offset: 'UTC-5' },
+    { city: 'Hong Kong (HKT)', timeZone: 'Asia/Hong_Kong', flag: '🇭🇰', offset: 'UTC+8' },
+    { city: 'Singapore (SGT)', timeZone: 'Asia/Singapore', flag: '🇸🇬', offset: 'UTC+8' },
+    { city: 'Seoul (KST)', timeZone: 'Asia/Seoul', flag: '🇰🇷', offset: 'UTC+9' },
+    { city: 'Amsterdam (CET)', timeZone: 'Europe/Amsterdam', flag: '🇳🇱', offset: 'UTC+2' },
   ];
+
+  const [worldClockSearch, setWorldClockSearch] = useState('');
+  const filteredTimezones = timezones.filter(tz =>
+    tz.city.toLowerCase().includes(worldClockSearch.toLowerCase()) ||
+    tz.offset.toLowerCase().includes(worldClockSearch.toLowerCase())
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-xl animate-fadeIn select-none">
@@ -355,102 +416,197 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
           
           {/* TAB 1: ANALOG CLOCK */}
           {activeTab === 'ANALOG' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-              
-              {/* ANALOG CLOCK FACE */}
-              <div className="flex flex-col items-center justify-center p-4 bg-slate-950/80 rounded-3xl border border-white/10 shadow-inner relative">
-                <div className="relative w-64 h-64 sm:w-72 sm:h-72 rounded-full border-4 border-[#FF5F1F]/60 bg-gradient-to-b from-slate-900 to-black shadow-[0_0_30px_rgba(255,95,31,0.2)] flex items-center justify-center">
-                  
-                  {/* Clock Numbers & Ticks */}
-                  {[...Array(12)].map((_, i) => {
-                    const angle = (i + 1) * 30;
-                    const rad = (angle * Math.PI) / 180;
-                    const x = 50 + 38 * Math.sin(rad);
-                    const y = 50 - 38 * Math.cos(rad);
-                    return (
-                      <span
-                        key={i}
-                        className="absolute text-xs font-black font-mono text-zinc-300"
-                        style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' }}
-                      >
-                        {i + 1}
-                      </span>
-                    );
-                  })}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+               
+               {/* ANALOG CLOCK FACE */}
+               <div className="flex flex-col items-center justify-center p-6 bg-slate-950/80 rounded-[2rem] border border-white/10 shadow-inner relative">
+                 <div className="relative w-80 h-80 sm:w-96 sm:h-96 rounded-full bg-gradient-to-b from-slate-900 to-black shadow-[inset_0_4px_20px_rgba(0,0,0,0.8),0_0_40px_rgba(255,95,31,0.15)] flex items-center justify-center">
+                   <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#FF5F1F]/5 to-transparent" />
 
-                  {/* HOUR HAND */}
-                  <div
-                    className="absolute w-1.5 h-16 bg-white rounded-full origin-bottom shadow-lg"
-                    style={{
-                      transform: `rotate(${hourDeg}deg)`,
-                      bottom: '50%',
-                    }}
-                  />
+                   {[...Array(60)].map((_, i) => {
+                     const angle = i * 6;
+                     const isHourTick = i % 5 === 0;
+                     const tickLength = isHourTick ? 14 : 6;
+                     const tickWidth = isHourTick ? 2.5 : 0.75;
+                     const tickOpacity = isHourTick ? 1 : 0.35;
+                     const rad = (angle * Math.PI) / 180;
+                     const innerR = 43;
+                     const outerR = innerR + tickLength;
+                     const x1 = 50 + innerR * Math.sin(rad);
+                     const y1 = 50 - innerR * Math.cos(rad);
+                     const x2 = 50 + outerR * Math.sin(rad);
+                     const y2 = 50 - outerR * Math.cos(rad);
+                     return (
+                       <div
+                         key={i}
+                         className="absolute bg-zinc-300 rounded-full"
+                         style={{
+                           left: `${x1}%`,
+                           top: `${y1}%`,
+                           width: `${tickWidth}px`,
+                           height: `${tickLength}px`,
+                           transformOrigin: 'center center',
+                           transform: `rotate(${angle}deg) translate(-50%, -50%)`,
+                           opacity: tickOpacity,
+                         }}
+                       />
+                     );
+                   })}
 
-                  {/* MINUTE HAND */}
-                  <div
-                    className="absolute w-1 h-24 bg-sky-400 rounded-full origin-bottom shadow-lg"
-                    style={{
-                      transform: `rotate(${minDeg}deg)`,
-                      bottom: '50%',
-                    }}
-                  />
+                   {[...Array(12)].map((_, i) => {
+                     const angle = (i + 1) * 30;
+                     const rad = (angle * Math.PI) / 180;
+                     const x = 50 + 34 * Math.sin(rad);
+                     const y = 50 - 34 * Math.cos(rad);
+                     return (
+                       <span
+                         key={i}
+                         className="absolute text-base sm:text-lg font-black font-mono bg-gradient-to-b from-white to-zinc-300 bg-clip-text text-transparent drop-shadow-[0_0_4px_rgba(255,255,255,0.3)]"
+                         style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' }}
+                       >
+                         {i + 1}
+                       </span>
+                     );
+                   })}
 
-                  {/* SECOND HAND */}
-                  <div
-                    className="absolute w-0.5 h-28 bg-[#FF5F1F] rounded-full origin-bottom shadow-lg"
-                    style={{
-                      transform: `rotate(${secDeg}deg)`,
-                      bottom: '50%',
-                    }}
-                  />
+                   <div
+                     className="absolute w-2.5 h-20 bg-gradient-to-t from-white to-zinc-300 rounded-full origin-bottom shadow-[0_0_10px_rgba(255,255,255,0.4)]"
+                     style={{
+                       transform: `rotate(${hourDeg}deg)`,
+                       bottom: '50%',
+                     }}
+                   />
 
-                  {/* CENTER CAP */}
-                  <div className="w-4 h-4 bg-[#FF5F1F] rounded-full border-2 border-white z-10 shadow-md" />
-                </div>
+                   <div
+                     className="absolute w-1.5 h-28 bg-gradient-to-t from-sky-300 to-sky-100 rounded-full origin-bottom shadow-[0_0_10px_rgba(56,189,248,0.4)]"
+                     style={{
+                       transform: `rotate(${minDeg}deg)`,
+                       bottom: '50%',
+                     }}
+                   />
 
-                {/* DIGITAL READOUT BELOW CLOCK */}
-                <div className="mt-4 text-center">
-                  <div className="text-3xl font-black font-mono text-white tracking-widest">
-                    {now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                  </div>
-                  <div className="text-xs font-mono text-sky-400 font-bold mt-1">
-                    {now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                  </div>
-                </div>
-              </div>
+                   <div
+                     className="absolute w-0.5 h-32 bg-gradient-to-t from-[#FF5F1F] to-orange-300 rounded-full origin-bottom shadow-[0_0_10px_rgba(255,95,31,0.5)]"
+                     style={{
+                       transform: `rotate(${secDeg}deg)`,
+                       bottom: '50%',
+                     }}
+                   />
 
-              {/* WORLD CLOCKS GRID */}
-              <div className="space-y-4">
-                <h4 className="text-xs font-bold font-mono text-zinc-400 uppercase tracking-wider flex items-center gap-2">
-                  <Globe className="w-4 h-4 text-[#FF5F1F]" />
-                  <span>World Clock Matrix</span>
-                </h4>
+                   <div className="absolute w-5 h-5 bg-[#FF5F1F] rounded-full border-[3px] border-white z-10 shadow-lg shadow-[#FF5F1F]/30" />
+                   <div className="absolute w-2.5 h-2.5 bg-white rounded-full z-20" />
 
-                <div className="space-y-2.5">
-                  {timezones.map((tz, idx) => {
-                    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
-                    const cityDate = new Date(utc + 3600000 * tz.offset);
-                    return (
-                      <div
-                        key={idx}
-                        className="p-3 rounded-2xl bg-slate-900/80 border border-white/10 flex items-center justify-between"
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <span className="text-lg">{tz.flag}</span>
-                          <span className="text-xs font-bold text-white">{tz.city}</span>
-                        </div>
-                        <span className="text-xs font-mono font-black text-[#FF5F1F]">
-                          {cityDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+                   {/* Seconds sub-dial */}
+                   <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-16 h-16 rounded-full bg-slate-950 border border-white/10 flex items-center justify-center shadow-[inset_0_2px_8px_rgba(0,0,0,0.6)]">
+                     <div className="relative w-full h-full">
+                       {[...Array(12)].map((_, i) => {
+                         const angle = i * 30;
+                         const rad = (angle * Math.PI) / 180;
+                         const x = 50 + 35 * Math.sin(rad);
+                         const y = 50 - 35 * Math.cos(rad);
+                         return (
+                           <div
+                             key={i}
+                             className="absolute w-0.5 h-1.5 bg-zinc-500 rounded-full"
+                             style={{
+                               left: `${x}%`,
+                               top: `${y}%`,
+                               transform: 'translate(-50%, -50%)',
+                             }}
+                           />
+                         );
+                       })}
+                       <div
+                         className="absolute w-px h-5 bg-[#FF5F1F] rounded-full origin-bottom left-1/2 bottom-1/2"
+                         style={{ transform: `translateX(-50%) rotate(${secDeg}deg)` }}
+                       />
+                       <div className="absolute w-1.5 h-1.5 bg-[#FF5F1F] rounded-full left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+                     </div>
+                   </div>
+                 </div>
 
-            </div>
-          )}
+                 <div className="mt-6 text-center">
+                   <div className="text-4xl font-black font-mono text-white tracking-widest">
+                     {now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                   </div>
+                   <div className="text-xs font-mono text-sky-400 font-bold mt-2">
+                     {now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                   </div>
+                 </div>
+               </div>
+
+               {/* WORLD CLOCKS GRID */}
+               <div className="space-y-5">
+                 <div className="flex items-center justify-between">
+                   <h4 className="text-xs font-bold font-mono text-zinc-400 uppercase tracking-wider flex items-center gap-2">
+                     <Globe className="w-4 h-4 text-[#FF5F1F]" />
+                     <span>World Clock Matrix</span>
+                   </h4>
+                 </div>
+
+                 <div className="relative">
+                   <Search className="absolute left-3 top-2.5 w-3.5 h-3.5 text-zinc-500" />
+                   <input
+                     type="text"
+                     placeholder="Search cities or UTC offsets..."
+                     value={worldClockSearch}
+                     onChange={(e) => setWorldClockSearch(e.target.value)}
+                     className="w-full pl-9 pr-3 py-2 bg-slate-900/80 border border-white/10 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#FF5F1F] font-mono"
+                   />
+                 </div>
+
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto pr-1">
+                   {filteredTimezones.map((tz, idx) => {
+                     const cityTime = new Date().toLocaleTimeString('en-US', {
+                       timeZone: tz.timeZone,
+                       hour: '2-digit',
+                       minute: '2-digit',
+                       hour12: false,
+                     });
+                     const cityDate = new Date().toLocaleDateString('en-US', {
+                       timeZone: tz.timeZone,
+                       weekday: 'short',
+                       month: 'short',
+                       day: 'numeric',
+                     });
+                     const cityHour = parseInt(new Date().toLocaleTimeString('en-US', {
+                       timeZone: tz.timeZone,
+                       hour: '2-digit',
+                       hour12: false,
+                     }));
+                     const isDaytime = cityHour >= 6 && cityHour < 18;
+                     return (
+                       <div
+                         key={idx}
+                         className="p-4 rounded-2xl bg-gradient-to-br from-slate-900/90 to-slate-950 border border-white/10 flex items-center justify-between shadow-lg hover:border-[#FF5F1F]/30 transition-all"
+                       >
+                         <div className="flex items-center gap-3">
+                           <span className="text-2xl">{tz.flag}</span>
+                           <div>
+                             <div className="flex items-center gap-2">
+                               <span className="text-xs font-bold text-white block">{tz.city.split(' (')[0]}</span>
+                               {isDaytime ? <Sun className="w-3 h-3 text-amber-400" /> : <Moon className="w-3 h-3 text-indigo-400" />}
+                             </div>
+                             <span className="text-[10px] text-zinc-500 font-mono block mt-0.5">{cityDate}</span>
+                             <span className="text-[10px] font-mono text-zinc-600">{tz.offset}</span>
+                           </div>
+                         </div>
+                         <div className="text-right">
+                           <span className="text-sm font-mono font-black text-[#FF5F1F] block">
+                             {cityTime}
+                           </span>
+                           <span className="text-[9px] font-mono text-zinc-500 block mt-0.5">
+                             {tz.city.match(/\(([^)]+)\)/)?.[1] || ''}
+                           </span>
+                         </div>
+                       </div>
+                     );
+                   })}
+                 </div>
+               </div>
+
+             </div>
+           )}
 
           {/* TAB 2: STOPWATCH */}
           {activeTab === 'STOPWATCH' && (
@@ -496,7 +652,6 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
                 </button>
               </div>
 
-              {/* LAPS SPLIT TABLE */}
               {swLaps.length > 0 && (
                 <div className="w-full max-w-md bg-slate-950 rounded-2xl border border-white/10 p-4 max-h-48 overflow-y-auto space-y-2">
                   <h5 className="text-xs font-mono font-bold text-zinc-400 uppercase">Lap Splits History</h5>
@@ -597,87 +752,85 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
               {/* MONTHLY CALENDAR GRID */}
-              <div className="bg-slate-950 p-4 rounded-3xl border border-white/10 space-y-4">
+              <div className="bg-slate-950 p-4 rounded-3xl border border-white/10 space-y-3">
                 <div className="flex items-center justify-between px-2">
                   <button
                     onClick={prevMonth}
-                    className="liquid-glass-btn p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white"
+                    className="liquid-glass-btn p-1.5 rounded-xl bg-slate-900/50 hover:bg-slate-800 text-zinc-400 hover:text-white transition-colors"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
-                  <span className="text-sm font-black text-white font-mono">
+                  <span className="text-sm font-bold text-white font-mono tracking-wide">
                     {monthName} {year}
                   </span>
                   <button
                     onClick={nextMonth}
-                    className="liquid-glass-btn p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white"
+                    className="liquid-glass-btn p-1.5 rounded-xl bg-slate-900/50 hover:bg-slate-800 text-zinc-400 hover:text-white transition-colors"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
 
-                <div className="grid grid-cols-7 gap-1 text-center font-mono text-[11px] font-bold text-zinc-400">
-                  <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                <div className="grid grid-cols-7 gap-1 text-center font-mono text-[11px] font-bold text-zinc-500">
+                  <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
                 </div>
 
-                <div className="grid grid-cols-7 gap-1.5 font-mono text-xs">
-                  {daysArray.map((day, idx) => {
-                    if (day === null) {
-                      return <div key={idx} className="h-8" />;
-                    }
-                    const dStr = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-                    const isSelected = selectedDateStr === dStr;
-                    const isToday = dStr === new Date().toISOString().split('T')[0];
-                    const hasEvents = events.some((e) => e.dateStr === dStr);
+                 <div className="grid grid-cols-7 gap-1 font-mono text-xs">
+                   {daysArray.map((day, idx) => {
+                     if (day === null) {
+                       return <div key={idx} className="h-10" />;
+                     }
+                     const dStr = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                     const isSelected = selectedDateStr === dStr;
+                     const isToday = dStr === new Date().toISOString().split('T')[0];
+                     const hasBirthday = birthdays.some(b => {
+                       const bDate = new Date(b.dateStr);
+                       return bDate.getMonth() === month && bDate.getDate() === day;
+                     });
 
-                    return (
-                      <button
-                        key={idx}
-                        onClick={() => setSelectedDateStr(dStr)}
-                        className={`liquid-glass-btn h-9 rounded-xl flex flex-col items-center justify-center transition-all cursor-pointer relative ${
-                          isSelected
-                            ? 'bg-[#FF5F1F] text-black font-extrabold shadow-md'
-                            : isToday
-                            ? 'bg-sky-500/30 text-sky-300 border border-sky-400/50 font-bold'
-                            : 'bg-slate-900 hover:bg-slate-800 text-zinc-200'
-                        }`}
-                      >
-                        <span>{day}</span>
-                        {hasEvents && (
-                          <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-black' : 'bg-[#FF5F1F]'}`} />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
+                     return (
+                       <button
+                         key={idx}
+                         onClick={() => setSelectedDateStr(dStr)}
+                         className={`liquid-glass-btn h-10 rounded-xl flex flex-col items-center justify-center transition-all cursor-pointer relative ${
+                           isSelected
+                             ? 'bg-white text-black font-bold'
+                             : isToday
+                             ? 'bg-zinc-800 text-white font-bold border border-zinc-600'
+                             : 'bg-transparent text-zinc-300 hover:bg-zinc-900'
+                         }`}
+                       >
+                         <span className="text-xs font-bold">{day}</span>
+                         {hasBirthday && (
+                           <span className="text-[8px] leading-none mt-0.5">🎂</span>
+                         )}
+                       </button>
+                     );
+                   })}
+                 </div>
               </div>
 
               {/* REMINDERS & EVENTS FOR SELECTED DAY */}
               <div className="space-y-4">
-                <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
-                  <h4 className="text-xs font-bold font-mono text-sky-400">
-                    Events for {selectedDateStr}
-                  </h4>
-                  <span className="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-zinc-300 font-mono">
-                    {events.filter((e) => e.dateStr === selectedDateStr).length} Scheduled
-                  </span>
-                </div>
+                <h4 className="text-xs font-bold font-mono text-zinc-400">
+                  Events for {selectedDateStr}
+                </h4>
 
                 {/* ADD EVENT FORM */}
                 <form onSubmit={handleAddEvent} className="p-3 bg-slate-950 rounded-2xl border border-white/10 space-y-2">
                   <div className="flex gap-2">
                     <input
                       type="text"
-                      placeholder="Event or Reminder title..."
+                      placeholder="Event title..."
                       value={newEventTitle}
                       onChange={(e) => setNewEventTitle(e.target.value)}
-                      className="flex-1 bg-slate-900 border border-zinc-700 rounded-xl px-2.5 py-1.5 text-xs text-white placeholder-zinc-500 font-mono"
+                      className="flex-1 bg-slate-900 border border-zinc-800 rounded-xl px-2.5 py-1.5 text-xs text-white placeholder-zinc-600 font-mono"
                     />
                     <input
                       type="time"
                       value={newEventTime}
                       onChange={(e) => setNewEventTime(e.target.value)}
-                      className="w-24 bg-slate-900 border border-zinc-700 rounded-xl px-2 py-1.5 text-xs text-white font-mono"
+                      className="w-24 bg-slate-900 border border-zinc-800 rounded-xl px-2 py-1.5 text-xs text-white font-mono"
                     />
                   </div>
 
@@ -685,7 +838,7 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
                     <select
                       value={newEventCategory}
                       onChange={(e) => setNewEventCategory(e.target.value as any)}
-                      className="bg-slate-900 border border-zinc-700 rounded-xl px-2 py-1 text-xs text-white font-mono"
+                      className="bg-slate-900 border border-zinc-800 rounded-xl px-2 py-1 text-xs text-white font-mono"
                     >
                       <option value="Reminder">Reminder</option>
                       <option value="Flight">Flight Spotting</option>
@@ -695,10 +848,10 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
 
                     <button
                       type="submit"
-                      className="liquid-glass-btn flex-1 py-1 bg-[#FF5F1F] hover:bg-orange-500 text-black font-extrabold text-xs rounded-xl flex items-center justify-center gap-1 cursor-pointer"
+                      className="liquid-glass-btn flex-1 py-1 bg-white hover:bg-zinc-200 text-black font-bold text-xs rounded-xl flex items-center justify-center gap-1 cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      <span>Add Event</span>
+                      <span>Add</span>
                     </button>
                   </div>
                 </form>
@@ -713,32 +866,100 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
                         className={`liquid-glass-btn p-2.5 rounded-xl border flex items-center justify-between text-xs font-mono transition-all ${
                           ev.completed
                             ? 'bg-zinc-950 border-zinc-800 text-zinc-500 line-through'
-                            : 'bg-slate-900 border-white/10 text-white'
+                            : 'bg-slate-900 border-zinc-700 text-white'
                         }`}
                       >
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => toggleEventComplete(ev.id)}
-                            className="liquid-glass-btn p-1 rounded text-emerald-400 hover:text-emerald-300"
+                            className="liquid-glass-btn p-1 rounded text-zinc-400 hover:text-white"
                           >
-                            <CheckCircle2 className={`liquid-glass-btn w-4 h-4 ${ev.completed ? 'fill-emerald-500 text-black' : ''}`} />
+                            <CheckCircle2 className={`liquid-glass-btn w-4 h-4 ${ev.completed ? 'fill-zinc-500 text-zinc-500' : ''}`} />
                           </button>
                           <div>
-                            <span className="font-bold block">{ev.title}</span>
-                            <span className="text-[10px] text-sky-400">
-                              {ev.time} • {ev.category}
+                            <span className="font-bold block text-xs">{ev.title}</span>
+                            <span className="text-[10px] text-zinc-500">
+                              {ev.time} · {ev.category}
                             </span>
                           </div>
                         </div>
 
                         <button
                           onClick={() => deleteEvent(ev.id)}
-                          className="liquid-glass-btn p-1 text-zinc-500 hover:text-rose-400"
+                          className="liquid-glass-btn p-1 text-zinc-500 hover:text-white"
                         >
                           <Trash2 className="liquid-glass-btn w-3.5 h-3.5" />
                         </button>
                       </div>
                     ))}
+                </div>
+
+                {/* BIRTHDAYS SECTION */}
+                <div className="space-y-3 pt-4 border-t border-white/10">
+                  <h4 className="text-xs font-bold font-mono text-zinc-400 flex items-center gap-2">
+                    <Cake className="w-4 h-4 text-pink-400" />
+                    Birthdays
+                  </h4>
+
+                  <form onSubmit={handleAddBirthday} className="p-3 bg-slate-950 rounded-2xl border border-white/10 space-y-2">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Name..."
+                        value={newBirthdayName}
+                        onChange={(e) => setNewBirthdayName(e.target.value)}
+                        className="flex-1 bg-slate-900 border border-zinc-800 rounded-xl px-2.5 py-1.5 text-xs text-white placeholder-zinc-600 font-mono"
+                      />
+                      <input
+                        type="date"
+                        value={newBirthdayDate}
+                        onChange={(e) => setNewBirthdayDate(e.target.value)}
+                        className="w-28 bg-slate-900 border border-zinc-800 rounded-xl px-2 py-1.5 text-xs text-white font-mono"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="liquid-glass-btn w-full py-1.5 bg-pink-600 hover:bg-pink-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add Birthday</span>
+                    </button>
+                  </form>
+
+                  <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                    {birthdays.length === 0 && (
+                      <p className="text-[10px] text-zinc-600 text-center py-2">No birthdays added yet</p>
+                    )}
+                    {birthdays.map((bday) => {
+                      const bdayDate = new Date(bday.dateStr + 'T00:00:00');
+                      const isToday = bday.dateStr === new Date().toISOString().split('T')[0];
+                      const monthDay = bdayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                      return (
+                        <div
+                          key={bday.id}
+                          className={`liquid-glass-btn p-2 rounded-xl border flex items-center justify-between text-xs font-mono transition-all ${
+                            isToday
+                              ? 'bg-pink-950/50 border-pink-500/30 text-pink-200'
+                              : 'bg-slate-900 border-zinc-800 text-zinc-300'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm">🎂</span>
+                            <div>
+                              <span className="font-bold block text-xs">{bday.name}</span>
+                              <span className="text-[10px] text-zinc-500">{monthDay}</span>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => deleteBirthday(bday.id)}
+                            className="liquid-glass-btn p-1 text-zinc-500 hover:text-white"
+                          >
+                            <Trash2 className="liquid-glass-btn w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
 

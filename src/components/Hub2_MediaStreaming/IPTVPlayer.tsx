@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { IPTVChannel } from '../../types';
 import { Tv, Play, Plus, RefreshCw, Radio, Search, Upload, CheckCircle2, ShieldCheck, Filter, Trash2, Globe } from 'lucide-react';
+import HLS from 'hls.js';
 
 export const IPTVPlayer: React.FC = () => {
   const { iptvChannels, setIptvChannels, selectedIPTVChannel, setSelectedIPTVChannel, showToast } = useApp();
@@ -10,45 +11,108 @@ export const IPTVPlayer: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [isLoadingDefault, setIsLoadingDefault] = useState(false);
+  const [loadProgress, setLoadProgress] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const hlsRef = useRef<HLS | null>(null);
 
-  // M3U Playlist Parser Logic
+  const DEFAULT_PLAYLISTS = [
+    'https://iptv-org.github.io/iptv/index.m3u',
+    'https://raw.githubusercontent.com/iptv-org/iptv/master/index.m3u',
+    'https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8',
+  ];
+
+  const CORS_PROXIES = [
+    (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  ];
+
+  const GITHUB_PAGES_PROXY = (url: string) =>
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+
+  const tryFetchWithCors = async (url: string): Promise<string> => {
+    const isGitHubPages = url.includes('github.io');
+    const attempts: { url: string; label: string }[] = [{ url, label: 'direct' }];
+    if (isGitHubPages) attempts.push({ url: GITHUB_PAGES_PROXY(url), label: 'proxy' });
+    CORS_PROXIES.forEach((p) => attempts.push({ url: p(url), label: 'proxy' }));
+
+    const errors: { endpoint: string; error: string }[] = [];
+
+    for (const attempt of attempts) {
+      try {
+        const res = await fetch(attempt.url);
+        if (!res.ok) {
+          const err = `HTTP ${res.status}${res.status === 404 ? ' (Not Found)' : res.status === 403 ? ' (Forbidden)' : ''}`;
+          errors.push({ endpoint: attempt.url, error: err });
+          continue;
+        }
+        return await res.text();
+      } catch (err) {
+        const classified = err instanceof Error ? err.message : String(err);
+        errors.push({ endpoint: attempt.url, error: classified });
+      }
+    }
+
+    const summary = errors.map((e) => `${new URL(e.endpoint).hostname}: ${e.error}`).join(' | ');
+    throw new Error(`All fetch attempts failed. Details: ${summary}`);
+  };
+
+  const generateChannelId = (name: string, url: string, index: number): string => {
+    const raw = `${name}-${url}-${index}`;
+    let hash = 0;
+    for (let i = 0; i < raw.length; i++) {
+      hash = ((hash << 5) - hash + raw.charCodeAt(i)) | 0;
+    }
+    return `iptv-${Math.abs(hash).toString(36)}-${index}`;
+  };
+
   const parseM3UContent = (content: string): IPTVChannel[] => {
-    const lines = content.split('\n');
+    const lines = content.split(/\r?\n/);
     const parsedChannels: IPTVChannel[] = [];
 
     let currentName = 'Live Channel';
     let currentCategory = 'General';
     let currentLogo = '📺';
     let currentCountry = 'Global';
+    let currentTvgId = '';
+    const extM3u = lines[0] && lines[0].trim().toUpperCase() === '#EXTM3U';
 
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
+      const raw = lines[i];
+      const line = raw.trim();
 
       if (line.startsWith('#EXTINF:')) {
-        const groupMatch = line.match(/group-title="([^"]+)"/i);
-        if (groupMatch && groupMatch[1]) {
-          currentCategory = groupMatch[1];
-        }
+        currentName = 'Live Channel';
+        currentCategory = 'General';
+        currentLogo = '📺';
+        currentCountry = 'Global';
+        currentTvgId = '';
 
-        const logoMatch = line.match(/tvg-logo="([^"]+)"/i);
-        if (logoMatch && logoMatch[1]) {
-          currentLogo = logoMatch[1];
-        }
+        const groupMatch = line.match(/group-title="([^"]*)"/i);
+        if (groupMatch && groupMatch[1]) currentCategory = groupMatch[1];
 
-        const countryMatch = line.match(/tvg-country="([^"]+)"/i);
-        if (countryMatch && countryMatch[1]) {
-          currentCountry = countryMatch[1];
-        }
+        const logoMatch = line.match(/tvg-logo="([^"]*)"/i);
+        if (logoMatch && logoMatch[1]) currentLogo = logoMatch[1];
+
+        const countryMatch = line.match(/tvg-country="([^"]*)"/i);
+        if (countryMatch && countryMatch[1]) currentCountry = countryMatch[1];
+
+        const tvgIdMatch = line.match(/tvg-id="([^"]*)"/i);
+        if (tvgIdMatch && tvgIdMatch[1]) currentTvgId = tvgIdMatch[1];
+
+        const tvgNameMatch = line.match(/tvg-name="([^"]*)"/i);
+        if (tvgNameMatch && tvgNameMatch[1]) currentName = tvgNameMatch[1];
 
         const commaIndex = line.lastIndexOf(',');
-        if (commaIndex !== -1) {
-          currentName = line.substring(commaIndex + 1).trim();
+        if (commaIndex !== -1 && commaIndex < line.length - 1) {
+          const afterComma = line.substring(commaIndex + 1).trim();
+          if (afterComma) currentName = afterComma;
         }
       } else if (line.length > 0 && !line.startsWith('#')) {
         const streamUrl = line;
+        const id = currentTvgId || generateChannelId(currentName, streamUrl, parsedChannels.length);
         parsedChannels.push({
-          id: `iptv-${Date.now()}-${parsedChannels.length}-${Math.random().toString(36).substring(2, 6)}`,
+          id,
           name: currentName || `Channel ${parsedChannels.length + 1}`,
           category: currentCategory || 'General',
           streamUrl,
@@ -61,31 +125,58 @@ export const IPTVPlayer: React.FC = () => {
         currentCategory = 'General';
         currentLogo = '📺';
         currentCountry = 'Global';
+        currentTvgId = '';
       }
     }
 
     return parsedChannels;
   };
 
+  const loadM3UFromSource = async (source: string, label: string): Promise<IPTVChannel[]> => {
+    setLoadProgress(`Fetching ${label}...`);
+    const text = await tryFetchWithCors(source);
+    setLoadProgress(`Parsing ${label}...`);
+    const channels = parseM3UContent(text);
+    setLoadProgress('');
+    return channels;
+  };
+
   const handleLoadDefaultM3U = async () => {
     setIsLoadingDefault(true);
+    setLoadProgress('');
     try {
-      showToast('Loading Playlist', 'Fetching default iptv-org playlist...', 'info');
-      const res = await fetch('https://iptv-org.github.io/iptv/index.m3u');
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const text = await res.text();
-      const newChannels = parseM3UContent(text);
-      if (newChannels.length > 0) {
-        setIptvChannels((prev) => [...newChannels, ...prev]);
-        if (!selectedIPTVChannel) setSelectedIPTVChannel(newChannels[0]);
-        showToast('Default Playlist Loaded', `Imported ${newChannels.length} channels from iptv-org`, 'success');
+      let lastError: Error | null = null;
+      let channels: IPTVChannel[] = [];
+
+      for (const url of DEFAULT_PLAYLISTS) {
+        try {
+          const hostname = new URL(url).hostname;
+          setLoadProgress(`Trying ${hostname}...`);
+          channels = await loadM3UFromSource(url, 'default playlist');
+          if (channels.length > 0) break;
+        } catch (err) {
+          lastError = err as Error;
+        }
+      }
+
+      if (channels.length > 0) {
+        setIptvChannels((prev) => [...channels, ...prev]);
+        if (!selectedIPTVChannel) setSelectedIPTVChannel(channels[0]);
+        showToast('Default Playlist Loaded', `Imported ${channels.length} channels from iptv-org directory`, 'success');
       } else {
-        showToast('Parse Warning', 'No channels found in default playlist', 'warning');
+        const reason = lastError?.message || 'Unknown error';
+        const is404 = reason.includes('404');
+        if (is404) {
+          showToast('Playlist Unavailable', 'iptv-org GitHub Pages returned 404. Check if the repository has moved.', 'warning');
+        } else {
+          showToast('Load Error', `No channels found (${channels.length} total). Reason: ${reason}`, 'warning');
+        }
       }
     } catch (err: any) {
       showToast('Load Error', `Failed to load default playlist: ${err.message}`, 'error');
     } finally {
       setIsLoadingDefault(false);
+      setLoadProgress('');
     }
   };
 
@@ -113,11 +204,13 @@ export const IPTVPlayer: React.FC = () => {
     if (!file) return;
 
     setIsLoadingFile(true);
+    setLoadProgress(`Reading ${file.name}...`);
     const reader = new FileReader();
 
     reader.onload = (event) => {
       try {
         const content = event.target?.result as string;
+        setLoadProgress(`Parsing ${file.name}...`);
         const newChannels = parseM3UContent(content);
 
         if (newChannels.length > 0) {
@@ -131,6 +224,7 @@ export const IPTVPlayer: React.FC = () => {
         showToast('File Read Error', `Error reading M3U file: ${err.message}`, 'error');
       } finally {
         setIsLoadingFile(false);
+        setLoadProgress('');
       }
     };
 
@@ -155,6 +249,50 @@ export const IPTVPlayer: React.FC = () => {
 
   const categories = Array.from(new Set(iptvChannels.map((c) => c.category)));
 
+  useEffect(() => {
+    const video = videoRef.current;
+    const channel = selectedIPTVChannel;
+    if (!video || !channel) return;
+
+    const url = channel.streamUrl;
+    const isHls = url.includes('.m3u8') || url.includes('m3u8');
+
+    if (hlsRef.current) {
+      hlsRef.current.destroy();
+      hlsRef.current = null;
+    }
+
+    if (isHls && HLS.isSupported()) {
+      const hls = new HLS();
+      hlsRef.current = hls;
+      hls.loadSource(url);
+      hls.attachMedia(video);
+      hls.on(HLS.Events.ERROR, (_event, data) => {
+        if (data.fatal) {
+          const reason = data.type === HLS.ErrorTypes.NETWORK_ERROR
+            ? 'Network error - stream may be offline'
+            : data.type === HLS.ErrorTypes.MEDIA_ERROR
+            ? 'Media decode error'
+            : 'Fatal stream error';
+          showToast('Stream Error', `${reason}: ${url}`, 'error');
+        }
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = url;
+    } else {
+      video.src = url;
+    }
+  }, [selectedIPTVChannel, showToast]);
+
+  useEffect(() => {
+    return () => {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+    };
+  }, []);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -169,6 +307,11 @@ export const IPTVPlayer: React.FC = () => {
               <span className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono rounded flex items-center gap-1 font-semibold">
                 <ShieldCheck className="w-3 h-3" /> Real-time M3U Parser
               </span>
+              {iptvChannels.length > 0 && (
+                <span className="px-2 py-0.5 bg-purple-500/10 border border-purple-500/30 text-purple-400 text-[10px] font-mono rounded font-semibold">
+                  {iptvChannels.length} channels loaded
+                </span>
+              )}
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
               Paste .m3u playlists, upload files, or load the default iptv-org directory
@@ -183,7 +326,7 @@ export const IPTVPlayer: React.FC = () => {
             className="liquid-glass-btn px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
           >
             <Globe className="w-3.5 h-3.5" />
-            <span>{isLoadingDefault ? 'Loading...' : 'Load Default Playlist'}</span>
+            <span>{isLoadingDefault ? (loadProgress || 'Loading...') : 'Load Default Playlist'}</span>
           </button>
 
           <button
@@ -235,14 +378,12 @@ export const IPTVPlayer: React.FC = () => {
           <div className="relative flex-1 bg-slate-950 flex items-center justify-center min-h-[340px]">
             {selectedIPTVChannel ? (
               <video
+                ref={videoRef}
                 key={selectedIPTVChannel.id}
                 controls
                 autoPlay
                 className="w-full h-full object-contain max-h-[420px]"
-                src={selectedIPTVChannel.streamUrl}
-                onError={() => {
-                  showToast('Stream Error', `Unable to decode stream at ${selectedIPTVChannel.streamUrl}`, 'error');
-                }}
+                onError={() => showToast('Stream Error', `Unable to decode stream at ${selectedIPTVChannel.streamUrl}`, 'error')}
               />
             ) : (
               <div className="text-center text-slate-500 p-8 space-y-3">

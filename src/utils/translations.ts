@@ -29,7 +29,6 @@ export interface UIStrings {
   calculator: string;
   cameraRater: string;
   aviationDict: string;
-  busTimetable: string;
   telemetry: string;
   language: string;
   error: string;
@@ -130,7 +129,7 @@ export interface UIStrings {
   verifySetKey: string;
   accountInfoMyPlanePics: string;
   backToHome: string;
-  brioDroidAccountActive: string;
+  brioAccountActive: string;
   openAppDrawer: string;
   apps: string;
   searchAppsFeatures: string;
@@ -155,7 +154,7 @@ export interface UIStrings {
   qrError: string;
   failedToGenerateQR: string;
   vaultCheck: string;
-  brioDroidMobile: string;
+  brioMobile: string;
   permanentFolderLinked: string;
   vaultedLinkedMedia: string;
   temporarySessionImport: string;
@@ -358,8 +357,6 @@ export interface UIStrings {
   unoCardsVsAI: string;
   drawDeck: string;
   topDiscard: string;
-  girlsUndPanzerTankeryTactical: string;
-  fireApheShell: string;
   documentProcessing: string;
   liveCustomIptvStreamTuner: string;
   loadSampleStream: string;
@@ -380,7 +377,6 @@ export interface UIStrings {
   languageIFE: string;
   openLanguageScreen: string;
   placeholderSearchAcronyms: string;
-  placeholderFilterBusRoute: string;
   placeholderRssFeedUrl: string;
   placeholderSearchRssContent: string;
   placeholderFilterNightcore: string;
@@ -407,7 +403,6 @@ export interface UIStrings {
   placeholderAircraftType: string;
   placeholderSpecialLivery: string;
   placeholderSelectDate: string;
-  noBusRoutesMatched: string;
   expectedFolderStructure: string;
   folderStructureHint: string;
   continueToSelectFolder: string;
@@ -416,6 +411,13 @@ export interface UIStrings {
   editMetadata: string;
   saveToVault: string;
   briophoneRssNews: string;
+  briophone: string;
+  callHistory: string;
+  contacts: string;
+  ringtone: string;
+  vibration: string;
+  networkType: string;
+  carrierName: string;
   aircraftType: string;
   specialLiveryOptional: string;
   dateCaptured: string;
@@ -424,6 +426,85 @@ export interface UIStrings {
   albumExportedAsPdf: string;
   exportPdf: string;
   unableToExportAlbum: string;
+  refreshInterval: string;
+  readingTime: string;
+  minRead: string;
+  readLater: string;
+  readLaterQueue: string;
+  copyLink: string;
+  openInNewTab: string;
+  shareArticle: string;
+  readingMode: string;
+  darkMode: string;
+  lightMode: string;
+  sourceStatus: string;
+  sourceWorking: string;
+  sourceFailed: string;
+  markAllAsRead: string;
+  loadMore: string;
+  noSavedArticles: string;
+  swipeToDismiss: string;
+  dismissed: string;
+  officeFeatures: string;
+  spreadsheet: string;
+  presentation: string;
+  wordProcessor: string;
+  notebook: string;
+  publisher: string;
+  pdfViewer: string;
+  formula: string;
+  cell: string;
+  slide: string;
+  exportAsPdf: string;
+  exportAsCsv: string;
+  exportAsTxt: string;
+  exportAsDocx: string;
+  addSlide: string;
+  addPage: string;
+  insertImage: string;
+  dragDropText: string;
+  dragDropImage: string;
+  annotatePdf: string;
+  penTool: string;
+  highlighterTool: string;
+  textTool: string;
+  signatureTool: string;
+  stampTool: string;
+  clearAnnotations: string;
+  saveAnnotations: string;
+  recentDocuments: string;
+  allDocuments: string;
+  spreadsheetCell: string;
+  insertFormula: string;
+  bold: string;
+  italic: string;
+  underline: string;
+  heading: string;
+  bulletList: string;
+  numberList: string;
+  alignLeft: string;
+  alignCenter: string;
+  alignRight: string;
+  fontSize: string;
+  backgroundColor: string;
+  textColor: string;
+  databaseManager: string;
+  databaseStorage: string;
+  currentSize: string;
+  lastBackup: string;
+  exportDb: string;
+  importDb: string;
+  backupNow: string;
+  restoreBackup: string;
+  manageDatabase: string;
+  databasePortability: string;
+  integrityChecksumVerified: string;
+  noDatabaseToExport: string;
+  exportDbSuccess: string;
+  importDbSuccess: string;
+  backupComplete: string;
+  restoreComplete: string;
+  databaseSize: string;
 }
 
 export const t: UIStrings = {
@@ -453,7 +534,6 @@ export const t: UIStrings = {
   calculator: 'Graphic & Sci Calc',
   cameraRater: 'Camera Setup Rater',
   aviationDict: 'Aviation Dictionary',
-  busTimetable: 'Bus Schedules',
   telemetry: 'System Telemetry',
   language: 'Language',
   error: 'Operation Error',
@@ -554,7 +634,7 @@ export const t: UIStrings = {
   verifySetKey: 'Verify & Set Key',
   accountInfoMyPlanePics: 'Account Info & MyPlanePics',
   backToHome: 'Back to Home',
-  brioDroidAccountActive: 'BRIO DROID Account Active',
+  brioAccountActive: 'Brio Account Active',
   openAppDrawer: 'Open App Drawer',
   apps: 'Apps',
   searchAppsFeatures: 'Search Apps & Features',
@@ -579,7 +659,7 @@ export const t: UIStrings = {
   qrError: 'QR Error',
   failedToGenerateQR: 'Failed to generate QR code',
   vaultCheck: 'Vault check',
-  brioDroidMobile: 'BRIO DROID Mobile',
+  brioMobile: 'BRIO Mobile',
   permanentFolderLinked: 'Permanent Folder Linked',
   vaultedLinkedMedia: 'Vaulted & linked media files permanently to account',
   temporarySessionImport: 'Temporary Session Import',
@@ -757,8 +837,6 @@ export const t: UIStrings = {
   unoCardsVsAI: 'UNO Cards vs AI',
   drawDeck: 'Draw Deck',
   topDiscard: 'Top Discard',
-  girlsUndPanzerTankeryTactical: 'Girls und Panzer Tankery Tactical',
-  fireApheShell: 'FIRE APHE SHELL',
   documentProcessing: 'Document Processing',
   liveCustomIptvStreamTuner: 'Live Custom IPTV Stream Tuner',
   loadSampleStream: 'Load Sample Stream',
@@ -816,11 +894,17 @@ export const t: UIStrings = {
   editMetadata: 'Edit Metadata',
   saveToVault: 'Save to Vault',
   briophoneRssNews: 'RSS News',
+  briophone: 'Briophone',
+  callHistory: 'Call History',
+  contacts: 'Contacts',
+  ringtone: 'Ringtone',
+  vibration: 'Vibration',
+  networkType: 'Network Type',
+  carrierName: 'Carrier Name',
   aircraftType: 'Aircraft Type',
   specialLiveryOptional: 'Special Livery (Optional)',
   dateCaptured: 'Date Captured',
   placeholderSearchAcronyms: 'Search acronyms...',
-  placeholderFilterBusRoute: 'Filter by bus route',
   placeholderRssFeedUrl: 'Paste RSS/Atom feed URL...',
   placeholderSearchRssContent: 'Search titles, summaries, sources...',
   placeholderFilterNightcore: 'Filter Nightcore streams...',
@@ -842,10 +926,88 @@ export const t: UIStrings = {
   placeholderNoteTitleMobile: 'Note title',
   placeholderUsernameExample: 'Username',
   placeholderEmail: 'Email address',
-  noBusRoutesMatched: 'No bus routes matched',
   exportSuccessful: 'Export Successful',
   exportFailed: 'Export Failed',
   albumExportedAsPdf: 'Album exported as PDF',
   exportPdf: 'Export PDF',
   unableToExportAlbum: 'Unable to export album',
+  refreshInterval: 'Refresh Interval',
+  readingTime: 'Reading Time',
+  minRead: 'min read',
+  readLater: 'Read Later',
+  readLaterQueue: 'Read Later Queue',
+  copyLink: 'Copy Link',
+  openInNewTab: 'Open in New Tab',
+  shareArticle: 'Share Article',
+  readingMode: 'Reading Mode',
+  darkMode: 'Dark Mode',
+  lightMode: 'Light Mode',
+  sourceStatus: 'Source Status',
+  sourceWorking: 'Working',
+  sourceFailed: 'Failed',
+  markAllAsRead: 'Mark All as Read',
+  loadMore: 'Load More',
+  noSavedArticles: 'No saved articles yet',
+  swipeToDismiss: 'Swipe to dismiss',
+  dismissed: 'Dismissed',
+  officeFeatures: 'Office Features',
+  spreadsheet: 'Spreadsheet',
+  presentation: 'Presentation',
+  wordProcessor: 'Word Processor',
+  notebook: 'Notebook',
+  publisher: 'Publisher',
+  pdfViewer: 'PDF Viewer',
+  formula: 'Formula',
+  cell: 'Cell',
+  slide: 'Slide',
+  exportAsPdf: 'Export as PDF',
+  exportAsCsv: 'Export as CSV',
+  exportAsTxt: 'Export as TXT',
+  exportAsDocx: 'Export as DOCX',
+  addSlide: 'Add Slide',
+  addPage: 'Add Page',
+  insertImage: 'Insert Image',
+  dragDropText: 'Drag text blocks',
+  dragDropImage: 'Drag images',
+  annotatePdf: 'Annotate PDF',
+  penTool: 'Pen',
+  highlighterTool: 'Highlighter',
+  textTool: 'Text',
+  signatureTool: 'Signature',
+  stampTool: 'Stamp',
+  clearAnnotations: 'Clear Annotations',
+  saveAnnotations: 'Save Annotations',
+  recentDocuments: 'Recent Documents',
+  allDocuments: 'All Documents',
+  spreadsheetCell: 'Spreadsheet Cell',
+  insertFormula: 'Insert Formula',
+  bold: 'Bold',
+  italic: 'Italic',
+  underline: 'Underline',
+  heading: 'Heading',
+  bulletList: 'Bullet List',
+  numberList: 'Numbered List',
+  alignLeft: 'Align Left',
+  alignCenter: 'Align Center',
+  alignRight: 'Align Right',
+  fontSize: 'Font Size',
+  backgroundColor: 'Background Color',
+  textColor: 'Text Color',
+  databaseManager: 'Database Manager',
+  databaseStorage: 'Database Storage',
+  currentSize: 'Current Size',
+  lastBackup: 'Last Backup',
+  exportDb: 'Export .db',
+  importDb: 'Import .db',
+  backupNow: 'Backup Now',
+  restoreBackup: 'Restore Backup',
+  manageDatabase: 'Manage Database',
+  databasePortability: 'Database Portability',
+  integrityChecksumVerified: 'Integrity checksum verified on load',
+  noDatabaseToExport: 'No database to export',
+  exportDbSuccess: 'Database exported as .db file successfully',
+  importDbSuccess: 'Database imported successfully',
+  backupComplete: 'Backup Complete',
+  restoreComplete: 'Database restored successfully',
+  databaseSize: 'Database Size',
 };

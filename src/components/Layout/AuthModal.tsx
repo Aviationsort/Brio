@@ -1,10 +1,11 @@
 /**
- * AuthModal - Login / Sign Up only
+ * AuthModal - Login / Sign Up with liquid glass UI
  */
 
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Shield, Lock, X, Eye, EyeOff, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
+import { Shield, Lock, X, Eye, EyeOff, CheckCircle2, AlertTriangle, Download, Sparkles } from 'lucide-react';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -12,7 +13,8 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
-  const { loginUser, user, showToast, authRequired, t } = useApp();
+  const { loginUser, signupUser, user, showToast, authRequired } = useApp();
+  const { theme, cycleTheme } = useTheme();
   const [isSignUp, setIsSignUp] = useState(false);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -60,7 +62,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
   const handleClose = () => {
     if (authRequired) {
-      showToast(t.authRequired, t.pleaseSignIn, 'warning');
+      showToast('Auth Required', 'Please sign in to continue.', 'warning');
       return;
     }
     onClose();
@@ -74,15 +76,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     }
     setLoading(true);
     try {
-      const success = await loginUser(username, email || `${username.toLowerCase()}@brio.vault`, passphrase);
-      if (success) {
-        setPassphrase('');
-        setConfirmPassphrase('');
-        setValidationError(null);
-        onClose();
+      let success = false;
+      if (isSignUp) {
+        success = await signupUser(username, email || `${username.toLowerCase()}@brio.vault`, passphrase);
+        if (success) {
+          setPassphrase('');
+          setConfirmPassphrase('');
+          setValidationError(null);
+        }
+      } else {
+        success = await loginUser(username, passphrase);
+        if (success) {
+          setPassphrase('');
+          setValidationError(null);
+          onClose();
+        }
       }
     } catch (err) {
-      showToast(t.encryptionError, String(err), 'error');
+      showToast('Error', String(err), 'error');
     } finally {
       setLoading(false);
     }
@@ -95,93 +106,152 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
-      <div className="relative w-full max-w-md aero-panel p-6 shadow-2xl text-slate-800 overflow-hidden">
-        <div className="absolute -top-12 -right-12 w-40 h-40 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-12 -left-12 w-40 h-40 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in">
+      <div 
+        className="relative w-full max-w-md rounded-3xl p-8 shadow-2xl text-slate-200 overflow-hidden"
+        style={{
+          background: `linear-gradient(135deg, ${theme.bgSecondary}dd, ${theme.bgTertiary}dd)`,
+          border: `1px solid ${theme.glassBorder}`,
+          boxShadow: `0 25px 50px -12px ${theme.shadow}, 0 0 0 1px ${theme.border}`,
+          backdropFilter: 'blur(24px)',
+        }}
+      >
+        {/* Ambient glow */}
+        <div 
+          className="absolute -top-24 -right-24 w-48 h-48 rounded-full blur-3xl pointer-events-none"
+          style={{ background: theme.accentGlow }}
+        />
+        <div 
+          className="absolute -bottom-24 -left-24 w-48 h-48 rounded-full blur-3xl pointer-events-none"
+          style={{ background: theme.accentGlow, opacity: 0.5 }}
+        />
 
-        <div className="flex items-center justify-between pb-4 border-b border-white/40">
+        {/* Theme selector & close */}
+        <div className="relative z-10 flex items-center justify-between pb-4 border-b" style={{ borderColor: theme.border }}>
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-white/40 border border-white/60 text-blue-700 shadow-inner">
+            <div 
+              className="p-2 rounded-xl border shadow-inner"
+              style={{ 
+                background: `${theme.accent}20`,
+                borderColor: `${theme.accent}40`,
+                color: theme.accent,
+              }}
+            >
               <Shield className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold tracking-wide text-blue-900 drop-shadow-sm">
-                {isSignUp ? t.createEncryptedAccount : t.easyLoginUnlock}
+              <h3 className="text-lg font-bold tracking-wide drop-shadow-sm" style={{ color: theme.textPrimary }}>
+                {isSignUp ? 'Create Encrypted Vault' : 'Unlock Vault'}
               </h3>
-              <p className="text-xs text-blue-700/80 font-medium">
-                {t.aesGCM256Cryptography}
+              <p className="text-xs font-medium" style={{ color: `${theme.accent}cc` }}>
+                {isSignUp ? 'One vault for all your data' : 'Enter your passphrase to unlock'}
               </p>
             </div>
           </div>
-          <button
-            onClick={handleClose}
-            className={`skeuo-button p-1.5 rounded-lg text-white ${authRequired ? 'opacity-50 cursor-not-allowed' : ''}`}
-            disabled={authRequired}
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={cycleTheme}
+              className="p-1.5 rounded-lg transition-all hover:rotate-180 duration-500"
+              style={{ color: theme.textSecondary }}
+              title="Cycle theme"
+            >
+              <Sparkles className="w-4 h-4" />
+            </button>
+            <button
+              onClick={handleClose}
+              className={`p-1.5 rounded-lg transition-colors ${authRequired ? 'opacity-50 cursor-not-allowed' : ''}`}
+              style={{ color: theme.textSecondary }}
+              disabled={authRequired}
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+        <form onSubmit={handleSubmit} className="relative z-10 mt-6 space-y-5">
+          {/* Username */}
           <div>
-            <label className="block text-xs font-medium text-blue-900 mb-1 drop-shadow-sm">{t.usernameOperatorCall}</label>
+            <label className="block text-xs font-medium mb-1.5" style={{ color: theme.textSecondary }}>Username</label>
             <input
               type="text"
               required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="e.g. CaptainVance or BrioAgent"
-              className="w-full px-3.5 py-2.5 flash-panel text-sm text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all font-medium"
+              placeholder="e.g. CaptainVance"
+              className="w-full px-4 py-3 rounded-xl text-sm transition-all outline-none"
+              style={{
+                background: theme.bgTertiary,
+                border: `1px solid ${theme.border}`,
+                color: theme.textPrimary,
+                boxShadow: `inset 0 2px 4px ${theme.shadow}`,
+              }}
               minLength={3}
             />
           </div>
 
+          {/* Email (signup only) */}
           {isSignUp && (
             <div>
-              <label className="block text-xs font-medium text-blue-900 mb-1 drop-shadow-sm">{t.emailAddressOptional}</label>
+              <label className="block text-xs font-medium mb-1.5" style={{ color: theme.textSecondary }}>Email (optional)</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="operator@brio.vault"
-                className="w-full px-3.5 py-2.5 flash-panel text-sm text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all font-medium"
+                className="w-full px-4 py-3 rounded-xl text-sm transition-all outline-none"
+                style={{
+                  background: theme.bgTertiary,
+                  border: `1px solid ${theme.border}`,
+                  color: theme.textPrimary,
+                  boxShadow: `inset 0 2px 4px ${theme.shadow}`,
+                }}
               />
             </div>
           )}
 
+          {/* Passphrase */}
           <div>
-            <label className="block text-xs font-medium text-blue-900 mb-1 drop-shadow-sm">
-              {t.vaultMasterPassphrasePBKDF2}
+            <label className="block text-xs font-medium mb-1.5" style={{ color: theme.textSecondary }}>
+              Master Passphrase
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-3 w-4 h-4 text-blue-600" />
+              <Lock className="absolute left-3.5 top-3.5 w-4 h-4" style={{ color: theme.accent }} />
               <input
                 type={showPassphrase ? 'text' : 'password'}
                 required
                 value={passphrase}
                 onChange={(e) => setPassphrase(e.target.value)}
-                placeholder={t.enterMasterSecretPassphrase}
-                className="w-full pl-9 pr-10 py-2.5 flash-panel text-sm text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all font-medium"
+                placeholder="Enter your master passphrase"
+                className="w-full pl-10 pr-12 py-3 rounded-xl text-sm transition-all outline-none"
+                style={{
+                  background: theme.bgTertiary,
+                  border: `1px solid ${theme.border}`,
+                  color: theme.textPrimary,
+                  boxShadow: `inset 0 2px 4px ${theme.shadow}`,
+                }}
                 minLength={6}
               />
               <button
                 type="button"
                 onClick={() => setShowPassphrase((prev) => !prev)}
-                className="absolute right-3 top-2.5 text-blue-600 hover:text-blue-800 transition-colors"
+                className="absolute right-3 top-3 transition-colors"
+                style={{ color: theme.accent }}
                 tabIndex={-1}
               >
                 {showPassphrase ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
             {passphrase.length > 0 && (
-              <div className="mt-1.5 flex items-center gap-2">
-                <div className="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+              <div className="mt-2 flex items-center gap-2">
+                <div 
+                  className="flex-1 h-1.5 rounded-full overflow-hidden"
+                  style={{ background: theme.bgTertiary }}
+                >
                   <div
                     className="h-full rounded-full transition-all duration-300"
                     style={{
                       width: `${(passphraseStrength.score / 5) * 100}%`,
-                      backgroundColor: passphraseStrength.score <= 1 ? '#f43f5e' : passphraseStrength.score <= 3 ? '#f59e0b' : '#10b981',
+                      backgroundColor: passphraseStrength.score <= 1 ? theme.error : passphraseStrength.score <= 3 ? theme.warning : theme.success,
                     }}
                   />
                 </div>
@@ -190,33 +260,37 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 </span>
               </div>
             )}
-            <p className="text-[11px] text-blue-700/90 mt-1 flex items-center gap-1 font-medium">
-              {t.passphraseGeneratesClientSideKey}
-            </p>
           </div>
 
+          {/* Confirm Passphrase (signup only) */}
           {isSignUp && (
             <div>
-              <label className="block text-xs font-medium text-blue-900 mb-1 drop-shadow-sm">
-                {t.vaultMasterPassphrasePBKDF2}
+              <label className="block text-xs font-medium mb-1.5" style={{ color: theme.textSecondary }}>
+                Confirm Passphrase
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 w-4 h-4 text-blue-600" />
+                <Lock className="absolute left-3.5 top-3.5 w-4 h-4" style={{ color: theme.accent }} />
                 <input
                   type={showPassphrase ? 'text' : 'password'}
                   required
                   value={confirmPassphrase}
                   onChange={(e) => setConfirmPassphrase(e.target.value)}
                   placeholder="Confirm your master passphrase..."
-                  className="w-full pl-9 pr-3.5 py-2.5 flash-panel text-sm text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all font-medium"
+                  className="w-full pl-10 pr-12 py-3 rounded-xl text-sm transition-all outline-none"
+                  style={{
+                    background: theme.bgTertiary,
+                    border: `1px solid ${theme.border}`,
+                    color: theme.textPrimary,
+                    boxShadow: `inset 0 2px 4px ${theme.shadow}`,
+                  }}
                   minLength={6}
                 />
                 {confirmPassphrase.length > 0 && (
-                  <div className="absolute right-3 top-2.5">
+                  <div className="absolute right-3 top-3">
                     {passphrase === confirmPassphrase ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      <CheckCircle2 className="w-4 h-4" style={{ color: theme.success }} />
                     ) : (
-                      <AlertTriangle className="w-4 h-4 text-rose-500" />
+                      <AlertTriangle className="w-4 h-4" style={{ color: theme.error }} />
                     )}
                   </div>
                 )}
@@ -224,36 +298,60 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             </div>
           )}
 
+          {/* Validation error */}
           {validationError && (
-            <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2">
+            <div 
+              className="p-3 rounded-xl border text-xs font-medium flex items-center gap-2"
+              style={{ 
+                background: `${theme.error}15`,
+                borderColor: `${theme.error}40`,
+                color: theme.error,
+              }}
+            >
               <AlertTriangle className="w-4 h-4 shrink-0" />
               {validationError}
             </div>
           )}
 
+          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
-            className="skeuo-button w-full py-3 text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
+            className="w-full py-3.5 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-extrabold disabled:opacity-50 active:scale-[0.97]"
+            style={{
+              background: `linear-gradient(135deg, ${theme.accent}, ${theme.accentHover})`,
+              color: theme.buttonText,
+              boxShadow: `0 10px 25px ${theme.accentGlow}`,
+            }}
           >
             {loading ? (
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <div 
+                className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin"
+                style={{ borderColor: theme.buttonText, borderTopColor: 'transparent' }}
+              />
             ) : (
               <>
                 <Shield className="w-4 h-4" />
-                {isSignUp ? t.createEncryptedVault : t.unlockBrioVault}
+                {isSignUp ? 'Create Vault' : 'Unlock Vault'}
               </>
             )}
           </button>
 
-          <div className="pt-2 text-center">
+          {/* Toggle mode */}
+          <div className="pt-1 text-center space-y-1">
             <button
               type="button"
               onClick={switchMode}
-              className="text-xs text-blue-700 hover:underline font-semibold hover:text-blue-900 transition-colors"
+              className="text-xs font-semibold transition-colors"
+              style={{ color: theme.accent }}
             >
-              {isSignUp ? t.alreadyHavePassphrase : t.firstTimeCreateNewVault}
+              {isSignUp ? 'Already have a vault? Login' : 'First time? Create new vault'}
             </button>
+            <p className="text-[10px]" style={{ color: theme.textSecondary }}>
+              {isSignUp
+                ? 'Your vault is stored locally and encrypted. You can export a .db backup anytime.'
+                : 'Your vault is stored locally and encrypted. Without your passphrase it cannot be unlocked.'}
+            </p>
           </div>
         </form>
       </div>

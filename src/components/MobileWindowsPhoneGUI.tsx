@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { encryptionService } from '../utils/crypto';
 import {
-  Phone,
   MessageSquare,
   Globe,
   Gamepad2,
@@ -13,7 +12,6 @@ import {
   Search,
   Grid,
   ShieldCheck,
-  Users,
   Settings,
   Calculator,
   Camera,
@@ -77,9 +75,12 @@ import {
   List,
   Check,
   Video,
+  Phone,
+  Users,
+  Wand2,
 } from 'lucide-react';
 import QRCode from 'qrcode';
-import { fetchAccurateWeather } from '../utils/weatherService';
+import { getWeather, convertCountryCode, type WeatherData } from '../utils/weatherService';
 import { ConnectSocialHub } from './Hub1_ConnectSocial/ConnectSocialHub';
 import { MediaStreamingHub } from './Hub2_MediaStreaming/MediaStreamingHub';
 import { RSSReader } from './Hub2_MediaStreaming/RSSReader';
@@ -148,46 +149,108 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
   const [lightboxPhoto, setLightboxPhoto] = useState<PlanePhoto | null>(null);
   const [isSelectMode, setIsSelectMode] = useState(false);
 
-  // Weather widget state
-  const [weatherCity, setWeatherCity] = useState('New York');
-  const [weatherData, setWeatherData] = useState<any>(null);
+  // Image Enhancement State
+  type EnhancementPreset = 'none' | 'natural' | 'vibrant' | 'film' | 'bw' | 'warm' | 'cool';
+  const [enhancePreset, setEnhancePreset] = useState<EnhancementPreset>('none');
+  const [enhanceBrightness, setEnhanceBrightness] = useState(100);
+  const [enhanceContrast, setEnhanceContrast] = useState(100);
+  const [enhanceSaturation, setEnhanceSaturation] = useState(100);
+  const [enhanceSepia, setEnhanceSepia] = useState(0);
+  const [enhanceHue, setEnhanceHue] = useState(0);
+  const [showEnhancePanel, setShowEnhancePanel] = useState(false);
+  const [globalEnhance, setGlobalEnhance] = useState(false);
+
+  const getMobileEnhancementFilter = () => {
+    const presetFilters: Record<EnhancementPreset, { brightness?: number; contrast?: number; saturate?: number; sepia?: number; hueRotate?: number }> = {
+      none: {},
+      natural: { brightness: 105, contrast: 105, saturate: 100 },
+      vibrant: { brightness: 110, contrast: 120, saturate: 150 },
+      film: { brightness: 95, contrast: 120, saturate: 80, sepia: 20 },
+      bw: { brightness: 110, contrast: 120, saturate: 0 },
+      warm: { brightness: 105, contrast: 105, saturate: 110, sepia: 15, hueRotate: -10 },
+      cool: { brightness: 105, contrast: 105, saturate: 110, hueRotate: 20 },
+    };
+
+    const preset = presetFilters[enhancePreset];
+    const brightness = preset.brightness ?? enhanceBrightness;
+    const contrast = preset.contrast ?? enhanceContrast;
+    const saturate = preset.saturate ?? enhanceSaturation;
+    const sepia = preset.sepia ?? enhanceSepia;
+    const hueRotate = preset.hueRotate ?? enhanceHue;
+
+    const parts = [
+      `brightness(${brightness}%)`,
+      `contrast(${contrast}%)`,
+      `saturate(${saturate}%)`,
+    ];
+
+    if (sepia > 0) parts.push(`sepia(${sepia}%)`);
+    if (hueRotate !== 0) parts.push(`hue-rotate(${hueRotate}deg)`);
+
+    return parts.join(' ');
+  };
+
+  const resetMobileEnhancements = () => {
+    setEnhancePreset('none');
+    setEnhanceBrightness(100);
+    setEnhanceContrast(100);
+    setEnhanceSaturation(100);
+    setEnhanceSepia(0);
+    setEnhanceHue(0);
+  };
+
+  // Weather widget state with unit toggle
+  type WeatherUnits = 'metric' | 'imperial';
+  const [weatherUnits, setWeatherUnits] = useState<WeatherUnits>('metric');
+  const [weatherCity, setWeatherCity] = useState('London');
   const [weatherLoading, setWeatherLoading] = useState(false);
 
-  // Live Weather State
-  const [weatherStationData, setWeatherStationData] = useState({
-    city: 'New York',
-    country: 'US',
-    tempC: 22,
-    tempF: 72,
-    condition: 'Partly Cloudy',
-    humidity: 58,
-    windSpeedKts: 14,
-    windDirection: '240° SW',
-    description: 'scattered clouds',
-    icon: '03d',
+  // Live Weather Station State
+  const [weatherStationData, setWeatherStationData] = useState<WeatherData>({
+    city: 'London',
+    country: '',
+    countryCode: '',
+    tempC: 18,
+    tempF: 64,
+    tempMinC: 14,
+    tempMaxC: 22,
+    condition: 'Fair / Clear',
+    description: 'clear sky',
+    icon: '01d',
+    humidity: 55,
+    windSpeedMs: 3.5,
+    windSpeedKts: 7,
+    windDirection: '180° S',
+    pressure: 1013,
+    visibility: 10000,
+    feelsLikeC: 17,
     isRealTime: false,
     lastUpdated: '',
+    datetime: '',
+    timezone: 0,
   });
 
   const loadWeatherForCity = async (city: string) => {
     try {
-      showToast('Weather', `Fetching live weather for ${city}...`, 'info');
-      const liveData = await fetchAccurateWeather(city);
+            const liveData = await getWeather(city, weatherUnits);
       setWeatherStationData(liveData);
-      showToast('Live Weather Updated', `Loaded live weather for ${liveData.city}`, 'success');
-    } catch {
+          } catch {
       showToast('Weather Error', 'Failed to retrieve live weather data', 'error');
     }
   };
 
   useEffect(() => {
-    loadWeatherForCity('New York');
+    loadWeatherForCity('London');
   }, []);
 
-  // Quick dialer state
-  const [dialNumber, setDialNumber] = useState('');
-  const [callActive, setCallActive] = useState(false);
+  useEffect(() => {
+    if (lightboxPhoto) {
+      resetMobileEnhancements();
+    }
+  }, [lightboxPhoto]);
 
+  // Quick dialer state
+  
   // Notes preview state
   const [newNoteTitle, setNewNoteTitle] = useState('');
   const [newNoteBody, setNewNoteBody] = useState('');
@@ -221,120 +284,6 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
     { name: 'Nightcore 101.3', freq: 101.3 },
     { name: 'Aviation Radio 107.9', freq: 107.9 },
   ]);
-
-  const filteredAndSortedPhotos = useMemo(() => {
-    let result = [...myPlanePics];
-    if (planePicsSearch.trim()) {
-      const q = planePicsSearch.toLowerCase();
-      result = result.filter(p =>
-        p.registration.toLowerCase().includes(q) ||
-        (p.airline && p.airline.toLowerCase().includes(q)) ||
-        (p.specialLivery && p.specialLivery.toLowerCase().includes(q)) ||
-        (p.aircraftModel && p.aircraftModel.toLowerCase().includes(q))
-      );
-    }
-    result.sort((a, b) => {
-      if (planePicsSort === 'newest') return (b.dateSpotted || '').localeCompare(a.dateSpotted || '') || b.id.localeCompare(a.id);
-      if (planePicsSort === 'oldest') return (a.dateSpotted || '').localeCompare(b.dateSpotted || '') || a.id.localeCompare(b.id);
-      if (planePicsSort === 'registration') return a.registration.localeCompare(b.registration);
-      if (planePicsSort === 'airline') return (a.airline || '').localeCompare(b.airline || '');
-      return 0;
-    });
-    return result;
-  }, [myPlanePics, planePicsSearch, planePicsSort]);
-
-  useEffect(() => {
-    if (screenMode !== 'FEATURE') {
-      setLightboxPhoto(null);
-    }
-  }, [screenMode]);
-
-  // Responsive paging calculation
-  useEffect(() => {
-    const calculatePerPage = () => {
-      const width = window.innerWidth;
-      if (width < 350) return 6;
-      if (width < 400) return 9;
-      return 12;
-    };
-    setPlanePicsPerPage(Math.min(calculatePerPage(), 50));
-    const handleResize = () => setPlanePicsPerPage(Math.min(calculatePerPage(), 50));
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Live Clock Update
-  useEffect(() => {
-    const updateTime = () => {
-      const d = new Date();
-      setCurrentTime(
-        d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
-      );
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 10000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    let interval: number;
-    if (swRunning) {
-      interval = window.setInterval(() => {
-        setSwTime((t) => t + 1);
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [swRunning]);
-
-  // Audio touch tone feedback with error catching
-  const playTouchSound = (freq = 520) => {
-    try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, ctx.currentTime);
-      gain.gain.setValueAtTime(0.05, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.08);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.08);
-    } catch (e) {
-      // Ignore web audio policies
-    }
-  };
-
-  const handleAppClick = (tabKey: string, actionName: string, feature?: string) => {
-    try {
-      playTouchSound(580);
-      if (tabKey === 'account') {
-        setScreenMode('ACCOUNT_OVERLAY');
-        return;
-      }
-      if (tabKey === 'feature' && feature) {
-        setCurrentFeature(feature);
-        setScreenMode('FEATURE');
-        showToast(t.brioDroidMobile, `${t.launching} ${actionName}...`, 'info');
-        return;
-      }
-      if (['connect', 'media', 'arcade', 'office', 'telemetry', 'rss'].includes(tabKey)) {
-        setScreenMode(tabKey as any);
-        showToast(t.brioDroidMobile, `${t.launching} ${actionName}...`, 'info');
-        return;
-      }
-      if (authRequired && !user) {
-        setShowAuthModal(true);
-        showToast(t.authRequired, t.pleaseSignIn, 'warning');
-        return;
-      }
-      showToast(t.brioDroidMobile, `${t.launching} ${actionName}...`, 'info');
-    } catch (err: any) {
-      showToast(t.navigationError, err.message || 'Failed to navigate', 'error');
-    }
-  };
 
   const generateAccountQR = async () => {
     try {
@@ -371,7 +320,6 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
 
         setQrDataUrl(url);
         setScreenMode('QR_ACCOUNT');
-        showToast('Success', 'Account QR code generated successfully', 'success');
       } catch (qrErr: any) {
         console.error('QR generation failed:', qrErr);
         showToast(t.qrError, `QR generation failed: ${qrErr.message || 'No usable data'}`, 'error');
@@ -392,7 +340,6 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
       if (encryptedTest) {
         setMasterPassphrase(passphraseInput);
         setVaultStatus('Custom Passphrase Active • Encrypted');
-        showToast(t.vaultSecurityUpdated, 'Master passphrase successfully set and verified.', 'success');
         setPassphraseInput('');
       }
     } catch (err: any) {
@@ -400,43 +347,91 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
     }
   };
 
+  const playTouchSound = (freq = 440) => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      gain.gain.setValueAtTime(0.06, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.12);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.12);
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleAppClick = (hub: string, name: string, feature?: string) => {
+    playTouchSound(520);
+    if (feature) {
+      setCurrentFeature(feature);
+      setScreenMode('FEATURE');
+    } else if (hub && hub !== 'feature' && hub !== 'account') {
+      onNavigateTab(hub);
+    } else if (name === 'Account Settings') {
+      setScreenMode('ACCOUNT_OVERLAY');
+    } else {
+      setScreenMode('HOME');
+    }
+  };
+
+  const filteredAndSortedPhotos = useMemo(() => {
+    let photos = myPlanePics.filter((p) => {
+      const q = planePicsSearch.toLowerCase();
+      return (
+        p.registration.toLowerCase().includes(q) ||
+        p.specialLivery.toLowerCase().includes(q) ||
+        (p.airline || '').toLowerCase().includes(q) ||
+        (p.location || '').toLowerCase().includes(q)
+      );
+    });
+    if (planePicsSort === 'newest') photos = [...photos].sort((a, b) => (b.dateCaptured || '').localeCompare(a.dateCaptured || ''));
+    if (planePicsSort === 'oldest') photos = [...photos].sort((a, b) => (a.dateCaptured || '').localeCompare(b.dateCaptured || ''));
+    if (planePicsSort === 'registration') photos = [...photos].sort((a, b) => a.registration.localeCompare(b.registration));
+    if (planePicsSort === 'airline') photos = [...photos].sort((a, b) => (a.airline || '').localeCompare(b.airline || ''));
+    return photos;
+  }, [myPlanePics, planePicsSearch, planePicsSort]);
+
+  const carrierName = user ? `${user.username}'s Vault` : 'Brio Vault';
+
   const drawerApps = [
-    { name: 'Connect & Mesh Social Hub', hub: 'connect', icon: MessageSquare, category: 'Connect' },
-    { name: 'P2P Mesh Network', hub: 'connect', icon: Users, category: 'Connect' },
-    { name: 'Encrypted Phone Dialer', hub: 'connect', icon: Phone, category: 'Connect' },
-    { name: 'P2P Encrypted Messaging', hub: 'connect', icon: MessageSquare, category: 'Connect' },
-    { name: 'Mesh Social Feed', hub: 'connect', icon: Users, category: 'Connect' },
+     { name: 'Encrypted Messaging', hub: 'connect', icon: MessageSquare, category: 'Connect' },
+     { name: 'Media & Streams Hub', hub: 'media', icon: Music, category: 'Media' },
+     { name: 'IPTV Live TV Streams', hub: 'media', icon: Tv, category: 'Media' },
+     { name: 'Nightcore Audio Player', hub: 'media', icon: Radio, category: 'Media' },
+     { name: 'Audio Equalizer Synthesizer', hub: 'media', icon: Sliders, category: 'Media' },
+     { name: 'RSS News Vault', hub: 'rss', icon: Rss, category: 'Media' },
 
-    { name: 'Media & Streams Hub', hub: 'media', icon: Music, category: 'Media' },
-    { name: 'IPTV Live TV Streams', hub: 'media', icon: Tv, category: 'Media' },
-    { name: 'Nightcore Audio Player', hub: 'media', icon: Radio, category: 'Media' },
-    { name: 'Audio Equalizer Synthesizer', hub: 'media', icon: Sliders, category: 'Media' },
-    { name: 'RSS News Vault', hub: 'rss', icon: Rss, category: 'Media' },
+     { name: 'Arcade & Games Hub', hub: 'arcade', icon: Gamepad2, category: 'Arcade' },
+     { name: 'Space Invaders Arcade', hub: 'arcade', icon: Gamepad2, category: 'Arcade' },
+     { name: 'Retro Snake Game', hub: 'arcade', icon: Gamepad2, category: 'Arcade' },
+     { name: 'Tetris Arcade', hub: 'arcade', icon: Layers, category: 'Arcade' },
+     { name: 'Asteroids & Cyber Defense', hub: 'arcade', icon: ShieldCheck, category: 'Arcade' },
 
-    { name: 'Arcade & Games Hub', hub: 'arcade', icon: Gamepad2, category: 'Arcade' },
-    { name: 'Space Invaders Arcade', hub: 'arcade', icon: Gamepad2, category: 'Arcade' },
-    { name: 'Retro Snake Game', hub: 'arcade', icon: Gamepad2, category: 'Arcade' },
-    { name: 'Tetris Arcade', hub: 'arcade', icon: Layers, category: 'Arcade' },
-    { name: 'Asteroids & Cyber Defense', hub: 'arcade', icon: ShieldCheck, category: 'Arcade' },
+     { name: 'Productivity & Office Hub', hub: 'office', icon: Briefcase, category: 'Office' },
+     { name: 'PDF Annotator & Editor', hub: 'office', icon: FileText, category: 'Office' },
+     { name: 'Encrypted Markdown Notes', hub: 'office', icon: FileText, category: 'Office' },
+     { name: 'Task Checklist Manager', hub: 'office', icon: CheckCircle2, category: 'Office' },
+     { name: 'Graphic Calculator', hub: 'feature', icon: Calculator, category: 'Office', feature: 'calculator' },
+     { name: 'Stopwatch & Timer', hub: 'feature', icon: Timer, category: 'Office', feature: 'stopwatch' },
 
-    { name: 'Productivity & Office Hub', hub: 'office', icon: Briefcase, category: 'Office' },
-    { name: 'PDF Annotator & Editor', hub: 'office', icon: FileText, category: 'Office' },
-    { name: 'Encrypted Markdown Notes', hub: 'office', icon: FileText, category: 'Office' },
-    { name: 'Task Checklist Manager', hub: 'office', icon: CheckCircle2, category: 'Office' },
-    { name: 'Graphic Calculator', hub: 'feature', icon: Calculator, category: 'Office', feature: 'calculator' },
-    { name: 'Stopwatch & Timer', hub: 'feature', icon: Timer, category: 'Office', feature: 'stopwatch' },
+     { name: 'Aviation & Telemetry Hub', hub: 'telemetry', icon: Plane, category: 'Telemetry' },
+     { name: 'MyPlanePics 3D Vault', hub: 'telemetry', icon: Camera, category: 'Telemetry' },
+     { name: 'Spotter Airline Rankings', hub: 'telemetry', icon: Award, category: 'Telemetry' },
+     { name: 'System Telemetry Monitor', hub: 'telemetry', icon: Zap, category: 'Telemetry' },
 
-    { name: 'Aviation & Telemetry Hub', hub: 'telemetry', icon: Plane, category: 'Telemetry' },
-    { name: 'MyPlanePics 3D Vault', hub: 'telemetry', icon: Camera, category: 'Telemetry' },
-    { name: 'Spotter Airline Rankings', hub: 'telemetry', icon: Award, category: 'Telemetry' },
-    { name: 'System Telemetry Monitor', hub: 'telemetry', icon: Zap, category: 'Telemetry' },
+     { name: 'FM Radio Tuner', hub: 'feature', icon: Radio, category: 'Media', feature: 'fmTuner' },
+     { name: 'World Clock Matrix', hub: 'feature', icon: Globe2, category: 'Office', feature: 'worldClock' },
 
-    { name: 'FM Radio Tuner', hub: 'feature', icon: Radio, category: 'Media', feature: 'fmTuner' },
-    { name: 'World Clock Matrix', hub: 'feature', icon: Globe2, category: 'Office', feature: 'worldClock' },
-
-    { name: 'Account Settings', hub: 'account', icon: Settings, category: 'Account' },
-    { name: 'AES-256 Vault Security', hub: 'account', icon: ShieldCheck, category: 'Account' },
-  ];
+      { name: 'Account Settings', hub: 'account', icon: Settings, category: 'Account' },
+      { name: 'AES-256 Vault Security', hub: 'account', icon: ShieldCheck, category: 'Account' },
+    ];
 
   const filteredDrawerApps = drawerApps.filter(
     (app) =>
@@ -462,50 +457,129 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
 
         {/* DIGITAL SCREEN DISPLAY VIEWPORT */}
          <div className="relative w-full h-[530px] bg-[#1a1c1e] rounded-xl border border-zinc-800 flex flex-col overflow-hidden text-white shadow-2xl">
-           {lightboxPhoto && currentFeature === 'photos' && (
-             <div className="absolute inset-0 z-50 bg-black/90 flex items-center justify-center p-3" onClick={() => setLightboxPhoto(null)}>
-               <div className="relative max-w-sm w-full bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-700 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-                 <div className="relative aspect-video bg-black">
-                   {lightboxPhoto.mediaType === 'video' && lightboxPhoto.videoUrl ? (
-                     <video src={lightboxPhoto.videoUrl} className="w-full h-full object-contain" controls autoPlay />
-                   ) : (
-                     <img src={lightboxPhoto.imageUrl} alt={lightboxPhoto.registration} className="w-full h-full object-contain" />
-                   )}
-                   <button onClick={() => setLightboxPhoto(null)} className="absolute top-2 right-2 p-1 bg-black/50 rounded-full text-white hover:bg-black/70">
-                     <X className="w-4 h-4" />
-                   </button>
-                 </div>
-                 <div className="p-3 space-y-2">
-                   <div className="flex items-center justify-between">
-                     <h3 className="text-sm font-bold text-white">{lightboxPhoto.registration}</h3>
-                     <button
-                       onClick={() => {
-                         try {
-                           navigator.clipboard.writeText(lightboxPhoto.filename);
-                           showToast('Copied', 'Filename copied to clipboard', 'success');
-                         } catch {
-                           showToast('Copy Failed', 'Clipboard access denied', 'error');
-                         }
-                       }}
-                       className="liquid-glass-btn p-1 bg-zinc-800 rounded-lg text-zinc-300 hover:text-white"
-                       title="Copy filename"
-                     >
-                       <Copy className="w-3.5 h-3.5" />
-                     </button>
-                   </div>
-                   <div className="space-y-1 text-[10px] text-zinc-400 max-h-32 overflow-y-auto">
-                     {lightboxPhoto.airline && <p><span className="text-zinc-300 font-bold">Airline:</span> {lightboxPhoto.airline}</p>}
-                     {lightboxPhoto.aircraftModel && <p><span className="text-zinc-300 font-bold">Model:</span> {lightboxPhoto.aircraftModel}</p>}
-                     {lightboxPhoto.specialLivery && <p><span className="text-zinc-300 font-bold">Livery:</span> {lightboxPhoto.specialLivery}</p>}
-                     {lightboxPhoto.dateCaptured && <p><span className="text-zinc-300 font-bold">Date:</span> {lightboxPhoto.dateCaptured}</p>}
-                     {lightboxPhoto.location && <p><span className="text-zinc-300 font-bold">Location:</span> {lightboxPhoto.location}</p>}
-                      <p><span className="text-zinc-300 font-bold">Format:</span> {lightboxPhoto.formatPattern}</p>
-                     {lightboxPhoto.isAutoCorrected && <p className="text-amber-400 font-bold">Auto-corrected filename</p>}
-                   </div>
-                 </div>
-               </div>
-             </div>
-           )}
+            {lightboxPhoto && currentFeature === 'photos' && (
+              <div className="absolute inset-0 z-50 bg-black/90 flex items-center justify-center p-3" onClick={() => setLightboxPhoto(null)}>
+                <div className="relative max-w-sm w-full bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-700 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                  <div className="relative aspect-video bg-black">
+                    {lightboxPhoto.mediaType === 'video' && lightboxPhoto.videoUrl ? (
+                      <video src={lightboxPhoto.videoUrl} className="w-full h-full object-contain" controls autoPlay style={{ filter: getMobileEnhancementFilter() }} />
+                    ) : (
+                      <img src={lightboxPhoto.imageUrl} alt={lightboxPhoto.registration} className="w-full h-full object-contain" style={{ filter: getMobileEnhancementFilter() }} />
+                    )}
+                    <button onClick={() => setLightboxPhoto(null)} className="absolute top-2 right-2 p-1 bg-black/50 rounded-full text-white hover:bg-black/70">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-bold text-white">{lightboxPhoto.registration}</h3>
+                      <button
+                        onClick={() => {
+                          try {
+                            navigator.clipboard.writeText(lightboxPhoto.filename);
+                          } catch {
+                            showToast('Copy Failed', 'Clipboard access denied', 'error');
+                          }
+                        }}
+                        className="liquid-glass-btn p-1 bg-zinc-800 rounded-lg text-zinc-300 hover:text-white"
+                        title="Copy filename"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    <div className="space-y-1 text-[10px] text-zinc-400 max-h-32 overflow-y-auto">
+                      {lightboxPhoto.airline && <p><span className="text-zinc-300 font-bold">Airline:</span> {lightboxPhoto.airline}</p>}
+                      {lightboxPhoto.aircraftModel && <p><span className="text-zinc-300 font-bold">Model:</span> {lightboxPhoto.aircraftModel}</p>}
+                      {lightboxPhoto.specialLivery && <p><span className="text-zinc-300 font-bold">Livery:</span> {lightboxPhoto.specialLivery}</p>}
+                      {lightboxPhoto.dateCaptured && <p><span className="text-zinc-300 font-bold">Date:</span> {lightboxPhoto.dateCaptured}</p>}
+                      {lightboxPhoto.location && <p><span className="text-zinc-300 font-bold">Location:</span> {lightboxPhoto.location}</p>}
+                       <p><span className="text-zinc-300 font-bold">Format:</span> {lightboxPhoto.formatPattern}</p>
+                      {lightboxPhoto.isAutoCorrected && <p className="text-amber-400 font-bold">Auto-corrected filename</p>}
+                    </div>
+                    <button
+                      onClick={() => setShowEnhancePanel(!showEnhancePanel)}
+                      className="liquid-glass-btn w-full py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-[10px] font-bold flex items-center justify-center gap-1"
+                    >
+                      <Sparkles className="w-3 h-3" /> {showEnhancePanel ? 'Hide' : 'Enhance'} Image
+                    </button>
+                    {showEnhancePanel && (
+                      <div className="p-2.5 bg-black/50 rounded-xl border border-zinc-800 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] text-zinc-400 uppercase font-bold">Preset</span>
+                          <button onClick={resetMobileEnhancements} className="text-[9px] text-zinc-500 hover:text-white">Reset</button>
+                        </div>
+                        <div className="grid grid-cols-4 gap-1">
+                          {[
+                            { id: 'none', label: 'None' },
+                            { id: 'natural', label: 'Natural' },
+                            { id: 'vibrant', label: 'Vibrant' },
+                            { id: 'film', label: 'Film' },
+                            { id: 'bw', label: 'B&W' },
+                            { id: 'warm', label: 'Warm' },
+                            { id: 'cool', label: 'Cool' },
+                            { id: 'bw', label: 'B&W' },
+                          ].map((preset) => (
+                            <button
+                              key={preset.id}
+                              onClick={() => setEnhancePreset(preset.id as EnhancementPreset)}
+                              className={`liquid-glass-btn px-1 py-1 rounded text-[9px] font-bold cursor-pointer ${
+                                enhancePreset === preset.id
+                                  ? 'bg-[#FF5F1F] text-black'
+                                  : 'bg-zinc-800 text-zinc-300'
+                              }`}
+                            >
+                              {preset.label}
+                            </button>
+                          ))}
+                        </div>
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] text-zinc-400">Brightness</span>
+                            <span className="text-[9px] text-zinc-500 font-mono">{enhanceBrightness}%</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="50"
+                            max="150"
+                            value={enhanceBrightness}
+                            onChange={(e) => { setEnhanceBrightness(Number(e.target.value)); setEnhancePreset('none'); }}
+                            className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#FF5F1F]"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] text-zinc-400">Contrast</span>
+                            <span className="text-[9px] text-zinc-500 font-mono">{enhanceContrast}%</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="50"
+                            max="150"
+                            value={enhanceContrast}
+                            onChange={(e) => { setEnhanceContrast(Number(e.target.value)); setEnhancePreset('none'); }}
+                            className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#FF5F1F]"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] text-zinc-400">Saturation</span>
+                            <span className="text-[9px] text-zinc-500 font-mono">{enhanceSaturation}%</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="0"
+                            max="200"
+                            value={enhanceSaturation}
+                            onChange={(e) => { setEnhanceSaturation(Number(e.target.value)); setEnhancePreset('none'); }}
+                            className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#FF5F1F]"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
            
            {/* ANDROID 2.x CLASSIC WHITE STATUS BAR */}
           <div className="w-full bg-white text-zinc-900 px-2.5 py-0.5 flex items-center justify-between text-[11px] font-bold font-sans z-30 shadow-sm border-b border-zinc-300">
@@ -544,25 +618,33 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
           >
             {/* GOOGLE SEARCH WIDGET FLOATING NEAR TOP */}
             <div className="p-3 pt-3">
-              <button
-                onClick={() => {
-                  playTouchSound(550);
-                  setScreenMode('SEARCH');
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const query = (e.target as HTMLFormElement).elements.namedItem('googleQ') as HTMLInputElement;
+                  const q = query?.value?.trim();
+                  if (q) {
+                    playTouchSound(550);
+                    window.open(`https://www.google.com/search?q=${encodeURIComponent(q)}`, '_blank', 'noopener,noreferrer');
+                  }
                 }}
-                className="liquid-glass-btn w-full bg-white/95 hover:bg-white text-zinc-800 rounded-lg px-3 py-2 shadow-lg border border-white/40 flex items-center justify-between transition-transform active:scale-98 cursor-pointer group"
-                title="Search Apps & Features"
+                className="flex gap-2"
               >
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-extrabold tracking-tight bg-gradient-to-r from-blue-600 via-red-500 to-amber-500 bg-clip-text text-transparent">
-                    Google
-                  </span>
-                  <span className="text-xs text-zinc-400 font-mono">| Search</span>
-                </div>
-                <div className="flex items-center gap-2 text-zinc-500 group-hover:text-zinc-800">
-                  <Search className="w-4 h-4" />
-                  <Mic className="w-4 h-4 text-blue-500" />
-                </div>
-              </button>
+                <input
+                  type="text"
+                  name="googleQ"
+                  placeholder="Search Google..."
+                  autoComplete="off"
+                  className="flex-1 bg-white/95 text-zinc-800 rounded-lg px-3 py-2 text-xs font-mono placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-sky-400"
+                />
+                <button
+                  type="submit"
+                  className="liquid-glass-btn bg-white hover:bg-zinc-100 text-zinc-800 rounded-lg px-3 py-2 shadow border border-white/40 flex items-center gap-1"
+                  title="Search Google"
+                >
+                  <Search className="w-4 h-4 text-blue-600" />
+                </button>
+              </form>
             </div>
 
              {/* SCREEN CONTENT VIEW SWITCHER */}
@@ -579,27 +661,13 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-[10px] font-mono text-sky-300 uppercase tracking-wider">{t.weatherWidget}</p>
-                          <p className="text-lg font-black text-white font-mono">{weatherData ? `${weatherData.temp || '--'}°C` : '--°C'}</p>
-                           <p className="text-[10px] text-sky-200">{weatherData?.name || weatherStationData.city}</p>
+                          <p className="text-lg font-black text-white font-mono">
+                            {weatherStationData ? `${weatherUnits === 'metric' ? weatherStationData.tempC : weatherStationData.tempF}°` : '--°'}
+                          </p>
+                           <p className="text-[10px] text-sky-200">{weatherStationData?.city || '—'}</p>
                         </div>
                         <div className="p-2 bg-sky-500/20 rounded-xl border border-sky-400/30">
                           <Cloud className="w-6 h-6 text-sky-300" />
-                        </div>
-                      </div>
-                    </button>
-
-                    {/* Quick Dialer Widget */}
-                    <button
-                      onClick={() => { setCurrentFeature('dialer'); setScreenMode('FEATURE'); playTouchSound(580); }}
-                      className="liquid-glass-btn w-full p-3 bg-gradient-to-r from-emerald-500/20 to-teal-600/20 border border-emerald-400/30 rounded-2xl text-left active:scale-[0.98] transition-transform"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-[10px] font-mono text-emerald-300 uppercase tracking-wider">{t.quickDialer}</p>
-                          <p className="text-sm font-bold text-white font-mono">{dialNumber || t.dialNumber}</p>
-                        </div>
-                        <div className="p-2 bg-emerald-500/20 rounded-xl border border-emerald-400/30">
-                          <Phone className="w-6 h-6 text-emerald-300" />
                         </div>
                       </div>
                     </button>
@@ -688,13 +756,13 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
 
                     {/* News Ticker Widget */}
                     <button
-                      onClick={() => { setCurrentFeature('news'); setScreenMode('FEATURE'); playTouchSound(580); }}
+                      onClick={() => { setScreenMode('rss'); playTouchSound(580); }}
                       className="liquid-glass-btn w-full p-3 bg-gradient-to-r from-cyan-500/20 to-sky-600/20 border border-cyan-400/30 rounded-2xl text-left active:scale-[0.98] transition-transform"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
                           <p className="text-[10px] font-mono text-cyan-300 uppercase tracking-wider">{t.newsTicker}</p>
-                          <p className="text-xs text-white truncate">{socialPosts.length > 0 ? socialPosts[0].content : t.noArticlesFound}</p>
+                          <p className="text-xs text-white truncate">{t.rssReader}</p>
                         </div>
                         <div className="p-2 bg-cyan-500/20 rounded-xl border border-cyan-400/30 shrink-0 ml-2">
                           <Newspaper className="w-6 h-6 text-cyan-300" />
@@ -820,8 +888,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                         <button
                           onClick={() => {
                             setShowAuthModal(true);
-                            showToast('Auth Modal', 'Opening login modal', 'info');
-                          }}
+                                                      }}
                           className="liquid-glass-btn flex-1 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs rounded-lg text-center"
                         >
                           {t.loginSignUp}
@@ -830,8 +897,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                         <button
                           onClick={() => {
                             logoutUser();
-                            showToast(t.loggedOut, t.userSessionTerminated, 'info');
-                          }}
+                                                      }}
                           className="liquid-glass-btn flex-1 py-1.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-lg text-center flex items-center justify-center gap-1"
                         >
                           <LogOut className="w-3 h-3" /> {t.signOut}
@@ -878,100 +944,120 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                      </button>
                    </div>
 
-                    {/* Weather Feature */}
-                    {currentFeature === 'weather' && (
-                      <div className="space-y-3">
-                        <div className="p-3 bg-zinc-900 rounded-xl border border-zinc-800 space-y-2">
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="text"
-                              value={weatherCity}
-                              onChange={(e) => setWeatherCity(e.target.value)}
-                              placeholder="City name..."
-                              className="flex-1 bg-black border border-zinc-700 rounded-lg px-2 py-1.5 text-xs text-white font-mono"
-                            />
-                            <button
-                              onClick={async () => {
-                                setWeatherLoading(true);
-                                try {
-                                  await loadWeatherForCity(weatherCity || 'New York');
-                                } catch (e) {
-                                  showToast(t.error, String(e), 'error');
-                                } finally {
-                                  setWeatherLoading(false);
-                                }
-                              }}
-                              className="liquid-glass-btn px-3 py-1.5 bg-sky-600 text-white text-xs rounded-lg"
-                            >
-                              {t.refresh}
-                            </button>
-                          </div>
-                          {weatherLoading && <p className="text-[10px] text-zinc-400">{t.loading}...</p>}
-                          {weatherStationData && (
-                            <div className="grid grid-cols-2 gap-2">
-                              <div className="p-2 bg-black/50 rounded-lg">
-                                <p className="text-[9px] text-zinc-500 uppercase">{t.temperature}</p>
-                                <p className="text-sm font-bold text-white">{weatherStationData.tempC}°C</p>
-                              </div>
-                              <div className="p-2 bg-black/50 rounded-lg">
-                                <p className="text-[9px] text-zinc-500 uppercase">{t.windSpeedLabel}</p>
-                                <p className="text-sm font-bold text-white">{weatherStationData.windSpeedKts} kts</p>
-                              </div>
-                              <div className="p-2 bg-black/50 rounded-lg">
-                                <p className="text-[9px] text-zinc-500 uppercase">{t.humidityLabel}</p>
-                                <p className="text-sm font-bold text-white">{weatherStationData.humidity}%</p>
-                              </div>
-                              <div className="p-2 bg-black/50 rounded-lg">
-                                <p className="text-[9px] text-zinc-500 uppercase">{t.condition}</p>
-                                <p className="text-sm font-bold text-white">{weatherStationData.condition || 'N/A'}</p>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                   {/* Quick Dialer Feature */}
-                   {currentFeature === 'dialer' && (
-                     <div className="space-y-3">
-                       <div className="p-3 bg-zinc-900 rounded-xl border border-zinc-800 space-y-2">
-                         <div className="text-center">
-                           <p className="text-2xl font-mono font-bold text-white tracking-widest">{dialNumber || '—'}</p>
-                         </div>
-                         <div className="grid grid-cols-3 gap-2">
-                           {['1','2','3','4','5','6','7','8','9','*','0','#'].map((key) => (
-                             <button
-                               key={key}
-                               onClick={() => { setDialNumber(d => d + key); playTouchSound(700 + parseInt(key) * 50); }}
-                               className="liquid-glass-btn p-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-white font-bold text-lg"
-                             >
-                               {key}
-                             </button>
-                           ))}
-                         </div>
-                         <div className="flex gap-2">
+                     {/* Weather Feature */}
+                     {currentFeature === 'weather' && (
+                       <div className="space-y-3">
+                         <form
+                           onSubmit={(e) => {
+                             e.preventDefault();
+                             const input = e.currentTarget.elements.namedItem('weatherCity') as HTMLInputElement;
+                             if (input?.value?.trim()) {
+                               loadWeatherForCity(input.value.trim());
+                             }
+                           }}
+                           className="flex gap-2 items-center"
+                         >
+                           <input
+                             type="text"
+                             name="weatherCity"
+                             defaultValue={weatherStationData.city}
+                             placeholder="City name..."
+                             className="flex-1 bg-black border border-zinc-700 rounded-lg px-2 py-1.5 text-xs text-white font-mono"
+                           />
                            <button
-                             onClick={() => setDialNumber(d => d.slice(0, -1))}
-                             className="liquid-glass-btn flex-1 py-2 bg-zinc-800 text-white text-xs rounded-lg"
+                             type="submit"
+                             className="liquid-glass-btn px-3 py-1.5 bg-sky-600 text-white text-xs rounded-lg"
                            >
-                             {t.clear}
+                             {t.refresh}
+                           </button>
+                         </form>
+                         <div className="flex items-center gap-2">
+                           <span className="text-[9px] text-zinc-400 uppercase font-bold">Units:</span>
+                           <button
+                             onClick={() => setWeatherUnits('metric')}
+                             className={`liquid-glass-btn px-2 py-1 rounded text-[10px] font-bold cursor-pointer ${
+                               weatherUnits === 'metric' ? 'bg-sky-500 text-black' : 'bg-zinc-800 text-zinc-300'
+                             }`}
+                           >
+                             °C
                            </button>
                            <button
-                             onClick={() => {
-                               if (dialNumber) {
-                                 setCallActive(true);
-                                 showToast(t.phoneDialer, `Calling ${dialNumber}...`, 'info');
-                                 setTimeout(() => setCallActive(false), 3000);
-                               }
-                             }}
-                             className="liquid-glass-btn flex-1 py-2 bg-emerald-600 text-black font-bold text-xs rounded-lg"
+                             onClick={() => setWeatherUnits('imperial')}
+                             className={`liquid-glass-btn px-2 py-1 rounded text-[10px] font-bold cursor-pointer ${
+                               weatherUnits === 'imperial' ? 'bg-sky-500 text-black' : 'bg-zinc-800 text-zinc-300'
+                             }`}
                            >
-                             {callActive ? t.endCall : t.dialCall}
+                             °F
                            </button>
                          </div>
+                         {weatherLoading && <p className="text-[10px] text-zinc-400">{t.loading}...</p>}
+                         {weatherStationData && (
+                           <div className="p-3 bg-zinc-900 rounded-xl border border-zinc-800 space-y-3">
+                             <div className="flex items-center justify-between">
+                               <div>
+                                 <p className="text-sm font-bold text-white">{weatherStationData.city}</p>
+                                 <p className="text-[10px] text-sky-400 font-mono">
+                                   {weatherStationData.country || ''} {weatherStationData.datetime ? `• ${weatherStationData.datetime}` : ''}
+                                 </p>
+                               </div>
+                               <div className="text-right">
+                                 {weatherStationData.icon && (
+                                   <img
+                                     src={`https://openweathermap.org/img/wn/${weatherStationData.icon}@2x.png`}
+                                     alt={weatherStationData.description}
+                                     className="w-10 h-10 inline-block"
+                                   />
+                                 )}
+                                 <p className="text-lg font-black text-sky-300">
+                                   {weatherUnits === 'metric' ? `${weatherStationData.tempC}°C` : `${weatherStationData.tempF}°F`}
+                                 </p>
+                                 {weatherStationData.tempMinC !== undefined && (
+                                   <p className="text-[9px] text-zinc-400">
+                                     H: {weatherUnits === 'metric' ? `${weatherStationData.tempMaxC}°` : `${Math.round((weatherStationData.tempMaxC * 9) / 5 + 32)}°`} /
+                                     L: {weatherUnits === 'metric' ? `${weatherStationData.tempMinC}°` : `${Math.round((weatherStationData.tempMinC * 9) / 5 + 32)}°`}
+                                   </p>
+                                 )}
+                               </div>
+                             </div>
+                             <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
+                               <div className="p-2 bg-black/50 rounded-lg">
+                                 <p className="text-[9px] text-zinc-500 uppercase">Forecast</p>
+                                 <p className="text-xs font-bold text-white">{weatherStationData.condition || 'N/A'}</p>
+                               </div>
+                               <div className="p-2 bg-black/50 rounded-lg">
+                                 <p className="text-[9px] text-zinc-500 uppercase">{t.humidityLabel}</p>
+                                 <p className="text-xs font-bold text-white">{weatherStationData.humidity}%</p>
+                               </div>
+                               <div className="p-2 bg-black/50 rounded-lg">
+                                 <p className="text-[9px] text-zinc-500 uppercase">Wind</p>
+                                 <p className="text-xs font-bold text-white">
+                                   {weatherUnits === 'metric'
+                                     ? `${weatherStationData.windSpeedMs.toFixed(1)} m/s`
+                                     : `${(weatherStationData.windSpeedMs * 2.237).toFixed(1)} mph`}
+                                   {' '}{weatherStationData.windDirection}
+                                 </p>
+                               </div>
+                               <div className="p-2 bg-black/50 rounded-lg">
+                                 <p className="text-[9px] text-zinc-500 uppercase">Pressure</p>
+                                 <p className="text-xs font-bold text-white">{weatherStationData.pressure || '--'} hPa</p>
+                               </div>
+                               <div className="p-2 bg-black/50 rounded-lg">
+                                 <p className="text-[9px] text-zinc-500 uppercase">Real Feel</p>
+                                 <p className="text-xs font-bold text-white">
+                                   {weatherUnits === 'metric' ? `${weatherStationData.feelsLikeC}°C` : `${Math.round((weatherStationData.feelsLikeC * 9) / 5 + 32)}°F`}
+                                 </p>
+                               </div>
+                             </div>
+                             {weatherStationData.isRealTime && (
+                               <p className="text-[9px] text-emerald-400 font-mono flex items-center gap-1">
+                                 <Activity className="w-3 h-3 animate-pulse" />
+                                 Live • Updated: {weatherStationData.lastUpdated}
+                               </p>
+                             )}
+                           </div>
+                         )}
                        </div>
-                     </div>
-                   )}
+                     )}
 
                    {/* Notes Feature */}
                    {currentFeature === 'notes' && (
@@ -1103,6 +1189,14 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                           >
                             {planePicsViewMode === 'grid' ? <List className="w-3.5 h-3.5" /> : <Grid3x3 className="w-3.5 h-3.5" />}
                           </button>
+
+                          <button
+                            onClick={() => setGlobalEnhance(!globalEnhance)}
+                            className={`liquid-glass-btn p-1 rounded-lg text-zinc-300 shrink-0 ${globalEnhance ? 'bg-cyan-600 text-white' : 'bg-zinc-800'}`}
+                            title={globalEnhance ? 'Enhancement ON' : 'Enhancement OFF'}
+                          >
+                            <Wand2 className="w-3.5 h-3.5" />
+                          </button>
                         </div>
 
                         {/* Batch Actions */}
@@ -1152,11 +1246,13 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                                     className={`relative aspect-square rounded-lg overflow-hidden bg-black border cursor-pointer ${planePicsSelectedIds.has(photo.id) ? 'border-pink-500 ring-1 ring-pink-500' : 'border-white/10'}`}
                                   >
                                     {photo.mediaType === 'video' && photo.videoUrl ? (
-                                      <video src={photo.videoUrl} className="w-full h-full object-cover" muted />
+                                      <video src={photo.videoUrl} className="w-full h-full object-cover" muted style={{ filter: globalEnhance ? getMobileEnhancementFilter() : undefined }} />
                                     ) : (
-                                      <img src={photo.thumbnailUrl || photo.imageUrl} alt={photo.registration} className="w-full h-full object-cover" />
+                                      <img src={photo.thumbnailUrl || photo.imageUrl} alt={photo.registration} className="w-full h-full object-cover" style={{ filter: globalEnhance ? getMobileEnhancementFilter() : undefined }} />
                                     )}
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                                    {/* Frutiger Aero glossy shine */}
+                                    <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none opacity-0 hover:opacity-100 transition-opacity duration-300" />
                                     <div className="absolute bottom-0.5 left-0.5 right-0.5">
                                       <p className="text-[8px] font-mono text-white truncate">{photo.registration}</p>
                                       {photo.airline && <p className="text-[7px] text-zinc-300 truncate">{photo.airline}</p>}
@@ -1191,27 +1287,28 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                                     }}
                                     className={`flex items-center gap-2 p-1.5 rounded-lg border cursor-pointer ${planePicsSelectedIds.has(photo.id) ? 'bg-pink-900/20 border-pink-500' : 'bg-zinc-900 border-zinc-800'}`}
                                   >
-                                    <div className="w-10 h-10 rounded-md overflow-hidden bg-black shrink-0">
-                                      {photo.mediaType === 'video' && photo.videoUrl ? (
-                                        <video src={photo.videoUrl} className="w-full h-full object-cover" muted />
-                                      ) : (
-                                        <img src={photo.thumbnailUrl || photo.imageUrl} alt={photo.registration} className="w-full h-full object-cover" />
-                                      )}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                      <p className="text-[10px] font-bold text-white truncate">{photo.registration}</p>
-                                      <p className="text-[9px] text-zinc-400 truncate">{photo.airline || photo.aircraftModel || 'Unknown'}</p>
-                                    </div>
-                                    {photo.mediaType === 'video' && <Video className="w-3 h-3 text-zinc-400 shrink-0" />}
-                                    {isSelectMode && (
-                                      <div className="w-4 h-4 rounded-full border-2 border-white flex items-center justify-center bg-black/50 shrink-0">
-                                        {planePicsSelectedIds.has(photo.id) && <Check className="w-2.5 h-2.5 text-pink-400" />}
+                                      <div className="w-10 h-10 rounded-md overflow-hidden bg-black shrink-0 relative">
+                                        {photo.mediaType === 'video' && photo.videoUrl ? (
+                                          <video src={photo.videoUrl} className="w-full h-full object-cover" muted />
+                                        ) : (
+                                          <img src={photo.thumbnailUrl || photo.imageUrl} alt={photo.registration} className="w-full h-full object-cover" />
+                                        )}
+                                        <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none opacity-0 hover:opacity-100 transition-opacity duration-300" />
                                       </div>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
+                                     <div className="flex-1 min-w-0">
+                                       <p className="text-[10px] font-bold text-white truncate">{photo.registration}</p>
+                                       <p className="text-[9px] text-zinc-400 truncate">{photo.airline || photo.aircraftModel || 'Unknown'}</p>
+                                     </div>
+                                     {photo.mediaType === 'video' && <Video className="w-3 h-3 text-zinc-400 shrink-0" />}
+                                     {isSelectMode && (
+                                       <div className="w-4 h-4 rounded-full border-2 border-white flex items-center justify-center bg-black/50 shrink-0">
+                                         {planePicsSelectedIds.has(photo.id) && <Check className="w-2.5 h-2.5 text-pink-400" />}
+                                       </div>
+                                     )}
+                                   </div>
+                                 ))}
+                               </div>
+                             )}
                           </>
                         )}
 
@@ -1593,60 +1690,112 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                    </button>
                  </div>
 
-                  <div className="flex gap-2 overflow-x-auto pb-2">
-                    {['New York', 'London', 'Tokyo', 'Dubai', 'Paris', 'Los Angeles', 'San Francisco', 'Frankfurt'].map((city) => (
-                      <button
-                        key={city}
-                        onClick={() => loadWeatherForCity(city)}
-                        className={`liquid-glass-btn px-3 py-1.5 rounded-lg text-[10px] font-bold font-mono transition-all shrink-0 ${
-                          weatherStationData.city === city
-                            ? 'bg-sky-500 text-black font-extrabold'
-                            : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                        }`}
-                      >
-                        {city}
-                      </button>
-                    ))}
-                  </div>
+                   <div className="flex gap-2 overflow-x-auto pb-2">
+                     {['New York', 'London', 'Tokyo', 'Dubai', 'Paris', 'Los Angeles', 'San Francisco', 'Frankfurt'].map((city) => (
+                       <button
+                         key={city}
+                         onClick={() => loadWeatherForCity(city)}
+                         className={`liquid-glass-btn px-3 py-1.5 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer shrink-0 ${
+                           weatherStationData.city === city
+                             ? 'bg-sky-500 text-black font-extrabold shadow-lg'
+                             : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                         }`}
+                       >
+                         {city}
+                       </button>
+                     ))}
+                   </div>
 
-                  <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-sm font-bold text-white">{weatherStationData.city}</h3>
-                        <p className="text-[10px] text-sky-400 font-mono">{weatherStationData.country} • {weatherStationData.description}</p>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-2xl font-black text-sky-300">{weatherStationData.tempC}°C</span>
-                        <p className="text-[10px] text-slate-400">{weatherStationData.tempF}°F</p>
-                      </div>
-                    </div>
+                   <div className="flex items-center gap-2">
+                     <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">Units:</span>
+                     <button
+                       onClick={() => setWeatherUnits('metric')}
+                       className={`liquid-glass-btn px-2 py-1 rounded text-[10px] font-bold cursor-pointer ${
+                         weatherUnits === 'metric' ? 'bg-sky-500 text-black shadow' : 'bg-slate-800 text-slate-300'
+                       }`}
+                     >
+                       °C / m/s
+                     </button>
+                     <button
+                       onClick={() => setWeatherUnits('imperial')}
+                       className={`liquid-glass-btn px-2 py-1 rounded text-[10px] font-bold cursor-pointer ${
+                         weatherUnits === 'imperial' ? 'bg-sky-500 text-black shadow' : 'bg-slate-800 text-slate-300'
+                       }`}
+                     >
+                       °F / mph
+                     </button>
+                   </div>
 
-                    <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
-                      <div className="p-2 bg-slate-900 rounded-lg border border-slate-800">
-                        <span className="text-slate-400 block">Condition</span>
-                        <span className="font-bold text-white">{weatherStationData.condition}</span>
-                      </div>
-                      <div className="p-2 bg-slate-900 rounded-lg border border-slate-800">
-                        <span className="text-slate-400 block">Humidity</span>
-                        <span className="font-bold text-white">{weatherStationData.humidity}%</span>
-                      </div>
-                      <div className="p-2 bg-slate-900 rounded-lg border border-slate-800">
-                        <span className="text-slate-400 block">Wind</span>
-                        <span className="font-bold text-white">{weatherStationData.windSpeedKts} kts ({weatherStationData.windDirection})</span>
-                      </div>
-                      <div className="p-2 bg-slate-900 rounded-lg border border-slate-800">
-                        <span className="text-slate-400 block">Pressure</span>
-                        <span className="font-bold text-white">{weatherStationData.pressure || '--'} hPa</span>
-                      </div>
-                    </div>
+                   <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+                     <div className="flex items-center justify-between">
+                       <div>
+                         <h3 className="text-sm font-bold text-white">{weatherStationData.city}</h3>
+                         <p className="text-[10px] text-sky-400 font-mono">
+                           {weatherStationData.country || ''} {weatherStationData.datetime ? `• ${weatherStationData.datetime}` : ''}
+                         </p>
+                         <p className="text-[10px] text-slate-400 capitalize">{weatherStationData.description}</p>
+                       </div>
+                       <div className="text-right flex flex-col items-end gap-1">
+                         {weatherStationData.icon && (
+                           <img
+                             src={`https://openweathermap.org/img/wn/${weatherStationData.icon}@2x.png`}
+                             alt={weatherStationData.description}
+                             className="w-12 h-12"
+                           />
+                         )}
+                         <span className="text-2xl font-black text-sky-300">
+                           {weatherUnits === 'metric' ? `${weatherStationData.tempC}°C` : `${weatherStationData.tempF}°F`}
+                         </span>
+                         {weatherStationData.tempMinC !== undefined && (
+                           <span className="text-[9px] text-zinc-400">
+                             H: {weatherUnits === 'metric' ? `${weatherStationData.tempMaxC}°` : `${Math.round((weatherStationData.tempMaxC * 9) / 5 + 32)}°`} /
+                             L: {weatherUnits === 'metric' ? `${weatherStationData.tempMinC}°` : `${Math.round((weatherStationData.tempMinC * 9) / 5 + 32)}°`}
+                           </span>
+                         )}
+                       </div>
+                     </div>
 
-                    {weatherStationData.isRealTime && (
-                      <div className="flex items-center gap-2 text-[10px] font-mono text-emerald-400 pt-2 border-t border-slate-800">
-                        <Activity className="w-3 h-3 animate-pulse" />
-                        <span>Live data from OpenWeatherMap • Updated: {weatherStationData.lastUpdated}</span>
-                      </div>
-                    )}
-                  </div>
+                     <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
+                       <div className="p-2 bg-slate-900 rounded-lg border border-slate-800">
+                         <span className="text-slate-400 block">Forecast</span>
+                         <span className="font-bold text-white">{weatherStationData.condition}</span>
+                       </div>
+                       <div className="p-2 bg-slate-900 rounded-lg border border-slate-800">
+                         <span className="text-slate-400 block">Humidity</span>
+                         <span className="font-bold text-white">{weatherStationData.humidity}%</span>
+                       </div>
+                       <div className="p-2 bg-slate-900 rounded-lg border border-slate-800">
+                         <span className="text-slate-400 block">Wind</span>
+                         <span className="font-bold text-white">
+                           {weatherUnits === 'metric'
+                             ? `${weatherStationData.windSpeedMs.toFixed(1)} m/s`
+                             : `${(weatherStationData.windSpeedMs * 2.237).toFixed(1)} mph`}
+                           {' '}{weatherStationData.windDirection}
+                         </span>
+                       </div>
+                       <div className="p-2 bg-slate-900 rounded-lg border border-slate-800">
+                         <span className="text-slate-400 block">Pressure</span>
+                         <span className="font-bold text-white">{weatherStationData.pressure || '--'} hPa</span>
+                       </div>
+                       <div className="p-2 bg-slate-900 rounded-lg border border-slate-800">
+                         <span className="text-slate-400 block">Real Feel</span>
+                         <span className="font-bold text-white">
+                           {weatherUnits === 'metric' ? `${weatherStationData.feelsLikeC}°C` : `${Math.round((weatherStationData.feelsLikeC * 9) / 5 + 32)}°F`}
+                         </span>
+                       </div>
+                       <div className="p-2 bg-slate-900 rounded-lg border border-slate-800">
+                         <span className="text-slate-400 block">Visibility</span>
+                         <span className="font-bold text-white">{(weatherStationData.visibility / 1000).toFixed(1)} km</span>
+                       </div>
+                     </div>
+
+                     {weatherStationData.isRealTime && (
+                       <div className="flex items-center gap-2 text-[10px] font-mono text-emerald-400 pt-2 border-t border-slate-800">
+                         <Activity className="w-3 h-3 animate-pulse" />
+                         <span>Live data from OpenWeatherMap • Updated: {weatherStationData.lastUpdated}</span>
+                       </div>
+                     )}
+                   </div>
                </div>
              </div>
            )}
@@ -1662,12 +1811,12 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
 
          </div>
 
-        {/* BOTTOM HARDWARE CHIN WITH VERIZON / BRIO LOGO */}
+        {/* BOTTOM HARDWARE CHIN WITH CARRIER / BRIO LOGO */}
         <div className="w-full pt-2.5 pb-0.5 flex items-center justify-between px-3 text-[10px] font-mono font-bold text-zinc-400">
-          <span className="tracking-widest">DROID</span>
+          <span className="tracking-widest">BRIO</span>
           <div className="flex items-center gap-1 italic text-zinc-300">
-            <span className="text-red-500 font-black">✓</span>
-            <span className="tracking-wider">verizon / brio</span>
+            <span className="text-emerald-500 font-black">✓</span>
+            <span className="tracking-wider">{carrierName}</span>
           </div>
         </div>
 

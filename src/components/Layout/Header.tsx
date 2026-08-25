@@ -5,7 +5,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { ShieldCheck, Lock, Unlock, User, Radio, Smartphone } from 'lucide-react';
-import { AuthModal } from './AuthModal';
 
 export const Header: React.FC = () => {
   const {
@@ -14,8 +13,8 @@ export const Header: React.FC = () => {
     showMobileGUI,
     setShowMobileGUI,
     t,
+    setShowAuthModal,
   } = useApp();
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState('');
 
   useEffect(() => {
@@ -91,7 +90,7 @@ export const Header: React.FC = () => {
 
             {/* Auth Button */}
             <button
-              onClick={() => setIsAuthOpen(true)}
+              onClick={() => setShowAuthModal(true)}
               className="liquid-glass-btn flex items-center gap-2 px-4 py-1.5 rounded-xl bg-gradient-to-b from-sky-400 via-sky-500 to-blue-600 hover:from-sky-300 hover:to-blue-500 border-t border-sky-200 text-xs font-bold text-white transition-all shadow-lg shadow-sky-500/20 active:scale-95 cursor-pointer"
             >
               {user ? (
@@ -112,9 +111,6 @@ export const Header: React.FC = () => {
           </div>
         </div>
       </header>
-
-      {/* Auth Modal */}
-      <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
     </>
   );
 };

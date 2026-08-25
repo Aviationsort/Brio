@@ -1,16 +1,21 @@
 /**
  * Live Accurate Weather Service using OpenWeatherMap API
- * Fetches real weather data for any city name.
+ * Rewritten with vanilla JS approach: state object, selectors, clean helpers.
  */
 
-const API_KEY = '64f60853740a1ee3ba20d0fb595c97d5';
+const API_KEY = import.meta.env.VITE_WEATHER_API_KEY as string | undefined;
 
 export interface WeatherData {
   city: string;
   country: string;
+  countryCode: string;
   tempC: number;
   tempF: number;
+  tempMinC: number;
+  tempMaxC: number;
   condition: string;
+  description: string;
+  icon: string;
   humidity: number;
   windSpeedMs: number;
   windSpeedKts: number;
@@ -18,11 +23,25 @@ export interface WeatherData {
   pressure: number;
   visibility: number;
   feelsLikeC: number;
-  description: string;
-  icon: string;
   isRealTime: boolean;
   lastUpdated: string;
+  datetime: string;
+  timezone: number;
 }
+
+interface WeatherState {
+  currCity: string;
+  units: 'metric' | 'imperial';
+  loading: boolean;
+  error: string | null;
+}
+
+const weatherState: WeatherState = {
+  currCity: 'London',
+  units: 'metric',
+  loading: false,
+  error: null,
+};
 
 function mapWeatherCondition(main: string, description: string): string {
   const lower = description.toLowerCase();
@@ -42,97 +61,129 @@ function getWindDirDegrees(deg: number): string {
   return `${Math.round(deg)}° ${directions[index]}`;
 }
 
-function getAqiStatus(aqi: number): string {
-  if (aqi <= 50) return 'Good / Clean Air';
-  if (aqi <= 100) return 'Moderate Air Quality';
-  if (aqi <= 150) return 'Unhealthy for Sensitive Groups';
-  return 'Unhealthy Air Quality';
+export function convertTimeStamp(timestamp: number, timezoneOffsetSeconds: number): string {
+  const utcTime = new Date(timestamp * 1000);
+  const localTime = new Date(utcTime.getTime() + timezoneOffsetSeconds * 1000);
+  return localTime.toLocaleString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: 'UTC',
+  });
 }
 
-/**
- * Fetch accurate live weather data for any city name or country
- */
-export async function fetchAccurateWeather(city: string, units: string = 'metric'): Promise<WeatherData> {
-  const query = city.trim();
-  let isRealTime = false;
+export function convertCountryCode(countryCode: string): string {
+  if (!countryCode || countryCode.length !== 2) return countryCode;
+  try {
+    const displayNames = new Intl.DisplayNames(['en'], { type: 'region' });
+    return displayNames.of(countryCode.toUpperCase()) || countryCode;
+  } catch {
+    return countryCode;
+  }
+}
 
-  let tempC = 20;
-  let tempF = 68;
-  let humidity = 60;
-  let windSpeedMs = 3;
-  let windSpeedKts = 6;
-  let windDirection = '180° S';
-  let condition = 'Fair / Clear';
-  let pressure = 1013;
-  let visibility = 10000;
-  let feelsLikeC = 20;
-  let description = '';
-  let icon = '01d';
-  let cityName = query;
-  let country = '';
+const selectors = {
+  weatherIcon: (iconCode: string, size: string = '2x') =>
+    `https://openweathermap.org/img/wn/${iconCode}@${size}.png`,
+  searchForm: () => document.querySelector('.weather-search-form') as HTMLFormElement | null,
+  cityInput: () => document.querySelector('.weather-city-input') as HTMLInputElement | null,
+  unitToggle: () => document.querySelector('.weather-unit-toggle') as HTMLDivElement | null,
+  weatherDisplay: () => document.querySelector('.weather-display') as HTMLDivElement | null,
+};
+
+function setState(partial: Partial<WeatherState>) {
+  Object.assign(weatherState, partial);
+}
+
+async function getWeather(city?: string, units?: 'metric' | 'imperial'): Promise<WeatherData> {
+  const targetCity = city || weatherState.currCity;
+  const targetUnits = units || weatherState.units;
+  setState({ currCity: targetCity, units: targetUnits, loading: true, error: null });
+
+  const query = targetCity.trim();
+  const isMetric = targetUnits === 'metric';
+
+  const defaults: WeatherData = {
+    city: query,
+    country: '',
+    countryCode: '',
+    tempC: 18,
+    tempF: Math.round((18 * 9) / 5 + 32),
+    tempMinC: 14,
+    tempMaxC: 22,
+    condition: 'Fair / Clear',
+    description: 'clear sky',
+    icon: '01d',
+    humidity: 55,
+    windSpeedMs: 3.5,
+    windSpeedKts: Math.round(3.5 * 1.94384),
+    windDirection: '180° S',
+    pressure: 1013,
+    visibility: 10000,
+    feelsLikeC: 17,
+    isRealTime: false,
+    lastUpdated: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    datetime: new Date().toLocaleString(),
+    timezone: 0,
+  };
+
+  if (!API_KEY) {
+    setState({ loading: false, error: 'Weather API key not configured.' });
+    return { ...defaults, error: 'Weather API key not configured.' } as any;
+  }
 
   try {
-    const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(query)}&appid=${API_KEY}&units=${units}`;
-    const res = await fetch(weatherUrl);
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(query)}&appid=${API_KEY}&units=${targetUnits}`;
+    const res = await fetch(url);
 
     if (res.ok) {
       const data = await res.json();
-      tempC = Math.round(data.main.temp);
-      feelsLikeC = Math.round(data.main.feels_like);
-      tempF = Math.round((tempC * 9) / 5 + 32);
-      humidity = data.main.humidity;
-      pressure = data.main.pressure;
-      visibility = data.visibility || 10000;
-      windSpeedMs = Math.round(data.wind.speed * 10) / 10;
-      windSpeedKts = Math.round(windSpeedMs * 1.94384);
-      windDirection = getWindDirDegrees(data.wind.deg || 0);
-      condition = mapWeatherCondition(data.weather[0]?.main || '', data.weather[0]?.description || '');
-      description = data.weather[0]?.description || '';
-      icon = data.weather[0]?.icon || '01d';
-      cityName = data.name || query;
-      country = data.sys?.country || '';
-      isRealTime = true;
+      const tempC = Math.round(data.main.temp);
+      const feelsLikeC = Math.round(data.main.feels_like);
+      const windSpeedMs = data.wind.speed || 0;
+      const result: WeatherData = {
+        city: data.name || query,
+        country: convertCountryCode(data.sys?.country || ''),
+        countryCode: data.sys?.country || '',
+        tempC: isMetric ? tempC : Math.round((tempC * 9) / 5 + 32),
+        tempF: isMetric ? Math.round((tempC * 9) / 5 + 32) : tempC,
+        tempMinC: Math.round(data.main.temp_min),
+        tempMaxC: Math.round(data.main.temp_max),
+        condition: mapWeatherCondition(data.weather[0]?.main || '', data.weather[0]?.description || ''),
+        description: data.weather[0]?.description || '',
+        icon: data.weather[0]?.icon || '01d',
+        humidity: data.main.humidity,
+        windSpeedMs,
+        windSpeedKts: Math.round(windSpeedMs * 1.94384),
+        windDirection: getWindDirDegrees(data.wind.deg || 0),
+        pressure: data.main.pressure,
+        visibility: data.visibility || 10000,
+        feelsLikeC: isMetric ? feelsLikeC : Math.round((feelsLikeC * 9) / 5 + 32),
+        isRealTime: true,
+        lastUpdated: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        datetime: convertTimeStamp(data.dt, data.timezone || 0),
+        timezone: data.timezone || 0,
+      };
+      setState({ loading: false });
+      return result;
     }
-  } catch (err) {
-    console.warn(`OpenWeatherMap fetch skipped/failed for ${query}:`, err);
+
+    if (res.status === 404) {
+      setState({ loading: false, error: `City "${query}" not found.` });
+      return { ...defaults, city: query, error: `City "${query}" not found.` } as any;
+    }
+  } catch (err: any) {
+    const message = err?.message || String(err);
+    console.warn(`Weather fetch failed for ${query}: ${message}`);
+    setState({ loading: false, error: message });
+    return { ...defaults, error: message } as any;
   }
 
-  // Deterministic calculation if offline/network fails
-  if (!isRealTime) {
-    const charSum = query.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-    const hour = new Date().getHours();
-    tempC = 12 + ((charSum + hour) % 18);
-    feelsLikeC = tempC;
-    tempF = Math.round((tempC * 9) / 5 + 32);
-    humidity = 45 + (charSum % 35);
-    windSpeedMs = 2 + (charSum % 8);
-    windSpeedKts = Math.round(windSpeedMs * 1.94384);
-    windDirection = `${(charSum * 15) % 360}°`;
-    pressure = 1000 + (charSum % 30);
-    visibility = 5000 + (charSum % 10000);
-    condition = 'Fair / Clear';
-    description = 'clear sky';
-    icon = '01d';
-  }
-
-  const weatherRecord: WeatherData = {
-    city: cityName,
-    country,
-    tempC,
-    tempF,
-    condition,
-    humidity,
-    windSpeedMs,
-    windSpeedKts,
-    windDirection,
-    pressure,
-    visibility,
-    feelsLikeC,
-    description,
-    icon,
-    isRealTime,
-    lastUpdated: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-  };
-
-  return weatherRecord;
+  setState({ loading: false });
+  return defaults;
 }
+
+export { weatherState, selectors, getWeather };

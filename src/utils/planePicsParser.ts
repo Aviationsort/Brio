@@ -6,9 +6,22 @@
 
 import { ParsedFilenameResult } from '../types';
 
-/**
- * Format month, day, year numbers into a human readable date string like "July 30, 2025"
- */
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+] as const;
+
+const SUPPORTED_EXTENSIONS = new Set([
+  'jpg', 'jpeg', 'png', 'bmp', 'tiff', 'tif', 'gif', 'webp', 'heic', 'heif',
+  'raw', 'dng', 'svg', 'avif', 'jxl', 'mp4', 'mov', 'avi', 'mkv', 'flv', 'wmv', 'webm', 'm4v', '3gp'
+]);
+
+const PAREN_REGEX = /^(.+?)\s*\(\s*(\d{1,2})\s*\.\s*(\d{1,2})\s*\.\s*(\d{2,4})\s*\)(?:\s+(\d+))?$/;
+const NO_PAREN_REGEX = /^(.+?)\s+(\d{1,2})\s*\.\s*(\d{1,2})\s*\.\s*(\d{2,4})(?:\s+(\d+))?$/;
+const RANGE_REGEX = /^([A-Z0-9]+\.[0-9]+-[0-9]+[A-Z0-9]*)/i;
+
+const parseCache = new Map<string, ParsedFilenameResult>();
+
 export function formatPlaneDate(monthStr: string, dayStr: string, yearStr: string): string {
   const m = parseInt(monthStr.trim(), 10);
   const d = parseInt(dayStr.trim(), 10);
@@ -17,29 +30,90 @@ export function formatPlaneDate(monthStr: string, dayStr: string, yearStr: strin
   if (isNaN(m) || isNaN(d) || isNaN(y)) return 'Invalid Date';
   if (m < 1 || m > 12 || d < 1 || d > 31) return 'Invalid Date';
 
-  // Convert 2-digit year to 20YY format
   if (y < 100) {
     y = 2000 + y;
   }
 
-  const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
-
-  return `${months[m - 1]} ${d}, ${y}`;
+  return `${MONTH_NAMES[m - 1]} ${d}, ${y}`;
 }
 
-/**
- * Main Filename Parser Function
- */
+function buildResult(
+  cleanInput: string,
+  leftPart: string,
+  monthStr: string,
+  dayStr: string,
+  yearStr: string,
+  shotNumStr: string | undefined,
+  extension: string,
+  isRangeFormat: boolean,
+  isAutoCorrected: boolean
+): ParsedFilenameResult {
+  const formattedDate = formatPlaneDate(monthStr, dayStr, yearStr);
+  const rawDate = `${monthStr}.${dayStr}.${yearStr}`;
+  const shotNumber = shotNumStr ? parseInt(shotNumStr, 10) : null;
+
+  let registration = leftPart;
+  let specialLivery = 'None';
+
+  const spaceIdx = leftPart.indexOf(' ');
+  if (spaceIdx !== -1) {
+    registration = leftPart.slice(0, spaceIdx).trim();
+    specialLivery = leftPart.slice(spaceIdx + 1).trim();
+  }
+
+  let formatPattern = '1. Basic Format';
+  if (isAutoCorrected) {
+    formatPattern = isRangeFormat ? '8. Range Format without Parentheses (Auto-Corrected)' : '5. Missing Parentheses Format (Auto-Corrected)';
+  } else if (isRangeFormat) {
+    if (specialLivery !== 'None') {
+      formatPattern = '9. Range Format with Special Livery';
+    } else if (yearStr.length === 4) {
+      formatPattern = '10. Range Format with Four-Digit Year';
+    } else {
+      formatPattern = '7. Range Format with Parentheses';
+    }
+  } else if (specialLivery !== 'None') {
+    formatPattern = '2. Special Livery Format';
+  } else if (shotNumber !== null) {
+    formatPattern = '3. Multiple Shots Format';
+  } else if (yearStr.length === 4) {
+    formatPattern = '4. Four-Digit Year Format';
+  }
+
+  const cleanMonth = parseInt(monthStr, 10);
+  const cleanDay = parseInt(dayStr, 10);
+  const cleanDateStr = `${cleanMonth}.${cleanDay}.${yearStr}`;
+  const liveryPart = specialLivery !== 'None' ? ` ${specialLivery}` : '';
+  const shotPart = shotNumber !== null ? ` ${shotNumber}` : '';
+  const correctedFilename = `${registration}${liveryPart} (${cleanDateStr})${shotPart}.${extension}`;
+
+  return {
+    filename: cleanInput,
+    registration,
+    specialLivery,
+    dateCaptured: rawDate,
+    formattedDate,
+    rawDate,
+    shotNumber,
+    extension,
+    formatPattern,
+    isRangeFormat,
+    isAutoCorrected,
+    correctedFilename,
+    isValid: formattedDate !== 'Invalid Date',
+    errorMessage: formattedDate === 'Invalid Date' ? 'Date numbers out of valid range (MM 1-12, DD 1-31).' : undefined,
+  };
+}
+
 export function parsePlaneFilename(filenameInput: string): ParsedFilenameResult {
   const cleanInput = filenameInput.trim();
 
-  // Extract extension
+  const cached = parseCache.get(cleanInput);
+  if (cached) return cached;
+
   const lastDotIdx = cleanInput.lastIndexOf('.');
   if (lastDotIdx === -1) {
-    return {
+    const result: ParsedFilenameResult = {
       filename: cleanInput,
       registration: 'UNKNOWN',
       specialLivery: 'None',
@@ -55,14 +129,13 @@ export function parsePlaneFilename(filenameInput: string): ParsedFilenameResult 
       isValid: false,
       errorMessage: 'Missing file extension (.jpg, .png, etc.)',
     };
+    parseCache.set(cleanInput, result);
+    return result;
   }
 
   const extension = cleanInput.slice(lastDotIdx + 1).toLowerCase();
-  const baseName = cleanInput.slice(0, lastDotIdx).trim();
-
-  const supportedExtensions = ['jpg', 'jpeg', 'png', 'bmp', 'tiff', 'tif', 'gif', 'webp', 'heic', 'heif', 'raw', 'dng', 'svg', 'avif', 'jxl', 'mp4', 'mov', 'avi', 'mkv', 'flv', 'wmv', 'webm', 'm4v', '3gp'];
-  if (!supportedExtensions.includes(extension)) {
-    return {
+  if (!SUPPORTED_EXTENSIONS.has(extension)) {
+    const result: ParsedFilenameResult = {
       filename: cleanInput,
       registration: 'UNKNOWN',
       specialLivery: 'None',
@@ -78,19 +151,15 @@ export function parsePlaneFilename(filenameInput: string): ParsedFilenameResult 
       isValid: false,
       errorMessage: `Extension .${extension} is not supported. Use JPG, PNG, WEBP, HEIC, RAW, MP4, MOV, etc.`,
     };
+    parseCache.set(cleanInput, result);
+    return result;
   }
 
-  // Regex patterns to test in priority order
+  const baseName = cleanInput.slice(0, lastDotIdx).trim();
 
-  // Check if it's a range format: PREFIX.NUMBER-RANGE[SUFFIX] e.g. HU.26-31A or AB.1-5
-  const rangePatternCheck = /^([A-Z0-9]+\.[0-9]+-[0-9]+[A-Z0-9]*)/i;
-  const isRangeFormat = rangePatternCheck.test(baseName);
+  const isRangeFormat = RANGE_REGEX.test(baseName);
 
-  // 1. With Parentheses & optional shot number:
-  // e.g. "G-NLPD (7.30.25).jpg", "G-NLPD Honami (7.31.25).png", "G-NLPD (7.30.25) 1.jpg", "A6-FMR (7. 30. 25) 2.jpg", "HU.26-31A Special Livery (7.30.2025).jpg"
-  const parenRegex = /^(.+?)\s*\(\s*(\d{1,2})\s*\.\s*(\d{1,2})\s*\.\s*(\d{2,4})\s*\)(?:\s+(\d+))?$/;
-  const parenMatch = baseName.match(parenRegex);
-
+  const parenMatch = baseName.match(PAREN_REGEX);
   if (parenMatch) {
     const leftPart = parenMatch[1].trim();
     const monthStr = parenMatch[2];
@@ -98,76 +167,15 @@ export function parsePlaneFilename(filenameInput: string): ParsedFilenameResult 
     const yearStr = parenMatch[4];
     const shotNumStr = parenMatch[5];
 
-    const formattedDate = formatPlaneDate(monthStr, dayStr, yearStr);
-    const rawDate = `${monthStr}.${dayStr}.${yearStr}`;
-    const shotNumber = shotNumStr ? parseInt(shotNumStr, 10) : null;
+    const hasExtraSpaces = parenMatch[0].includes('. ') || parenMatch[0].includes(' .');
+    const autoCorrected = hasExtraSpaces;
 
-    // Split leftPart into registration and livery
-    // If leftPart contains spaces and leftPart is not a range format without livery
-    let registration = leftPart;
-    let specialLivery = 'None';
-
-    // If there's a space in leftPart:
-    // e.g., "G-NLPD Honami" -> Reg: G-NLPD, Livery: Honami
-    // e.g., "HU.26-31A Special Livery" -> Reg: HU.26-31A, Livery: Special Livery
-    const spaceIdx = leftPart.indexOf(' ');
-    if (spaceIdx !== -1) {
-      registration = leftPart.slice(0, spaceIdx).trim();
-      specialLivery = leftPart.slice(spaceIdx + 1).trim();
-    }
-
-    // Determine specific pattern format
-    let formatPattern = '1. Basic Format';
-    let isAutoCorrected = false;
-
-    // Check if extra spaces inside date e.g. (7. 30. 25)
-    if (parenMatch[0].includes('. ') || parenMatch[0].includes(' .')) {
-      formatPattern = '6. Extra Spaces Format';
-      isAutoCorrected = true;
-    } else if (isRangeFormat) {
-      if (specialLivery !== 'None') {
-        formatPattern = '9. Range Format with Special Livery';
-      } else if (yearStr.length === 4) {
-        formatPattern = '10. Range Format with Four-Digit Year';
-      } else {
-        formatPattern = '7. Range Format with Parentheses';
-      }
-    } else if (specialLivery !== 'None') {
-      formatPattern = '2. Special Livery Format';
-    } else if (shotNumber !== null) {
-      formatPattern = '3. Multiple Shots Format';
-    } else if (yearStr.length === 4) {
-      formatPattern = '4. Four-Digit Year Format';
-    }
-
-    // Construct corrected filename
-    const cleanDateStr = `${parseInt(monthStr, 10)}.${parseInt(dayStr, 10)}.${yearStr}`;
-    const liveryPart = specialLivery !== 'None' ? ` ${specialLivery}` : '';
-    const shotPart = shotNumber !== null ? ` ${shotNumber}` : '';
-    const correctedFilename = `${registration}${liveryPart} (${cleanDateStr})${shotPart}.${extension}`;
-
-    return {
-      filename: cleanInput,
-      registration,
-      specialLivery,
-      dateCaptured: rawDate,
-      formattedDate,
-      rawDate,
-      shotNumber,
-      extension,
-      formatPattern,
-      isRangeFormat,
-      isAutoCorrected,
-      correctedFilename,
-      isValid: formattedDate !== 'Invalid Date',
-      errorMessage: formattedDate === 'Invalid Date' ? 'Date numbers out of valid range (MM 1-12, DD 1-31).' : undefined,
-    };
+    const result = buildResult(cleanInput, leftPart, monthStr, dayStr, yearStr, shotNumStr, extension, isRangeFormat, autoCorrected);
+    parseCache.set(cleanInput, result);
+    return result;
   }
 
-  // 2. Missing Parentheses Format e.g. "A6-FMR 7.30.25.jpg" or "HU.26-31A 7.30.25.jpg"
-  const noParenRegex = /^(.+?)\s+(\d{1,2})\s*\.\s*(\d{1,2})\s*\.\s*(\d{2,4})(?:\s+(\d+))?$/;
-  const noParenMatch = baseName.match(noParenRegex);
-
+  const noParenMatch = baseName.match(NO_PAREN_REGEX);
   if (noParenMatch) {
     const leftPart = noParenMatch[1].trim();
     const monthStr = noParenMatch[2];
@@ -175,48 +183,12 @@ export function parsePlaneFilename(filenameInput: string): ParsedFilenameResult 
     const yearStr = noParenMatch[4];
     const shotNumStr = noParenMatch[5];
 
-    const formattedDate = formatPlaneDate(monthStr, dayStr, yearStr);
-    const rawDate = `${monthStr}.${dayStr}.${yearStr}`;
-    const shotNumber = shotNumStr ? parseInt(shotNumStr, 10) : null;
-
-    let registration = leftPart;
-    let specialLivery = 'None';
-
-    const spaceIdx = leftPart.indexOf(' ');
-    if (spaceIdx !== -1) {
-      registration = leftPart.slice(0, spaceIdx).trim();
-      specialLivery = leftPart.slice(spaceIdx + 1).trim();
-    }
-
-    const formatPattern = isRangeFormat
-      ? '8. Range Format without Parentheses (Auto-Corrected)'
-      : '5. Missing Parentheses Format (Auto-Corrected)';
-
-    const cleanDateStr = `${parseInt(monthStr, 10)}.${parseInt(dayStr, 10)}.${yearStr}`;
-    const liveryPart = specialLivery !== 'None' ? ` ${specialLivery}` : '';
-    const shotPart = shotNumber !== null ? ` ${shotNumber}` : '';
-    const correctedFilename = `${registration}${liveryPart} (${cleanDateStr})${shotPart}.${extension}`;
-
-    return {
-      filename: cleanInput,
-      registration,
-      specialLivery,
-      dateCaptured: rawDate,
-      formattedDate,
-      rawDate,
-      shotNumber,
-      extension,
-      formatPattern,
-      isRangeFormat,
-      isAutoCorrected: true,
-      correctedFilename,
-      isValid: formattedDate !== 'Invalid Date',
-      errorMessage: formattedDate === 'Invalid Date' ? 'Date numbers out of valid range.' : undefined,
-    };
+    const result = buildResult(cleanInput, leftPart, monthStr, dayStr, yearStr, shotNumStr, extension, isRangeFormat, true);
+    parseCache.set(cleanInput, result);
+    return result;
   }
 
-  // If match fails:
-  return {
+  const result: ParsedFilenameResult = {
     filename: cleanInput,
     registration: 'INVALID',
     specialLivery: 'None',
@@ -232,4 +204,6 @@ export function parsePlaneFilename(filenameInput: string): ParsedFilenameResult 
     isValid: false,
     errorMessage: 'Filename does not match standard MyPlanePics patterns. Check documentation for expected date format e.g. (MM.DD.YY).',
   };
+  parseCache.set(cleanInput, result);
+  return result;
 }

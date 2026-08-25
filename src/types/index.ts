@@ -107,15 +107,23 @@ export interface StickerItem {
 }
 
 // Hub 2: Nightcore Player
+export type PlaybackMode = 'sequential' | 'shuffle' | 'repeat-one' | 'repeat-all';
+
 export interface MediaTrack {
   id: string;
   title: string;
   artist: string;
-  coverUrl: string;
+  coverUrl?: string;
   audioUrl: string;
   durationSeconds: number;
   isYoutube?: boolean;
   youtubeId?: string;
+  mediaType?: 'audio' | 'video';
+  fileFormat?: string;
+  fileSize?: number;
+  lyrics?: string;
+  lrcUrl?: string;
+  addedAt: number;
 }
 
 // Hub 2: IPTV
@@ -151,8 +159,6 @@ export type GameId =
   | 'blackjack'
   | 'flappy'
   | 'minesweeper'
-  | 'risk'
-  | 'tankery'
   | 'flagquiz';
 
 export interface GameHighScore {
@@ -196,6 +202,38 @@ export interface PDFAnnotation {
   pageNumber: number;
 }
 
+export interface SpreadsheetCell {
+  id: string;
+  row: number;
+  col: number;
+  value: string;
+  formula?: string;
+  format: {
+    bold?: boolean;
+    italic?: boolean;
+    underline?: boolean;
+    backgroundColor?: string;
+    textColor?: string;
+    fontSize?: number;
+    textAlign?: 'left' | 'center' | 'right';
+  };
+}
+
+export interface Slide {
+  id: string;
+  title: string;
+  content: string;
+  transition: 'fade' | 'slide' | 'none';
+  order: number;
+}
+
+export interface DocumentPage {
+  id: string;
+  title: string;
+  content: string;
+  order: number;
+}
+
 // Hub 5: Aviation & Telemetry
 export interface CameraSetupRating {
   cameraName: string;
@@ -224,20 +262,6 @@ export interface AviationTerm {
   phoneticEquivalent?: string;
 }
 
-export interface BusSchedule {
-  id: string;
-  country: 'Lebanon' | 'Cyprus';
-  routeNumber: string;
-  routeName: string;
-  origin: string;
-  destination: string;
-  stops: string[];
-  departureTimes: string[];
-  fareLocalCurrency: string;
-  operator: string;
-  timetableUrl?: string;
-}
-
 export interface SystemTelemetryData {
   cpuUsage: number;
   ramUsageMb: number;
@@ -248,6 +272,15 @@ export interface SystemTelemetryData {
   cryptoWorkerStatus: 'active' | 'idle' | 'processing';
   activeThreads: number;
   systemLogs: { timestamp: string; level: 'info' | 'warn' | 'error'; message: string }[];
+  gpuName?: string;
+  gpuDriver?: string;
+  cpuName?: string;
+  cpuCores?: number;
+  cpuThreads?: number;
+  gpuMemoryMb?: number;
+  gpuMemoryTotalMb?: number;
+  romTotalGb?: number;
+  romUsedGb?: number;
 }
 
 // MyPlanePics Aircraft Photo Vault, Ranking & Statistics
@@ -293,6 +326,9 @@ export interface PlanePhoto {
   encryptedData?: EncryptedPayload<string>;
   rating?: number;
   notes?: string;
+  tags?: string[];
+  collections?: string[];
+  favorite?: boolean;
 }
 
 export interface SpotterRanking {

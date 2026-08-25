@@ -21,31 +21,8 @@ import {
 
 export const Messaging: React.FC = () => {
   const { messages, addMessage, showToast } = useApp();
-  const [contacts, setContacts] = useState<ChatContact[]>([
-    {
-      id: 'c-1',
-      name: 'P2P Operations Channel',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop',
-      online: true,
-      bluetoothNearby: true,
-      signalStrength: 98,
-      lastMessage: 'Active AES-GCM Encrypted Room',
-      unreadCount: 0,
-      publicKeyFingerprint: 'A3:99:BC:41:88:F0',
-    },
-    {
-      id: 'c-2',
-      name: 'Encrypted Broadcast Channel',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
-      online: true,
-      bluetoothNearby: true,
-      signalStrength: 85,
-      lastMessage: 'Secure mesh link verified.',
-      unreadCount: 0,
-      publicKeyFingerprint: '7B:E2:19:64:D0:FE',
-    },
-  ]);
-  const [selectedContact, setSelectedContact] = useState<ChatContact>(contacts[0]);
+  const [contacts, setContacts] = useState<ChatContact[]>([]);
+  const [selectedContact, setSelectedContact] = useState<ChatContact | null>(null);
   const [inputText, setInputText] = useState('');
   const [newChannelName, setNewChannelName] = useState('');
   const [showAddChannel, setShowAddChannel] = useState(false);
@@ -71,7 +48,6 @@ export const Messaging: React.FC = () => {
     setSelectedContact(newChan);
     setNewChannelName('');
     setShowAddChannel(false);
-    showToast('Channel Created', `Established encrypted room: ${newChan.name}`, 'success');
   };
 
   const handleSend = async (e: React.FormEvent) => {
@@ -107,7 +83,6 @@ export const Messaging: React.FC = () => {
           status: 'sent',
           mode,
         });
-        showToast('Voice Note Sent', 'Voice payload encrypted and attached.', 'success');
       } catch (err) {
         showToast('Voice Error', String(err), 'error');
       }
@@ -175,7 +150,7 @@ export const Messaging: React.FC = () => {
                 key={contact.id}
                 onClick={() => setSelectedContact(contact)}
                 className={`liquid-glass-btn w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition-all ${
-                  selectedContact.id === contact.id
+                  selectedContact?.id === contact.id
                     ? 'bg-slate-800/90 border border-slate-700 text-white shadow'
                     : 'text-slate-300 hover:bg-slate-900/50 hover:text-white'
                 }`}
@@ -204,6 +179,7 @@ export const Messaging: React.FC = () => {
       {/* Main Conversation Window */}
       <div className="md:col-span-2 flex flex-col justify-between bg-slate-900/50">
         {/* Chat Header */}
+        {selectedContact && (
         <div className="p-3.5 border-b border-slate-800 bg-slate-950/40 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img src={selectedContact.avatar} alt={selectedContact.name} className="w-8 h-8 rounded-full object-cover" />
@@ -227,6 +203,7 @@ export const Messaging: React.FC = () => {
             </button>
           </div>
         </div>
+        )}
 
         {/* Messages Stream */}
         <div className="p-4 flex-1 overflow-y-auto space-y-3.5 max-h-[420px]">
@@ -273,8 +250,8 @@ export const Messaging: React.FC = () => {
         <form onSubmit={handleSend} className="p-3 border-t border-slate-800 bg-slate-950/80 flex items-center gap-2">
           <button
             type="button"
-            onClick={() => showToast('Attachment Locked', 'Select file or sticker from vault', 'info')}
             className="liquid-glass-btn p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-colors"
+            title="Attachments"
           >
             <Paperclip className="w-4 h-4" />
           </button>

@@ -8,7 +8,6 @@ export interface NewsItem {
   category: 'Centrist' | 'Left-wing' | 'Right-wing' | 'State-Controlled';
   imageUrl?: string;
   country?: string;
-  topicCountries?: string[];
   _ts?: number;
 }
 
@@ -55,7 +54,6 @@ export const RSS_CREDITS: Record<string, string> = {
   'https://www.cbsnews.com/latest/rss/politics': 'CBS News',
   'https://www.cbsnews.com/latest/rss/world': 'CBS News',
   'https://rthk.hk/rthk/news/rss/e_expressnews_einternational.xml': 'RTHK',
-  'https://news.google.com/rss/search?q=when:24h+allinurl:bloomberg.com&hl=en-US&gl=US&ceid=US:en': 'Bloomberg',
   'https://indianexpress.com/section/politics/feed/': 'Indian Express',
   'https://www.thehimalayantimes.com/rssFeed/27': 'The Himalayan Times',
   'https://vietnamnews.vn/rss/politics-laws.rss': 'Vietnam News',
@@ -79,6 +77,7 @@ export const RSS_CREDITS: Record<string, string> = {
   'https://www.nna-leb.gov.lb/en/rss': 'NNA Lebanon',
   'https://feeds.bbci.co.uk/news/rss.xml': 'BBC News',
   'https://english.alarabiya.net/feed/rss2/en/News.xml': 'Al Arabiya',
+  'https://www.theguardian.com/world/rss': 'The Guardian',
   'https://www.nbcnews.com/rss': 'NBC News',
   'https://www.politicshome.com/rss': 'Politics Home',
   'https://www.europarl.europa.eu/rss/doc/press-releases/en.xml': 'European Parliament',
@@ -99,12 +98,10 @@ export const RSS_CREDITS: Record<string, string> = {
   'https://globalnews.ca/canada/feed/': 'Global News',
   'https://balkaninsight.com/feed': 'Balkan Insight',
   'https://globalvoices.org/feed/': 'Global Voices',
-  'https://crisisgroup.org/categories.xml': 'International Crisis Group',
   'https://theconversation.com/articles.atom': 'The Conversation',
   'https://moxie.foxnews.com/google-publisher/world.xml': 'Fox News',
   'https://moxie.foxnews.com/google-publisher/us.xml': 'Fox News',
   'https://www.canberratimes.com.au/rss.xml': 'Canberra Times',
-  'https://www.9news.com.au/rss': '9 News Australia',
   'https://www.ft.com/rss/home': 'Financial Times',
   'https://eng.globalaffairs.ru/feed/': 'Global Affairs',
   'https://hungarytoday.hu/feed/': 'Hungary Today',
@@ -114,8 +111,8 @@ export const RSS_CREDITS: Record<string, string> = {
   'https://www.cyprustodayonline.com/rss/category/south-cyprus': 'Cyprus Today',
   'https://www.cyprustodayonline.com/rss/category/news': 'Cyprus Today',
   'https://www.cyprustodayonline.com/rss/category/cyprus': 'Cyprus Today',
-  'https://www.lbcgroup.tv/Rss/News/en/8/lebanon-news': 'LBC',
-  'https://www.lbcgroup.tv/Rss/News/en/125/world-news': 'LBC',
+  'https://www.lbcgroup.tv/rss/news/en/8/lebanon-news': 'LBC',
+  'https://www.lbcgroup.tv/rss/news/en/125/world-news': 'LBC',
   'https://www.executive-magazine.com/feed': 'Executive Magazine',
   'https://notesfrompoland.com/rss/': 'Notes from Poland',
   'https://api.axios.com/feed/': 'Axios',
@@ -162,19 +159,16 @@ export const RSS_CREDITS: Record<string, string> = {
   'https://www.royalgazette.com/feeds/': 'Royal Gazette',
   'https://www.consilium.europa.eu/en/rss/pressreleases.ashx': 'European Council',
   'https://officialblogofunio.com/feed/': 'Official Blog of Unio',
-  'https://www.europeanlawblog.eu/rss.xml': 'European Law Blog',
   'https://ec.europa.eu/eurostat/en/search?p_p_id=estatsearchportlet_WAR_estatsearchportlet&p_p_lifecycle=2&p_p_state=maximized&p_p_mode=view&p_p_resource_id=atom&_estatsearchportlet_WAR_estatsearchportlet_collection=CAT_PREREL': 'Eurostat',
   'https://ecfr.eu/feed/': 'ECFR',
   'https://feeds.feedburner.com/ekathimerini/sKip': 'Ekathimerini',
   'https://www.thenationalherald.com/feed/': 'The National Herald',
-  'https://www.crisisgroup.org/rss': 'International Crisis Group',
   'https://www.mfa.gov.tr/en.rss.mfa?ad9093da-8e71-4678-a1b6-05f297baadc4': 'Turkish MFA',
   'https://www.msf.org/rss/all': 'MSF',
   'https://buenosairesherald.com/feed/atom': 'Buenos Aires Herald',
   'https://www.batimes.com.ar/feed': 'Buenos Aires Times',
   'http://news.am/eng/rss/': 'News.am',
   'http://en.1in.am/feed': '1in.am',
-  'http://en.aravot.am/feed/': 'Aravot',
   'https://stickers.panarmenian.net/feeds/eng/news/': 'PanARMENIAN',
   'https://armenianweekly.com/feed/': 'Armenian Weekly',
   'https://hetq.am/en/rss': 'Hetq',
@@ -212,7 +206,6 @@ export const RSS_CREDITS: Record<string, string> = {
   'https://www.tehrantimes.com/rss/tp/698': 'Tehran Times',
   'https://www.tehrantimes.com/rss': 'Tehran Times',
   'https://en.irna.ir/rss': 'IRNA',
-  'https://en.radiofarda.com/api/zp_qmtl-vomx-tpe_bimr': 'Radio Farda',
   'https://en.isna.ir/rss/tp/13': 'ISNA',
   'https://en.isna.ir/rss': 'ISNA',
   'https://www.azernews.az/feed.php': 'AzerNews',
@@ -260,13 +253,8 @@ const ALT_URLS: Record<string, string> = {
   'https://www.independent.co.uk/news/world/rss': 'https://www.independent.co.uk/rss',
   'https://www.independent.co.uk/news/uk/rss': 'https://www.independent.co.uk/rss',
   'https://natowatch.org/news.xml': 'https://natowatch.org/feed/',
-  'https://news.google.com/rss/search?q=when:24h+allinurl:bloomberg.com&hl=en-US&gl=US&ceid=US:en': 'https://feeds.bloomberg.com/markets/stocks/rss',
   'https://english.alarabiya.net/feed/rss2/en/News.xml': 'https://english.alarabiya.net/rss/',
-  'https://crisisgroup.org/categories.xml': 'https://www.crisisgroup.org/feed/',
-  'https://www.9news.com.au/rss': 'https://www.9news.com.au/feed/',
   'https://english.enabbaladi.net/feed/': 'https://english.enabbaladi.net/en/feed/',
-  'https://www.lbcgroup.tv/Rss/News/en/8/lebanon-news': 'https://www.lbcgroup.tv/rss/news/en/8/lebanon-news',
-  'https://www.lbcgroup.tv/Rss/News/en/125/world-news': 'https://www.lbcgroup.tv/rss/news/en/125/world-news',
   'https://sputnikglobe.com/export/rss2/archive/index.xml': 'https://sputnikglobe.com/feed/',
   'https://eng.globalaffairs.ru/feed/': 'https://eng.globalaffairs.ru/rss/',
   'https://www.thestar.com/search/?f=rss&t=article&c=politics&l=50&s=start_time&sd=desc': 'https://www.thestar.com/content/thestar/feed.rss',
@@ -274,7 +262,6 @@ const ALT_URLS: Record<string, string> = {
   'https://www.themoscowtimes.com/rss/news': 'https://www.themoscowtimes.com/rss/',
   'https://www.washingtontimes.com/rss/headlines/news/politics/': 'https://www.washingtontimes.com/rss/',
   'https://www.namibiansun.com/rssFeed/-55': 'https://www.namibiansun.com/rss/',
-  'https://en.radiofarda.com/api/zp_qmtl-vomx-tpe_bimr': 'https://www.rferl.org/api/zp_qmtl-vomx-tpe_bimr',
   'https://www.38north.org/feed/': 'https://www.38north.org/feed',
   'https://jordantimes.com/rss-feed/47': 'https://jordantimes.com/rss',
   'https://jordantimes.com/rss-feed/45': 'https://jordantimes.com/rss',
@@ -288,7 +275,6 @@ const ALT_URLS: Record<string, string> = {
   'https://www.arabnews.com/cat/3/rss.xml': 'https://www.arabnews.com/rss',
   'https://broadbentinstitute.ca/updates/feed/': 'https://broadbentinstitute.ca/feed/',
   'https://www.mfa.gov.tr/en.rss.mfa?ad9093da-8e71-4678-a1b6-05f297baadc4': 'https://www.mfa.gov.tr/en.rss.mfa',
-  'http://en.aravot.am/feed/': 'https://en.aravot.am/feed/',
   'https://en.granma.cu/feed': 'https://en.granma.cu/rss',
   'https://english.alahednews.news/rss/541': 'https://english.alahednews.news/rss/',
 };
@@ -312,7 +298,7 @@ const FEEDS_DATA: FeedData[] = [
   {"url": "https://www.cbsnews.com/latest/rss/politics", "category": "Centrist"},
   {"url": "https://www.cbsnews.com/latest/rss/world", "category": "Centrist"},
   {"url": "https://rthk.hk/rthk/news/rss/e_expressnews_einternational.xml", "category": "State-Controlled"},
-  {"url": "https://news.google.com/rss/search?q=when:24h+allinurl:bloomberg.com&hl=en-US&gl=US&ceid=US:en", "category": "Centrist"},
+  {"url": "https://www.theguardian.com/world/rss", "category": "Centrist"},
   {"url": "https://indianexpress.com/section/politics/feed/", "category": "Centrist"},
   {"url": "https://www.thehimalayantimes.com/rssFeed/27", "category": "Centrist"},
   {"url": "https://vietnamnews.vn/rss/politics-laws.rss", "category": "State-Controlled"},
@@ -354,13 +340,11 @@ const FEEDS_DATA: FeedData[] = [
   {"url": "https://globalnews.ca/canada/feed/", "category": "Centrist"},
   {"url": "https://balkaninsight.com/feed", "category": "Centrist"},
   {"url": "https://globalvoices.org/feed/", "category": "Left-wing"},
-  {"url": "https://crisisgroup.org/categories.xml", "category": "Centrist"},
   {"url": "https://theconversation.com/articles.atom", "category": "Left-wing"},
   {"url": "https://moxie.foxnews.com/google-publisher/world.xml", "category": "Right-wing"},
   {"url": "https://moxie.foxnews.com/google-publisher/us.xml", "category": "Right-wing"},
   {"url": "https://en.yenisafak.com/rss-feeds?category=/politics", "category": "Right-wing"},
   {"url": "https://www.canberratimes.com.au/rss.xml", "category": "Centrist"},
-  {"url": "https://www.9news.com.au/rss", "category": "Centrist"},
   {"url": "https://www.ft.com/rss/home", "category": "Centrist"},
   {"url": "https://eng.globalaffairs.ru/feed/", "category": "State-Controlled"},
   {"url": "https://hungarytoday.hu/feed/", "category": "Right-wing"},
@@ -372,8 +356,8 @@ const FEEDS_DATA: FeedData[] = [
   {"url": "https://www.cyprustodayonline.com/rss/category/cyprus", "category": "Centrist"},
   {"url": "https://www.shafaq.com/rss/en/Iraq", "category": "Centrist"},
   {"url": "https://www.iraq-businessnews.com/feed/", "category": "Centrist"},
-  {"url": "https://www.lbcgroup.tv/Rss/News/en/8/lebanon-news", "category": "Centrist"},
-  {"url": "https://www.lbcgroup.tv/Rss/News/en/125/world-news", "category": "Centrist"},
+  {"url": "https://www.lbcgroup.tv/rss/news/en/8/lebanon-news", "category": "Centrist"},
+  {"url": "https://www.lbcgroup.tv/rss/news/en/125/world-news", "category": "Centrist"},
   {"url": "https://notesfrompoland.com/rss/", "category": "Centrist"},
   {"url": "https://api.axios.com/feed/", "category": "Centrist"},
   {"url": "https://www.buzzfeed.com/politics.xml", "category": "Left-wing"},
@@ -428,19 +412,16 @@ const FEEDS_DATA: FeedData[] = [
   {"url": "https://www.royalgazette.com/feeds/", "category": "Centrist"},
   {"url": "https://www.consilium.europa.eu/en/rss/pressreleases.ashx", "category": "Centrist"},
   {"url": "https://officialblogofunio.com/feed/", "category": "Centrist"},
-  {"url": "https://www.europeanlawblog.eu/rss.xml", "category": "Centrist"},
   {"url": "https://ec.europa.eu/eurostat/en/search?p_p_id=estatsearchportlet_WAR_estatsearchportlet&p_p_lifecycle=2&p_p_state=maximized&p_p_mode=view&p_p_resource_id=atom&_estatsearchportlet_WAR_estatsearchportlet_collection=CAT_PREREL", "category": "Centrist"},
   {"url": "https://ecfr.eu/feed/", "category": "Centrist"},
   {"url": "https://feeds.feedburner.com/ekathimerini/sKip", "category": "Centrist"},
   {"url": "https://www.thenationalherald.com/feed/", "category": "Centrist"},
-  {"url": "https://www.crisisgroup.org/rss", "category": "Centrist"},
   {"url": "https://www.mfa.gov.tr/en.rss.mfa?ad9093da-8e71-4678-a1b6-05f297baadc4", "category": "State-Controlled"},
   {"url": "https://www.msf.org/rss/all", "category": "Centrist"},
   {"url": "https://buenosairesherald.com/feed/atom", "category": "Centrist"},
   {"url": "https://www.batimes.com.ar/feed", "category": "Centrist"},
   {"url": "http://news.am/eng/rss/", "category": "Centrist"},
   {"url": "http://en.1in.am/feed", "category": "Centrist"},
-  {"url": "http://en.aravot.am/feed/", "category": "Centrist"},
   {"url": "https://stickers.panarmenian.net/feeds/eng/news/", "category": "Centrist"},
   {"url": "https://armenianweekly.com/feed/", "category": "Centrist"},
   {"url": "https://hetq.am/en/rss", "category": "Centrist"},
@@ -466,7 +447,6 @@ const FEEDS_DATA: FeedData[] = [
   {"url": "https://www.tehrantimes.com/rss/tp/698", "category": "State-Controlled"},
   {"url": "https://www.tehrantimes.com/rss", "category": "State-Controlled"},
   {"url": "https://en.irna.ir/rss", "category": "State-Controlled"},
-  {"url": "https://en.radiofarda.com/api/zp_qmtl-vomx-tpe_bimr", "category": "Centrist"},
   {"url": "https://en.isna.ir/rss/tp/13", "category": "State-Controlled"},
   {"url": "https://en.isna.ir/rss", "category": "State-Controlled"},
   {"url": "https://www.azernews.az/feed.php", "category": "Centrist"},
@@ -548,6 +528,7 @@ const SOURCE_COUNTRY: Record<string, string> = {
   'https://www.aljazeera.com/xml/rss/all.xml': 'Qatar',
   'https://www.bbc.com/news/rss.xml': 'United Kingdom',
   'https://feeds.bbci.co.uk/news/rss.xml': 'United Kingdom',
+  'https://www.theguardian.com/world/rss': 'United Kingdom',
   'https://www.cbc.ca/webfeed/rss/rss-politics': 'Canada',
   'https://www.cbc.ca/webfeed/rss/rss-world': 'Canada',
   'https://www.cbc.ca/webfeed/rss/rss-canada': 'Canada',
@@ -575,7 +556,6 @@ const SOURCE_COUNTRY: Record<string, string> = {
   'https://www.pbs.org/newshour/feeds/rss/headlines': 'United States',
   'https://www.voanews.com/api/zqboml-vomx-tpeivmy': 'United States',
   'https://www.rferl.org/api/zbqiml-vomx-tpeqkmy': 'United States',
-  'https://en.radiofarda.com/api/zp_qmtl-vomx-tpe_bimr': 'United States',
   'https://crittendenpress.blogspot.com/feeds/posts/default?alt=rss': 'United States',
   'https://ottawacitizen.com/feed': 'Canada',
   'https://theprovince.com/feed': 'Canada',
@@ -636,12 +616,10 @@ const SOURCE_COUNTRY: Record<string, string> = {
   'https://feeds.feedburner.com/arabistdotnet': 'Morocco',
   'https://www.israelnationalnews.com/Rss.aspx': 'Israel',
   'https://www.haaretz.com/srv/haaretz-latest-headlines': 'Israel',
-  'https://www.crisisgroup.org/rss': 'Belgium',
   'https://www.europarl.europa.eu/rss/doc/press-releases/en.xml': 'Belgium',
   'https://www.consilium.europa.eu/en/rss/pressreleases.ashx': 'Belgium',
   'https://ec.europa.eu/eurostat/en/search?p_p_id=estatsearchportlet_WAR_estatsearchportlet&p_p_lifecycle=2&p_p_state=maximized&p_p_mode=view&p_p_resource_id=atom&_estatsearchportlet_WAR_estatsearchportlet_collection=CAT_PREREL': 'Belgium',
   'https://ecfr.eu/feed/': 'Germany',
-  'https://www.europeanlawblog.eu/rss.xml': 'Netherlands',
   'https://officialblogofunio.com/feed/': 'Belgium',
   'https://www.foreignaffairs.com/rss.xml': 'United States',
   'https://rss.politico.com/politics-news.xml': 'United States',
@@ -697,7 +675,6 @@ const SOURCE_COUNTRY: Record<string, string> = {
   'https://www.japantimes.co.jp/feed/': 'Japan',
   'https://abc.net.au/news/rss': 'Australia',
   'http://feeds.skynews.com/feeds/rss/world.xml': 'Australia',
-  'https://www.9news.com.au/rss': 'Australia',
   'https://www.abc.net.au/news/rss/': 'Australia',
   'https://www.sbs.com.au/news/rss': 'Australia',
   'https://www.theaustralian.com.au/news/rss': 'Australia',
@@ -763,96 +740,6 @@ function getSourceCountry(url: string): string {
   return SOURCE_COUNTRY[url] || 'Unknown';
 }
 
-const TOPIC_COUNTRIES: Record<string, string[]> = {
-  lebanon: ['Lebanon'],
-  israel: ['Israel'],
-  palestine: ['Palestine'],
-  jordan: ['Jordan'],
-  iraq: ['Iraq'],
-  syria: ['Syria'],
-  egypt: ['Egypt'],
-  iran: ['Iran'],
-  turkey: ['Turkey'],
-  'saudi arabia': ['Saudi Arabia'],
-  uae: ['United Arab Emirates'],
-  qatar: ['Qatar'],
-  bahrain: ['Bahrain'],
-  oman: ['Oman'],
-  kuwait: ['Kuwait'],
-  yemen: ['Yemen'],
-  morocco: ['Morocco'],
-  algeria: ['Algeria'],
-  tunisia: ['Tunisia'],
-  libya: ['Libya'],
-  sudan: ['Sudan'],
-  ethiopia: ['Ethiopia'],
-  somalia: ['Somalia'],
-  ukraine: ['Ukraine'],
-  russia: ['Russia'],
-  china: ['China'],
-  taiwan: ['Taiwan'],
-  japan: ['Japan'],
-  korea: ['South Korea', 'North Korea'],
-  india: ['India'],
-  pakistan: ['Pakistan'],
-  bangladesh: ['Bangladesh'],
-  'sri lanka': ['Sri Lanka'],
-  myanmar: ['Myanmar'],
-  thailand: ['Thailand'],
-  vietnam: ['Vietnam'],
-  philippines: ['Philippines'],
-  indonesia: ['Indonesia'],
-  malaysia: ['Malaysia'],
-  singapore: ['Singapore'],
-  australia: ['Australia'],
-  'new zealand': ['New Zealand'],
-  canada: ['Canada'],
-  'united states': ['United States'],
-  usa: ['United States'],
-  britain: ['United Kingdom'],
-  'united kingdom': ['United Kingdom'],
-  france: ['France'],
-  germany: ['Germany'],
-  italy: ['Italy'],
-  spain: ['Spain'],
-  portugal: ['Portugal'],
-  netherlands: ['Netherlands'],
-  belgium: ['Belgium'],
-  switzerland: ['Switzerland'],
-  austria: ['Austria'],
-  poland: ['Poland'],
-  brazil: ['Brazil'],
-  argentina: ['Argentina'],
-  mexico: ['Mexico'],
-  colombia: ['Colombia'],
-  chile: ['Chile'],
-  peru: ['Peru'],
-  venezuela: ['Venezuela'],
-  cuba: ['Cuba'],
-  'south africa': ['South Africa'],
-  nigeria: ['Nigeria'],
-  kenya: ['Kenya'],
-};
-
-function extractTopicCountries(text: string): string[] {
-  const lowerText = text.toLowerCase();
-  const found: string[] = [];
-  for (const [topic, countries] of Object.entries(TOPIC_COUNTRIES)) {
-    if (lowerText.includes(topic)) {
-      found.push(...countries);
-    }
-  }
-  return Array.from(new Set(found));
-}
-
-function getArticleCountry(article: NewsItem): string {
-  const topicCountries = extractTopicCountries(`${article.title} ${article.summary}`);
-  if (topicCountries.length > 0) {
-    return topicCountries[0];
-  }
-  return getSourceCountry(article.url);
-}
-
 const AVIATION_RSS_URLS = [
   'https://www.aeroroutes.com/?format=rss',
   'https://www.aero-news.net/news/rssCOMANW.xml',
@@ -880,7 +767,7 @@ interface FeedResult {
 const feedCache = new Map<string, { data: NewsItem[]; timestamp: number }>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
-const MAX_CONCURRENCY = 12;
+const MAX_CONCURRENCY = 3;
 
 async function runWithConcurrency<T>(
   tasks: (() => Promise<T>)[],
@@ -1027,7 +914,6 @@ class JsonFeedParser {
         category,
         imageUrl: it.image_url || (it.attachments?.[0]?.mime_type?.startsWith('image/') ? it.attachments?.[0]?.url : undefined),
         country: getSourceCountry(url),
-        topicCountries: extractTopicCountries(`${it.title || ''} ${it.content_text || it.content_html || it.summary || ''}`),
       }));
       const sourceCountry = getSourceCountry(url);
       return { items, source: { name: sourceName, status: items.length > 0 ? 'success' : 'failed', url, category, articleCount: items.length, checkedAt: new Date().toISOString(), country: sourceCountry } };
@@ -1319,7 +1205,6 @@ class XMLParser {
       link = baseUrl;
     }
 
-    const topicCountries = extractTopicCountries(`${title} ${summary}`);
     return {
       id: `${sourceName}-${index}-${Date.now()}`,
       title: title.substring(0, 300),
@@ -1330,7 +1215,6 @@ class XMLParser {
       category,
       imageUrl: this.extractImage(element),
       _ts: itemDate ? itemDate.getTime() : Date.now(),
-      topicCountries
     };
   }
 
@@ -1514,7 +1398,6 @@ class HTMLParser {
     if (!title || !link) return null;
 
     const sourceCountry = getSourceCountry(baseUrl);
-    const topicCountries = extractTopicCountries(`${title} ${summary}`);
     return {
       id: `${sourceName}-${index}-${Date.now()}`,
       title: title.substring(0, 300),
@@ -1524,8 +1407,7 @@ class HTMLParser {
       source: sourceName,
       category,
       imageUrl: this.extractImage(element),
-      country: topicCountries.length > 0 ? topicCountries[0] : sourceCountry,
-      topicCountries
+      country: sourceCountry,
     };
   }
 
@@ -1613,7 +1495,6 @@ async function tryParseWithRssParser(text: string, url: string): Promise<{ items
         source: sourceName,
         category,
         country: sourceCountry,
-        topicCountries: extractTopicCountries(`${title} ${summary}`),
         _ts: Date.now(),
       };
     });
@@ -1855,7 +1736,8 @@ function filterAndSort(items: NewsItem[]): NewsItem[] {
 export type FeedUpdate = (
   articles: NewsItem[],
   sources: NewsSource[],
-  done: boolean
+  done: boolean,
+  sourceName?: string
 ) => void;
 
 export async function fetchAviationNews(
@@ -1877,7 +1759,7 @@ export async function fetchAviationNews(
       resolved++;
 
       if (onFeedResolved) {
-        onFeedResolved(filterAndSort(newsItems), sourcesInfo, resolved === total);
+        onFeedResolved(filterAndSort(newsItems), sourcesInfo, resolved === total, result.source.name);
       }
     }),
     MAX_CONCURRENCY
@@ -1905,7 +1787,7 @@ export async function fetchWorldNews(
       resolved++;
 
       if (onFeedResolved) {
-        onFeedResolved(filterAndSort(newsItems), sourcesInfo, resolved === total);
+        onFeedResolved(filterAndSort(newsItems), sourcesInfo, resolved === total, result.source.name);
       }
     }),
     MAX_CONCURRENCY
@@ -1933,7 +1815,7 @@ export async function fetchAllNews(
       resolved++;
 
       if (onFeedResolved) {
-        onFeedResolved(filterAndSort(newsItems), sourcesInfo, resolved === total);
+        onFeedResolved(filterAndSort(newsItems), sourcesInfo, resolved === total, result.source.name);
       }
     }),
     MAX_CONCURRENCY

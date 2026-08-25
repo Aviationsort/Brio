@@ -13,8 +13,6 @@ import { PokerGame } from './PokerGame';
 import { BlackjackGame } from './BlackjackGame';
 import { FlappyBirdGame } from './FlappyBirdGame';
 import { MinesweeperGame } from './MinesweeperGame';
-import { TacticalRiskGame } from './TacticalRiskGame';
-import { TankeryGame } from './TankeryGame';
 import { FlagQuizGame } from './FlagQuizGame';
 import {
   Gamepad2,
@@ -25,8 +23,6 @@ import {
   Coins,
   Bird,
   Bomb,
-  MapPin,
-  Shield,
   Flag,
 } from 'lucide-react';
 
@@ -105,22 +101,6 @@ const GAMES_LIST: GameItem[] = [
     badge: 'Puzzle',
   },
   {
-    id: 'risk',
-    title: 'HOI4 / Risk Tactical Map',
-    category: 'Strategy',
-    description: 'Tactical map simulator for Lebanon & Cyprus with troop logistics & battle sim.',
-    icon: MapPin,
-    badge: 'Lebanon & Cyprus',
-  },
-  {
-    id: 'tankery',
-    title: 'Girls und Panzer Tankery',
-    category: 'Tactical',
-    description: 'Anime GuP style tank battle simulator with armor penetration & crew stats.',
-    icon: Shield,
-    badge: 'GuP Tactical',
-  },
-  {
     id: 'flagquiz',
     title: 'Country Flag Quiz',
     category: 'Trivia',
@@ -143,7 +123,7 @@ export const ArcadeGamesHub: React.FC = () => {
           </div>
           <div>
             <h3 className="text-sm font-bold text-white drop-shadow-md">Brio Arcade & Gaming Suite</h3>
-            <p className="text-xs text-pink-200/90 font-medium">11 Fully interactive games with encrypted high score storage</p>
+            <p className="text-xs text-pink-200/90 font-medium">9 Fully interactive games with encrypted high score storage</p>
           </div>
         </div>
 
@@ -168,8 +148,6 @@ export const ArcadeGamesHub: React.FC = () => {
           {selectedGame === 'blackjack' && <BlackjackGame />}
           {selectedGame === 'flappy' && <FlappyBirdGame />}
           {selectedGame === 'minesweeper' && <MinesweeperGame />}
-          {selectedGame === 'risk' && <TacticalRiskGame />}
-          {selectedGame === 'tankery' && <TankeryGame />}
           {selectedGame === 'flagquiz' && <FlagQuizGame />}
         </div>
       ) : (

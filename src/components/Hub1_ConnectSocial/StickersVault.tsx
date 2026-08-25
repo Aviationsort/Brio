@@ -17,8 +17,7 @@ export const StickersVault: React.FC = () => {
   const handleCopy = (sticker: StickerItem) => {
     navigator.clipboard.writeText(sticker.dataUrl);
     setCopiedId(sticker.id);
-    showToast('Sticker Copied', `Copied ${sticker.name} to clipboard.`, 'success');
-    setTimeout(() => setCopiedId(null), 2000);
+        setTimeout(() => setCopiedId(null), 2000);
   };
 
   const handleAdd = async (e: React.FormEvent) => {
