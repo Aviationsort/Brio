@@ -331,18 +331,18 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-xl animate-fadeIn select-none">
-      <div className="relative w-full max-w-4xl bg-gradient-to-b from-slate-900 via-slate-950 to-black rounded-3xl border-2 border-[#FF5F1F]/40 shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="relative w-full max-w-4xl bg-[#0a0a0c] rounded-[28px] border-2 border-red-500/40 shadow-[0_24px_64px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col max-h-[90vh] aero-glossy aero-panel">
         
         {/* MODAL HEADER BAR */}
-        <div className="px-6 py-4 bg-black/90 border-b border-white/10 flex items-center justify-between">
+        <div className="wiiu-header aero-glossy">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-[#FF5F1F]/20 border border-[#FF5F1F]/40 text-[#FF5F1F]">
+            <div className="p-2.5 rounded-2xl bg-red-900/30 border border-red-500/40 text-red-400">
               <Clock className="w-6 h-6 animate-pulse" />
             </div>
             <div>
               <h3 className="text-lg font-black text-white tracking-wide flex items-center gap-2">
                 <span>{t.clock || 'Clock & Calendar Suite'}</span>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-mono font-bold border border-emerald-500/30">
+                <span className="px-2 py-0.5 rounded-full bg-red-900/30 text-red-300 text-[10px] font-mono font-bold border border-red-500/30">
                   Precision Sync
                 </span>
               </h3>
@@ -354,20 +354,20 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
 
           <button
             onClick={onClose}
-            className="liquid-glass-btn p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-zinc-400 hover:text-white transition-all cursor-pointer"
+            className="ife-btn p-2 rounded-xl cursor-pointer"
           >
-            <X className="liquid-glass-btn w-5 h-5" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* SUB-TABS SELECTOR */}
-        <div className="px-6 py-3 bg-slate-950/90 border-b border-white/10 flex items-center gap-2 overflow-x-auto no-scrollbar">
+        <div className="px-6 py-3 aero-panel border-b border-white/10 flex items-center gap-2 overflow-x-auto no-scrollbar aero-glossy">
           <button
             onClick={() => setActiveTab('ANALOG')}
-            className={`liquid-glass-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`ife-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'ANALOG'
-                ? 'bg-gradient-to-r from-[#FF5F1F] to-orange-500 text-black shadow-lg font-black'
-                : 'bg-slate-900 text-zinc-300 hover:bg-slate-800'
+                ? 'bg-gradient-to-r from-[#C8102E] to-[#8B0000] text-white shadow-lg border border-red-400/40 font-black'
+                : 'bg-[#1a1a1a] text-zinc-300 hover:bg-zinc-800'
             }`}
           >
             <Clock className="w-4 h-4" />
@@ -376,10 +376,10 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
 
           <button
             onClick={() => setActiveTab('STOPWATCH')}
-            className={`liquid-glass-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`ife-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'STOPWATCH'
-                ? 'bg-gradient-to-r from-[#FF5F1F] to-orange-500 text-black shadow-lg font-black'
-                : 'bg-slate-900 text-zinc-300 hover:bg-slate-800'
+                ? 'bg-gradient-to-r from-[#C8102E] to-[#8B0000] text-white shadow-lg border border-red-400/40 font-black'
+                : 'bg-[#1a1a1a] text-zinc-300 hover:bg-zinc-800'
             }`}
           >
             <Activity className="w-4 h-4" />
@@ -388,10 +388,10 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
 
           <button
             onClick={() => setActiveTab('TIMER')}
-            className={`liquid-glass-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`ife-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'TIMER'
-                ? 'bg-gradient-to-r from-[#FF5F1F] to-orange-500 text-black shadow-lg font-black'
-                : 'bg-slate-900 text-zinc-300 hover:bg-slate-800'
+                ? 'bg-gradient-to-r from-[#C8102E] to-[#8B0000] text-white shadow-lg border border-red-400/40 font-black'
+                : 'bg-[#1a1a1a] text-zinc-300 hover:bg-zinc-800'
             }`}
           >
             <TimerIcon className="w-4 h-4" />
@@ -400,10 +400,10 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
 
           <button
             onClick={() => setActiveTab('CALENDAR')}
-            className={`liquid-glass-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`ife-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'CALENDAR'
-                ? 'bg-gradient-to-r from-[#FF5F1F] to-orange-500 text-black shadow-lg font-black'
-                : 'bg-slate-900 text-zinc-300 hover:bg-slate-800'
+                ? 'bg-gradient-to-r from-[#C8102E] to-[#8B0000] text-white shadow-lg border border-red-400/40 font-black'
+                : 'bg-[#1a1a1a] text-zinc-300 hover:bg-zinc-800'
             }`}
           >
             <CalendarIcon className="w-4 h-4" />
@@ -419,127 +419,127 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                
                {/* ANALOG CLOCK FACE */}
-               <div className="flex flex-col items-center justify-center p-6 bg-slate-950/80 rounded-[2rem] border border-white/10 shadow-inner relative">
-                 <div className="relative w-80 h-80 sm:w-96 sm:h-96 rounded-full bg-gradient-to-b from-slate-900 to-black shadow-[inset_0_4px_20px_rgba(0,0,0,0.8),0_0_40px_rgba(255,95,31,0.15)] flex items-center justify-center">
-                   <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#FF5F1F]/5 to-transparent" />
+               <div className="flex flex-col items-center justify-center p-6 bg-[#0a0a0c]/80 rounded-[2rem] border border-white/10 shadow-inner relative aero-panel">
+                  <div className="relative w-80 h-80 sm:w-96 sm:h-96 rounded-full bg-gradient-to-b from-[#1a1a1a] to-[#0a0a0c] shadow-[inset_0_4px_20px_rgba(0,0,0,0.8),0_0_40px_rgba(200,16,46,0.15)] flex items-center justify-center">
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-br from-red-900/10 to-transparent" />
 
-                   {[...Array(60)].map((_, i) => {
-                     const angle = i * 6;
-                     const isHourTick = i % 5 === 0;
-                     const tickLength = isHourTick ? 14 : 6;
-                     const tickWidth = isHourTick ? 2.5 : 0.75;
-                     const tickOpacity = isHourTick ? 1 : 0.35;
-                     const rad = (angle * Math.PI) / 180;
-                     const innerR = 43;
-                     const outerR = innerR + tickLength;
-                     const x1 = 50 + innerR * Math.sin(rad);
-                     const y1 = 50 - innerR * Math.cos(rad);
-                     const x2 = 50 + outerR * Math.sin(rad);
-                     const y2 = 50 - outerR * Math.cos(rad);
-                     return (
-                       <div
-                         key={i}
-                         className="absolute bg-zinc-300 rounded-full"
-                         style={{
-                           left: `${x1}%`,
-                           top: `${y1}%`,
-                           width: `${tickWidth}px`,
-                           height: `${tickLength}px`,
-                           transformOrigin: 'center center',
-                           transform: `rotate(${angle}deg) translate(-50%, -50%)`,
-                           opacity: tickOpacity,
-                         }}
-                       />
-                     );
-                   })}
+                    {[...Array(60)].map((_, i) => {
+                      const angle = i * 6;
+                      const isHourTick = i % 5 === 0;
+                      const tickLength = isHourTick ? 14 : 6;
+                      const tickWidth = isHourTick ? 2.5 : 0.75;
+                      const tickOpacity = isHourTick ? 1 : 0.35;
+                      const rad = (angle * Math.PI) / 180;
+                      const innerR = 43;
+                      const outerR = innerR + tickLength;
+                      const x1 = 50 + innerR * Math.sin(rad);
+                      const y1 = 50 - innerR * Math.cos(rad);
+                      const x2 = 50 + outerR * Math.sin(rad);
+                      const y2 = 50 - outerR * Math.cos(rad);
+                      return (
+                        <div
+                          key={i}
+                          className="absolute bg-zinc-300 rounded-full"
+                          style={{
+                            left: `${x1}%`,
+                            top: `${y1}%`,
+                            width: `${tickWidth}px`,
+                            height: `${tickLength}px`,
+                            transformOrigin: 'center center',
+                            transform: `rotate(${angle}deg) translate(-50%, -50%)`,
+                            opacity: tickOpacity,
+                          }}
+                        />
+                      );
+                    })}
 
-                   {[...Array(12)].map((_, i) => {
-                     const angle = (i + 1) * 30;
-                     const rad = (angle * Math.PI) / 180;
-                     const x = 50 + 34 * Math.sin(rad);
-                     const y = 50 - 34 * Math.cos(rad);
-                     return (
-                       <span
-                         key={i}
-                         className="absolute text-base sm:text-lg font-black font-mono bg-gradient-to-b from-white to-zinc-300 bg-clip-text text-transparent drop-shadow-[0_0_4px_rgba(255,255,255,0.3)]"
-                         style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' }}
-                       >
-                         {i + 1}
-                       </span>
-                     );
-                   })}
+                    {[...Array(12)].map((_, i) => {
+                      const angle = (i + 1) * 30;
+                      const rad = (angle * Math.PI) / 180;
+                      const x = 50 + 34 * Math.sin(rad);
+                      const y = 50 - 34 * Math.cos(rad);
+                      return (
+                        <span
+                          key={i}
+                          className="absolute text-base sm:text-lg font-black font-mono bg-gradient-to-b from-white to-zinc-300 bg-clip-text text-transparent drop-shadow-[0_0_4px_rgba(255,255,255,0.3)]"
+                          style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' }}
+                        >
+                          {i + 1}
+                        </span>
+                      );
+                    })}
 
-                   <div
-                     className="absolute w-2.5 h-20 bg-gradient-to-t from-white to-zinc-300 rounded-full origin-bottom shadow-[0_0_10px_rgba(255,255,255,0.4)]"
-                     style={{
-                       transform: `rotate(${hourDeg}deg)`,
-                       bottom: '50%',
-                     }}
-                   />
+                    <div
+                      className="absolute w-2.5 h-20 bg-gradient-to-t from-white to-zinc-300 rounded-full origin-bottom shadow-[0_0_10px_rgba(255,255,255,0.4)]"
+                      style={{
+                        transform: `rotate(${hourDeg}deg)`,
+                        bottom: '50%',
+                      }}
+                    />
 
-                   <div
-                     className="absolute w-1.5 h-28 bg-gradient-to-t from-sky-300 to-sky-100 rounded-full origin-bottom shadow-[0_0_10px_rgba(56,189,248,0.4)]"
-                     style={{
-                       transform: `rotate(${minDeg}deg)`,
-                       bottom: '50%',
-                     }}
-                   />
+                    <div
+                      className="absolute w-1.5 h-28 bg-gradient-to-t from-red-300 to-red-100 rounded-full origin-bottom shadow-[0_0_10px_rgba(200,16,46,0.4)]"
+                      style={{
+                        transform: `rotate(${minDeg}deg)`,
+                        bottom: '50%',
+                      }}
+                    />
 
-                   <div
-                     className="absolute w-0.5 h-32 bg-gradient-to-t from-[#FF5F1F] to-orange-300 rounded-full origin-bottom shadow-[0_0_10px_rgba(255,95,31,0.5)]"
-                     style={{
-                       transform: `rotate(${secDeg}deg)`,
-                       bottom: '50%',
-                     }}
-                   />
+                    <div
+                      className="absolute w-0.5 h-32 bg-gradient-to-t from-[#FF2D2D] to-red-300 rounded-full origin-bottom shadow-[0_0_10px_rgba(255,45,45,0.5)]"
+                      style={{
+                        transform: `rotate(${secDeg}deg)`,
+                        bottom: '50%',
+                      }}
+                    />
 
-                   <div className="absolute w-5 h-5 bg-[#FF5F1F] rounded-full border-[3px] border-white z-10 shadow-lg shadow-[#FF5F1F]/30" />
-                   <div className="absolute w-2.5 h-2.5 bg-white rounded-full z-20" />
+                    <div className="absolute w-5 h-5 bg-[#C8102E] rounded-full border-[3px] border-white z-10 shadow-lg shadow-red-900/30" />
+                    <div className="absolute w-2.5 h-2.5 bg-white rounded-full z-20" />
 
-                   {/* Seconds sub-dial */}
-                   <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-16 h-16 rounded-full bg-slate-950 border border-white/10 flex items-center justify-center shadow-[inset_0_2px_8px_rgba(0,0,0,0.6)]">
-                     <div className="relative w-full h-full">
-                       {[...Array(12)].map((_, i) => {
-                         const angle = i * 30;
-                         const rad = (angle * Math.PI) / 180;
-                         const x = 50 + 35 * Math.sin(rad);
-                         const y = 50 - 35 * Math.cos(rad);
-                         return (
-                           <div
-                             key={i}
-                             className="absolute w-0.5 h-1.5 bg-zinc-500 rounded-full"
-                             style={{
-                               left: `${x}%`,
-                               top: `${y}%`,
-                               transform: 'translate(-50%, -50%)',
-                             }}
-                           />
-                         );
-                       })}
-                       <div
-                         className="absolute w-px h-5 bg-[#FF5F1F] rounded-full origin-bottom left-1/2 bottom-1/2"
-                         style={{ transform: `translateX(-50%) rotate(${secDeg}deg)` }}
-                       />
-                       <div className="absolute w-1.5 h-1.5 bg-[#FF5F1F] rounded-full left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
-                     </div>
-                   </div>
-                 </div>
+                    {/* Seconds sub-dial */}
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-16 h-16 rounded-full bg-[#0a0a0c] border border-white/10 flex items-center justify-center shadow-[inset_0_2px_8px_rgba(0,0,0,0.6)]">
+                      <div className="relative w-full h-full">
+                        {[...Array(12)].map((_, i) => {
+                          const angle = i * 30;
+                          const rad = (angle * Math.PI) / 180;
+                          const x = 50 + 35 * Math.sin(rad);
+                          const y = 50 - 35 * Math.cos(rad);
+                          return (
+                            <div
+                              key={i}
+                              className="absolute w-0.5 h-1.5 bg-zinc-500 rounded-full"
+                              style={{
+                                left: `${x}%`,
+                                top: `${y}%`,
+                                transform: 'translate(-50%, -50%)',
+                              }}
+                            />
+                          );
+                        })}
+                        <div
+                          className="absolute w-px h-5 bg-[#C8102E] rounded-full origin-bottom left-1/2 bottom-1/2"
+                          style={{ transform: `translateX(-50%) rotate(${secDeg}deg)` }}
+                        />
+                        <div className="absolute w-1.5 h-1.5 bg-[#C8102E] rounded-full left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+                      </div>
+                    </div>
+                  </div>
 
-                 <div className="mt-6 text-center">
-                   <div className="text-4xl font-black font-mono text-white tracking-widest">
-                     {now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                   </div>
-                   <div className="text-xs font-mono text-sky-400 font-bold mt-2">
-                     {now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                   </div>
-                 </div>
+                  <div className="mt-6 text-center">
+                    <div className="text-4xl font-black font-mono text-white tracking-widest">
+                      {now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                    </div>
+                    <div className="text-xs font-mono text-red-400 font-bold mt-2">
+                      {now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                    </div>
+                  </div>
                </div>
 
                {/* WORLD CLOCKS GRID */}
                <div className="space-y-5">
                  <div className="flex items-center justify-between">
                    <h4 className="text-xs font-bold font-mono text-zinc-400 uppercase tracking-wider flex items-center gap-2">
-                     <Globe className="w-4 h-4 text-[#FF5F1F]" />
+                     <Globe className="w-4 h-4 text-red-400" />
                      <span>World Clock Matrix</span>
                    </h4>
                  </div>
@@ -551,7 +551,7 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
                      placeholder="Search cities or UTC offsets..."
                      value={worldClockSearch}
                      onChange={(e) => setWorldClockSearch(e.target.value)}
-                     className="w-full pl-9 pr-3 py-2 bg-slate-900/80 border border-white/10 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#FF5F1F] font-mono"
+                     className="w-full pl-9 pr-3 py-2 bg-[#1a1a1a]/80 border border-white/10 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-red-500 font-mono"
                    />
                  </div>
 
@@ -578,21 +578,21 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
                      return (
                        <div
                          key={idx}
-                         className="p-4 rounded-2xl bg-gradient-to-br from-slate-900/90 to-slate-950 border border-white/10 flex items-center justify-between shadow-lg hover:border-[#FF5F1F]/30 transition-all"
+                         className="p-4 rounded-2xl bg-gradient-to-br from-[#1a1a1a]/90 to-[#0a0a0c] border border-white/10 flex items-center justify-between shadow-lg hover:border-red-500/30 transition-all"
                        >
                          <div className="flex items-center gap-3">
                            <span className="text-2xl">{tz.flag}</span>
                            <div>
                              <div className="flex items-center gap-2">
                                <span className="text-xs font-bold text-white block">{tz.city.split(' (')[0]}</span>
-                               {isDaytime ? <Sun className="w-3 h-3 text-amber-400" /> : <Moon className="w-3 h-3 text-indigo-400" />}
+                               {isDaytime ? <Sun className="w-3 h-3 text-red-400" /> : <Moon className="w-3 h-3 text-red-300" />}
                              </div>
                              <span className="text-[10px] text-zinc-500 font-mono block mt-0.5">{cityDate}</span>
                              <span className="text-[10px] font-mono text-zinc-600">{tz.offset}</span>
                            </div>
                          </div>
                          <div className="text-right">
-                           <span className="text-sm font-mono font-black text-[#FF5F1F] block">
+                           <span className="text-sm font-mono font-black text-red-400 block">
                              {cityTime}
                            </span>
                            <span className="text-[9px] font-mono text-zinc-500 block mt-0.5">
@@ -605,13 +605,13 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
                  </div>
                </div>
 
-             </div>
-           )}
+            </div>
+          )}
 
           {/* TAB 2: STOPWATCH */}
           {activeTab === 'STOPWATCH' && (
             <div className="space-y-6 flex flex-col items-center justify-center py-4">
-              <div className="text-5xl sm:text-6xl font-black font-mono text-white tracking-wider bg-slate-950 px-8 py-6 rounded-3xl border-2 border-[#FF5F1F]/40 shadow-inner">
+              <div className="text-5xl sm:text-6xl font-black font-mono text-white tracking-wider bg-[#0a0a0c] px-8 py-6 rounded-3xl border-2 border-red-500/40 shadow-inner">
                 {formatMs(swTimeMs)}
               </div>
 
@@ -619,7 +619,7 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
                 {!swRunning ? (
                   <button
                     onClick={() => setSwRunning(true)}
-                    className="liquid-glass-btn px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-black font-black rounded-2xl text-sm flex items-center gap-2 cursor-pointer shadow-lg"
+                    className="flash-btn px-6 py-3 text-black font-black rounded-2xl text-sm flex items-center gap-2 cursor-pointer shadow-lg"
                   >
                     <Play className="w-4 h-4 fill-current" />
                     <span>Start</span>
@@ -627,7 +627,7 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
                 ) : (
                   <button
                     onClick={() => setSwRunning(false)}
-                    className="liquid-glass-btn px-6 py-3 bg-amber-500 hover:bg-amber-400 text-black font-black rounded-2xl text-sm flex items-center gap-2 cursor-pointer shadow-lg"
+                    className="flash-btn px-6 py-3 bg-red-500 hover:bg-red-400 text-black font-black rounded-2xl text-sm flex items-center gap-2 cursor-pointer shadow-lg"
                   >
                     <Pause className="w-4 h-4 fill-current" />
                     <span>Pause</span>
@@ -637,7 +637,7 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
                 <button
                   onClick={handleSwLap}
                   disabled={!swRunning}
-                  className="liquid-glass-btn px-6 py-3 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-white font-black rounded-2xl text-sm flex items-center gap-2 cursor-pointer border border-white/10"
+                  className="ife-btn px-6 py-3 text-white font-black rounded-2xl text-sm flex items-center gap-2 cursor-pointer border border-white/10"
                 >
                   <Flag className="w-4 h-4" />
                   <span>Split Lap</span>
@@ -645,7 +645,7 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
 
                 <button
                   onClick={handleSwReset}
-                  className="liquid-glass-btn px-6 py-3 bg-rose-900/60 hover:bg-rose-800 text-rose-200 font-black rounded-2xl text-sm flex items-center gap-2 cursor-pointer border border-rose-500/30"
+                  className="ife-btn px-6 py-3 bg-red-900/60 hover:bg-red-800 text-red-200 font-black rounded-2xl text-sm flex items-center gap-2 cursor-pointer border border-red-500/30"
                 >
                   <RotateCcw className="w-4 h-4" />
                   <span>Reset</span>
@@ -653,12 +653,12 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
               </div>
 
               {swLaps.length > 0 && (
-                <div className="w-full max-w-md bg-slate-950 rounded-2xl border border-white/10 p-4 max-h-48 overflow-y-auto space-y-2">
+                <div className="w-full max-w-md ife-card rounded-2xl border border-white/10 p-4 max-h-48 overflow-y-auto space-y-2">
                   <h5 className="text-xs font-mono font-bold text-zinc-400 uppercase">Lap Splits History</h5>
                   <div className="space-y-1.5 font-mono text-xs">
                     {swLaps.map((lap) => (
                       <div key={lap.id} className="flex items-center justify-between py-1 border-b border-zinc-800 text-zinc-300">
-                        <span className="font-bold text-sky-400">Lap {lap.id}</span>
+                        <span className="font-bold text-red-400">Lap {lap.id}</span>
                         <span>Split: {formatMs(lap.split)}</span>
                         <span className="text-white font-bold">Total: {formatMs(lap.total)}</span>
                       </div>
@@ -672,296 +672,296 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
           {/* TAB 3: TIMER */}
           {activeTab === 'TIMER' && (
             <div className="space-y-6 flex flex-col items-center justify-center py-2">
-              
-              {!timerRunning ? (
-                <div className="flex items-center gap-4 bg-slate-950 p-6 rounded-3xl border border-white/10">
-                  <div className="flex flex-col items-center">
-                    <span className="text-xs font-mono text-zinc-400">Hours</span>
-                    <input
-                      type="number"
-                      min={0}
-                      max={23}
-                      value={timerInputH}
-                      onChange={(e) => setTimerInputH(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-16 bg-slate-900 border border-zinc-700 rounded-xl py-2 text-center text-xl font-bold text-white font-mono"
-                    />
-                  </div>
-                  <span className="text-2xl font-bold text-zinc-500">:</span>
-                  <div className="flex flex-col items-center">
-                    <span className="text-xs font-mono text-zinc-400">Minutes</span>
-                    <input
-                      type="number"
-                      min={0}
-                      max={59}
-                      value={timerInputM}
-                      onChange={(e) => setTimerInputM(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-16 bg-slate-900 border border-zinc-700 rounded-xl py-2 text-center text-xl font-bold text-white font-mono"
-                    />
-                  </div>
-                  <span className="text-2xl font-bold text-zinc-500">:</span>
-                  <div className="flex flex-col items-center">
-                    <span className="text-xs font-mono text-zinc-400">Seconds</span>
-                    <input
-                      type="number"
-                      min={0}
-                      max={59}
-                      value={timerInputS}
-                      onChange={(e) => setTimerInputS(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-16 bg-slate-900 border border-zinc-700 rounded-xl py-2 text-center text-xl font-bold text-white font-mono"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div className="text-5xl sm:text-6xl font-black font-mono text-[#FF5F1F] tracking-widest bg-slate-950 px-8 py-6 rounded-3xl border-2 border-[#FF5F1F]/50 animate-pulse">
-                  {formatTimerSeconds(timerRemainingSec)}
-                </div>
-              )}
+               
+               {!timerRunning ? (
+                 <div className="flex items-center gap-4 bg-[#0a0a0c] p-6 rounded-3xl border border-white/10">
+                   <div className="flex flex-col items-center">
+                     <span className="text-xs font-mono text-zinc-400">Hours</span>
+                     <input
+                       type="number"
+                       min={0}
+                       max={23}
+                       value={timerInputH}
+                       onChange={(e) => setTimerInputH(Math.max(0, parseInt(e.target.value) || 0))}
+                       className="w-16 bg-[#1a1a1a] border border-zinc-700 rounded-xl py-2 text-center text-xl font-bold text-white font-mono"
+                     />
+                   </div>
+                   <span className="text-2xl font-bold text-zinc-500">:</span>
+                   <div className="flex flex-col items-center">
+                     <span className="text-xs font-mono text-zinc-400">Minutes</span>
+                     <input
+                       type="number"
+                       min={0}
+                       max={59}
+                       value={timerInputM}
+                       onChange={(e) => setTimerInputM(Math.max(0, parseInt(e.target.value) || 0))}
+                       className="w-16 bg-[#1a1a1a] border border-zinc-700 rounded-xl py-2 text-center text-xl font-bold text-white font-mono"
+                     />
+                   </div>
+                   <span className="text-2xl font-bold text-zinc-500">:</span>
+                   <div className="flex flex-col items-center">
+                     <span className="text-xs font-mono text-zinc-400">Seconds</span>
+                     <input
+                       type="number"
+                       min={0}
+                       max={59}
+                       value={timerInputS}
+                       onChange={(e) => setTimerInputS(Math.max(0, parseInt(e.target.value) || 0))}
+                       className="w-16 bg-[#1a1a1a] border border-zinc-700 rounded-xl py-2 text-center text-xl font-bold text-white font-mono"
+                     />
+                   </div>
+                 </div>
+               ) : (
+                 <div className="text-5xl sm:text-6xl font-black font-mono text-red-500 tracking-widest bg-[#0a0a0c] px-8 py-6 rounded-3xl border-2 border-red-500/50 animate-pulse">
+                   {formatTimerSeconds(timerRemainingSec)}
+                 </div>
+               )}
 
-              <div className="flex items-center gap-3">
-                {!timerRunning ? (
-                  <button
-                    onClick={startTimer}
-                    className="liquid-glass-btn px-6 py-3 bg-gradient-to-r from-[#FF5F1F] to-orange-500 text-black font-extrabold rounded-2xl text-sm flex items-center gap-2 cursor-pointer shadow-lg"
-                  >
-                    <Play className="w-4 h-4 fill-current" />
-                    <span>Start Countdown</span>
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => setTimerRunning(false)}
-                    className="liquid-glass-btn px-6 py-3 bg-amber-500 text-black font-extrabold rounded-2xl text-sm flex items-center gap-2 cursor-pointer shadow-lg"
-                  >
-                    <Pause className="w-4 h-4 fill-current" />
-                    <span>Pause</span>
-                  </button>
-                )}
+               <div className="flex items-center gap-3">
+                 {!timerRunning ? (
+                   <button
+                     onClick={startTimer}
+                     className="flash-btn px-6 py-3 text-black font-extrabold rounded-2xl text-sm flex items-center gap-2 cursor-pointer shadow-lg"
+                   >
+                     <Play className="w-4 h-4 fill-current" />
+                     <span>Start Countdown</span>
+                   </button>
+                 ) : (
+                   <button
+                     onClick={() => setTimerRunning(false)}
+                     className="flash-btn px-6 py-3 bg-red-500 text-black font-extrabold rounded-2xl text-sm flex items-center gap-2 cursor-pointer shadow-lg"
+                   >
+                     <Pause className="w-4 h-4 fill-current" />
+                     <span>Pause</span>
+                   </button>
+                 )}
 
-                <button
-                  onClick={resetTimer}
-                  className="liquid-glass-btn px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-extrabold rounded-2xl text-sm flex items-center gap-2 cursor-pointer border border-white/10"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  <span>Reset</span>
-                </button>
-              </div>
+                 <button
+                   onClick={resetTimer}
+                   className="ife-btn px-6 py-3 text-white font-extrabold rounded-2xl text-sm flex items-center gap-2 cursor-pointer border border-white/10"
+                 >
+                   <RotateCcw className="w-4 h-4" />
+                   <span>Reset</span>
+                 </button>
+               </div>
             </div>
           )}
 
           {/* TAB 4: CALENDAR & REMINDERS */}
           {activeTab === 'CALENDAR' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
-              {/* MONTHLY CALENDAR GRID */}
-              <div className="bg-slate-950 p-4 rounded-3xl border border-white/10 space-y-3">
-                <div className="flex items-center justify-between px-2">
-                  <button
-                    onClick={prevMonth}
-                    className="liquid-glass-btn p-1.5 rounded-xl bg-slate-900/50 hover:bg-slate-800 text-zinc-400 hover:text-white transition-colors"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <span className="text-sm font-bold text-white font-mono tracking-wide">
-                    {monthName} {year}
-                  </span>
-                  <button
-                    onClick={nextMonth}
-                    className="liquid-glass-btn p-1.5 rounded-xl bg-slate-900/50 hover:bg-slate-800 text-zinc-400 hover:text-white transition-colors"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-7 gap-1 text-center font-mono text-[11px] font-bold text-zinc-500">
-                  <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
-                </div>
-
-                 <div className="grid grid-cols-7 gap-1 font-mono text-xs">
-                   {daysArray.map((day, idx) => {
-                     if (day === null) {
-                       return <div key={idx} className="h-10" />;
-                     }
-                     const dStr = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-                     const isSelected = selectedDateStr === dStr;
-                     const isToday = dStr === new Date().toISOString().split('T')[0];
-                     const hasBirthday = birthdays.some(b => {
-                       const bDate = new Date(b.dateStr);
-                       return bDate.getMonth() === month && bDate.getDate() === day;
-                     });
-
-                     return (
-                       <button
-                         key={idx}
-                         onClick={() => setSelectedDateStr(dStr)}
-                         className={`liquid-glass-btn h-10 rounded-xl flex flex-col items-center justify-center transition-all cursor-pointer relative ${
-                           isSelected
-                             ? 'bg-white text-black font-bold'
-                             : isToday
-                             ? 'bg-zinc-800 text-white font-bold border border-zinc-600'
-                             : 'bg-transparent text-zinc-300 hover:bg-zinc-900'
-                         }`}
-                       >
-                         <span className="text-xs font-bold">{day}</span>
-                         {hasBirthday && (
-                           <span className="text-[8px] leading-none mt-0.5">🎂</span>
-                         )}
-                       </button>
-                     );
-                   })}
+               
+               {/* MONTHLY CALENDAR GRID */}
+               <div className="bg-[#0a0a0c] p-4 rounded-3xl border border-white/10 space-y-3 aero-panel">
+                 <div className="flex items-center justify-between px-2">
+                   <button
+                     onClick={prevMonth}
+                     className="ife-btn p-1.5 rounded-xl cursor-pointer"
+                   >
+                     <ChevronLeft className="w-4 h-4" />
+                   </button>
+                   <span className="text-sm font-bold text-white font-mono tracking-wide">
+                     {monthName} {year}
+                   </span>
+                   <button
+                     onClick={nextMonth}
+                     className="ife-btn p-1.5 rounded-xl cursor-pointer"
+                   >
+                     <ChevronRight className="w-4 h-4" />
+                   </button>
                  </div>
-              </div>
 
-              {/* REMINDERS & EVENTS FOR SELECTED DAY */}
-              <div className="space-y-4">
-                <h4 className="text-xs font-bold font-mono text-zinc-400">
-                  Events for {selectedDateStr}
-                </h4>
+                 <div className="grid grid-cols-7 gap-1 text-center font-mono text-[11px] font-bold text-zinc-500">
+                   <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+                 </div>
 
-                {/* ADD EVENT FORM */}
-                <form onSubmit={handleAddEvent} className="p-3 bg-slate-950 rounded-2xl border border-white/10 space-y-2">
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="Event title..."
-                      value={newEventTitle}
-                      onChange={(e) => setNewEventTitle(e.target.value)}
-                      className="flex-1 bg-slate-900 border border-zinc-800 rounded-xl px-2.5 py-1.5 text-xs text-white placeholder-zinc-600 font-mono"
-                    />
-                    <input
-                      type="time"
-                      value={newEventTime}
-                      onChange={(e) => setNewEventTime(e.target.value)}
-                      className="w-24 bg-slate-900 border border-zinc-800 rounded-xl px-2 py-1.5 text-xs text-white font-mono"
-                    />
-                  </div>
+                  <div className="grid grid-cols-7 gap-1 font-mono text-xs">
+                    {daysArray.map((day, idx) => {
+                      if (day === null) {
+                        return <div key={idx} className="h-10" />;
+                      }
+                      const dStr = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                      const isSelected = selectedDateStr === dStr;
+                      const isToday = dStr === new Date().toISOString().split('T')[0];
+                      const hasBirthday = birthdays.some(b => {
+                        const bDate = new Date(b.dateStr);
+                        return bDate.getMonth() === month && bDate.getDate() === day;
+                      });
 
-                  <div className="flex gap-2">
-                    <select
-                      value={newEventCategory}
-                      onChange={(e) => setNewEventCategory(e.target.value as any)}
-                      className="bg-slate-900 border border-zinc-800 rounded-xl px-2 py-1 text-xs text-white font-mono"
-                    >
-                      <option value="Reminder">Reminder</option>
-                      <option value="Flight">Flight Spotting</option>
-                      <option value="Meeting">Meeting</option>
-                      <option value="Task">Task</option>
-                    </select>
-
-                    <button
-                      type="submit"
-                      className="liquid-glass-btn flex-1 py-1 bg-white hover:bg-zinc-200 text-black font-bold text-xs rounded-xl flex items-center justify-center gap-1 cursor-pointer"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Add</span>
-                    </button>
-                  </div>
-                </form>
-
-                {/* EVENT LIST */}
-                <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
-                  {events
-                    .filter((e) => e.dateStr === selectedDateStr)
-                    .map((ev) => (
-                      <div
-                        key={ev.id}
-                        className={`liquid-glass-btn p-2.5 rounded-xl border flex items-center justify-between text-xs font-mono transition-all ${
-                          ev.completed
-                            ? 'bg-zinc-950 border-zinc-800 text-zinc-500 line-through'
-                            : 'bg-slate-900 border-zinc-700 text-white'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => toggleEventComplete(ev.id)}
-                            className="liquid-glass-btn p-1 rounded text-zinc-400 hover:text-white"
-                          >
-                            <CheckCircle2 className={`liquid-glass-btn w-4 h-4 ${ev.completed ? 'fill-zinc-500 text-zinc-500' : ''}`} />
-                          </button>
-                          <div>
-                            <span className="font-bold block text-xs">{ev.title}</span>
-                            <span className="text-[10px] text-zinc-500">
-                              {ev.time} · {ev.category}
-                            </span>
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={() => deleteEvent(ev.id)}
-                          className="liquid-glass-btn p-1 text-zinc-500 hover:text-white"
-                        >
-                          <Trash2 className="liquid-glass-btn w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ))}
-                </div>
-
-                {/* BIRTHDAYS SECTION */}
-                <div className="space-y-3 pt-4 border-t border-white/10">
-                  <h4 className="text-xs font-bold font-mono text-zinc-400 flex items-center gap-2">
-                    <Cake className="w-4 h-4 text-pink-400" />
-                    Birthdays
-                  </h4>
-
-                  <form onSubmit={handleAddBirthday} className="p-3 bg-slate-950 rounded-2xl border border-white/10 space-y-2">
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        placeholder="Name..."
-                        value={newBirthdayName}
-                        onChange={(e) => setNewBirthdayName(e.target.value)}
-                        className="flex-1 bg-slate-900 border border-zinc-800 rounded-xl px-2.5 py-1.5 text-xs text-white placeholder-zinc-600 font-mono"
-                      />
-                      <input
-                        type="date"
-                        value={newBirthdayDate}
-                        onChange={(e) => setNewBirthdayDate(e.target.value)}
-                        className="w-28 bg-slate-900 border border-zinc-800 rounded-xl px-2 py-1.5 text-xs text-white font-mono"
-                      />
-                    </div>
-                    <button
-                      type="submit"
-                      className="liquid-glass-btn w-full py-1.5 bg-pink-600 hover:bg-pink-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1 cursor-pointer"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Add Birthday</span>
-                    </button>
-                  </form>
-
-                  <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
-                    {birthdays.length === 0 && (
-                      <p className="text-[10px] text-zinc-600 text-center py-2">No birthdays added yet</p>
-                    )}
-                    {birthdays.map((bday) => {
-                      const bdayDate = new Date(bday.dateStr + 'T00:00:00');
-                      const isToday = bday.dateStr === new Date().toISOString().split('T')[0];
-                      const monthDay = bdayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                       return (
-                        <div
-                          key={bday.id}
-                          className={`liquid-glass-btn p-2 rounded-xl border flex items-center justify-between text-xs font-mono transition-all ${
-                            isToday
-                              ? 'bg-pink-950/50 border-pink-500/30 text-pink-200'
-                              : 'bg-slate-900 border-zinc-800 text-zinc-300'
+                        <button
+                          key={idx}
+                          onClick={() => setSelectedDateStr(dStr)}
+                          className={`ife-btn h-10 rounded-xl flex flex-col items-center justify-center transition-all cursor-pointer relative ${
+                            isSelected
+                              ? 'bg-white text-black font-bold'
+                              : isToday
+                              ? 'bg-zinc-800 text-white font-bold border border-zinc-600'
+                              : 'bg-transparent text-zinc-300 hover:bg-zinc-900'
                           }`}
                         >
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm">🎂</span>
-                            <div>
-                              <span className="font-bold block text-xs">{bday.name}</span>
-                              <span className="text-[10px] text-zinc-500">{monthDay}</span>
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => deleteBirthday(bday.id)}
-                            className="liquid-glass-btn p-1 text-zinc-500 hover:text-white"
-                          >
-                            <Trash2 className="liquid-glass-btn w-3.5 h-3.5" />
-                          </button>
-                        </div>
+                          <span className="text-xs font-bold">{day}</span>
+                          {hasBirthday && (
+                            <span className="text-[8px] leading-none mt-0.5">🎂</span>
+                          )}
+                        </button>
                       );
                     })}
                   </div>
-                </div>
-              </div>
+               </div>
+
+               {/* REMINDERS & EVENTS FOR SELECTED DAY */}
+               <div className="space-y-4">
+                 <h4 className="text-xs font-bold font-mono text-zinc-400">
+                   Events for {selectedDateStr}
+                 </h4>
+
+                 {/* ADD EVENT FORM */}
+                 <form onSubmit={handleAddEvent} className="ife-card p-3 rounded-2xl border border-white/10 space-y-2">
+                   <div className="flex gap-2">
+                     <input
+                       type="text"
+                       placeholder="Event title..."
+                       value={newEventTitle}
+                       onChange={(e) => setNewEventTitle(e.target.value)}
+                       className="flex-1 bg-[#1a1a1a] border border-zinc-800 rounded-xl px-2.5 py-1.5 text-xs text-white placeholder-zinc-600 font-mono"
+                     />
+                     <input
+                       type="time"
+                       value={newEventTime}
+                       onChange={(e) => setNewEventTime(e.target.value)}
+                       className="w-24 bg-[#1a1a1a] border border-zinc-800 rounded-xl px-2 py-1.5 text-xs text-white font-mono"
+                     />
+                   </div>
+
+                   <div className="flex gap-2">
+                     <select
+                       value={newEventCategory}
+                       onChange={(e) => setNewEventCategory(e.target.value as any)}
+                       className="bg-[#1a1a1a] border border-zinc-800 rounded-xl px-2 py-1 text-xs text-white font-mono"
+                     >
+                       <option value="Reminder">Reminder</option>
+                       <option value="Flight">Flight Spotting</option>
+                       <option value="Meeting">Meeting</option>
+                       <option value="Task">Task</option>
+                     </select>
+
+                     <button
+                       type="submit"
+                       className="ife-btn flex-1 py-1 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1 cursor-pointer"
+                     >
+                       <Plus className="w-3.5 h-3.5" />
+                       <span>Add</span>
+                     </button>
+                   </div>
+                 </form>
+
+                 {/* EVENT LIST */}
+                 <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
+                   {events
+                     .filter((e) => e.dateStr === selectedDateStr)
+                     .map((ev) => (
+                       <div
+                         key={ev.id}
+                         className={`ife-card p-2.5 rounded-xl border flex items-center justify-between text-xs font-mono transition-all ${
+                           ev.completed
+                             ? 'bg-[#0a0a0c] border-zinc-800 text-zinc-500 line-through'
+                             : 'bg-[#1a1a1a] border-zinc-700 text-white'
+                         }`}
+                       >
+                         <div className="flex items-center gap-2">
+                           <button
+                             onClick={() => toggleEventComplete(ev.id)}
+                             className="ife-btn p-1 rounded text-zinc-400 hover:text-white"
+                           >
+                             <CheckCircle2 className={`w-4 h-4 ${ev.completed ? 'fill-zinc-500 text-zinc-500' : ''}`} />
+                           </button>
+                           <div>
+                             <span className="font-bold block text-xs">{ev.title}</span>
+                             <span className="text-[10px] text-zinc-500">
+                               {ev.time} · {ev.category}
+                             </span>
+                           </div>
+                         </div>
+
+                         <button
+                           onClick={() => deleteEvent(ev.id)}
+                           className="ife-btn p-1 text-zinc-500 hover:text-white"
+                         >
+                           <Trash2 className="w-3.5 h-3.5" />
+                         </button>
+                       </div>
+                     ))}
+                 </div>
+
+                 {/* BIRTHDAYS SECTION */}
+                 <div className="space-y-3 pt-4 border-t border-white/10">
+                   <h4 className="text-xs font-bold font-mono text-zinc-400 flex items-center gap-2">
+                     <Cake className="w-4 h-4 text-red-400" />
+                     Birthdays
+                   </h4>
+
+                   <form onSubmit={handleAddBirthday} className="ife-card p-3 rounded-2xl border border-white/10 space-y-2">
+                     <div className="flex gap-2">
+                       <input
+                         type="text"
+                         placeholder="Name..."
+                         value={newBirthdayName}
+                         onChange={(e) => setNewBirthdayName(e.target.value)}
+                         className="flex-1 bg-[#1a1a1a] border border-zinc-800 rounded-xl px-2.5 py-1.5 text-xs text-white placeholder-zinc-600 font-mono"
+                       />
+                       <input
+                         type="date"
+                         value={newBirthdayDate}
+                         onChange={(e) => setNewBirthdayDate(e.target.value)}
+                         className="w-28 bg-[#1a1a1a] border border-zinc-800 rounded-xl px-2 py-1.5 text-xs text-white font-mono"
+                       />
+                     </div>
+                     <button
+                       type="submit"
+                       className="ife-btn w-full py-1.5 bg-red-700 hover:bg-red-600 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1 cursor-pointer"
+                     >
+                       <Plus className="w-3.5 h-3.5" />
+                       <span>Add Birthday</span>
+                     </button>
+                   </form>
+
+                   <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                     {birthdays.length === 0 && (
+                       <p className="text-[10px] text-zinc-600 text-center py-2">No birthdays added yet</p>
+                     )}
+                     {birthdays.map((bday) => {
+                       const bdayDate = new Date(bday.dateStr + 'T00:00:00');
+                       const isToday = bday.dateStr === new Date().toISOString().split('T')[0];
+                       const monthDay = bdayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                       return (
+                         <div
+                           key={bday.id}
+                           className={`ife-card p-2 rounded-xl border flex items-center justify-between text-xs font-mono transition-all ${
+                             isToday
+                               ? 'bg-red-950/50 border-red-500/30 text-red-200'
+                               : 'bg-[#1a1a1a] border-zinc-800 text-zinc-300'
+                           }`}
+                         >
+                           <div className="flex items-center gap-2">
+                             <span className="text-sm">🎂</span>
+                             <div>
+                               <span className="font-bold block text-xs">{bday.name}</span>
+                               <span className="text-[10px] text-zinc-500">{monthDay}</span>
+                             </div>
+                           </div>
+                           <button
+                             onClick={() => deleteBirthday(bday.id)}
+                             className="ife-btn p-1 text-zinc-500 hover:text-white"
+                           >
+                             <Trash2 className="w-3.5 h-3.5" />
+                           </button>
+                         </div>
+                       );
+                     })}
+                   </div>
+                 </div>
+               </div>
 
             </div>
           )}

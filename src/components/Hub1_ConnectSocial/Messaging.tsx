@@ -90,15 +90,15 @@ export const Messaging: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl grid grid-cols-1 md:grid-cols-3 min-h-[550px]">
+    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl grid grid-cols-1 md:grid-cols-3 min-h-[550px] aero-panel">
       {/* Contact List Sidebar */}
-      <div className="border-r border-slate-800 bg-slate-950/60 p-4 space-y-4">
+      <div className="border-r border-slate-800 bg-slate-950/60 p-4 space-y-4 ife-card">
         {/* Mode Selector */}
         <div className="flex items-center justify-between p-1 bg-slate-900 border border-slate-800 rounded-xl text-xs">
           <button
             onClick={() => setMode('online')}
             className={`liquid-glass-btn flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg font-semibold transition-all ${
-              mode === 'online' ? 'bg-cyan-600 text-white shadow' : 'text-slate-400 hover:text-white'
+              mode === 'online' ? 'bg-red-600 text-white shadow' : 'text-slate-400 hover:text-white'
             }`}
           >
             <Wifi className="w-3.5 h-3.5" />
@@ -107,7 +107,7 @@ export const Messaging: React.FC = () => {
           <button
             onClick={() => setMode('bluetooth')}
             className={`liquid-glass-btn flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg font-semibold transition-all ${
-              mode === 'bluetooth' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'
+              mode === 'bluetooth' ? 'bg-red-600 text-white shadow' : 'text-slate-400 hover:text-white'
             }`}
           >
             <Bluetooth className="w-3.5 h-3.5" />
@@ -120,24 +120,24 @@ export const Messaging: React.FC = () => {
             <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Channels</h4>
             <button
               onClick={() => setShowAddChannel(!showAddChannel)}
-              className="liquid-glass-btn text-xs text-cyan-400 hover:text-cyan-300 font-bold border border-cyan-500/30 px-2 py-0.5 rounded-lg bg-cyan-950/40"
+              className="liquid-glass-btn text-xs text-red-400 hover:text-red-300 font-bold border border-red-500/30 px-2 py-0.5 rounded-lg bg-red-950/40"
             >
               + New Channel
             </button>
           </div>
 
           {showAddChannel && (
-            <form onSubmit={handleAddChannel} className="mb-3 space-y-1.5 p-2 bg-slate-900 border border-cyan-500/30 rounded-xl">
+            <form onSubmit={handleAddChannel} className="mb-3 space-y-1.5 p-2 bg-slate-900 border border-red-500/30 rounded-xl">
               <input
                 type="text"
                 value={newChannelName}
                 onChange={(e) => setNewChannelName(e.target.value)}
                 placeholder="Channel / Room Name..."
-                className="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-cyan-400"
+                className="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-red-400"
               />
               <button
                 type="submit"
-                className="liquid-glass-btn w-full py-1 bg-cyan-600 hover:bg-cyan-500 text-black font-extrabold text-xs rounded-lg shadow"
+                className="liquid-glass-btn w-full py-1 bg-red-600 hover:bg-red-500 text-white font-extrabold text-xs rounded-lg shadow"
               >
                 Create Encrypted Channel
               </button>
@@ -158,14 +158,14 @@ export const Messaging: React.FC = () => {
                 <div className="relative shrink-0">
                   <img src={contact.avatar} alt={contact.name} className="w-9 h-9 rounded-full object-cover" />
                   {contact.online && (
-                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-slate-950 rounded-full" />
+                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-red-500 border-2 border-slate-950 rounded-full" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
                     <p className="text-xs font-bold truncate">{contact.name}</p>
                     {contact.bluetoothNearby && (
-                      <span className="text-[10px] text-cyan-400 font-mono">{contact.signalStrength}% RSSI</span>
+                      <span className="text-[10px] text-red-400 font-mono">{contact.signalStrength}% RSSI</span>
                     )}
                   </div>
                   <p className="text-[11px] text-slate-400 truncate">{contact.lastMessage}</p>
@@ -194,7 +194,7 @@ export const Messaging: React.FC = () => {
               onClick={() => setIsEncrypted(!isEncrypted)}
               className={`liquid-glass-btn flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
                 isEncrypted
-                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                  ? 'bg-red-500/10 border-red-500/30 text-red-400'
                   : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
               }`}
             >
@@ -214,13 +214,13 @@ export const Messaging: React.FC = () => {
                 <div
                   className={`liquid-glass-btn max-w-md p-3 rounded-2xl text-xs leading-relaxed shadow-lg ${
                     isMe
-                      ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-br-none'
+                      ? 'bg-gradient-to-r from-red-600 to-red-800 text-white rounded-br-none'
                       : 'bg-slate-800 text-slate-100 border border-slate-700/60 rounded-bl-none'
                   }`}
                 >
                   {msg.attachmentType === 'voice' ? (
                     <div className="flex items-center gap-2 font-mono">
-                      <Volume2 className="w-4 h-4 text-cyan-200 animate-pulse" />
+                      <Volume2 className="w-4 h-4 text-red-200 animate-pulse" />
                       <span>{msg.text}</span>
                     </div>
                   ) : (
@@ -230,7 +230,7 @@ export const Messaging: React.FC = () => {
                   {msg.encryptedPayload && (
                     <div className="mt-2 pt-1.5 border-t border-white/20 text-[10px] font-mono text-white/80 flex items-center justify-between">
                       <span className="flex items-center gap-1">
-                        <ShieldCheck className="w-3 h-3 text-emerald-300" /> AES-256 Checksum Verified
+                        <ShieldCheck className="w-3 h-3 text-red-300" /> AES-256 Checksum Verified
                       </span>
                       <span>IV: {msg.encryptedPayload.iv.slice(0, 8)}...</span>
                     </div>
@@ -239,7 +239,7 @@ export const Messaging: React.FC = () => {
 
                 <div className="flex items-center gap-1.5 text-[10px] text-slate-400 mt-1 px-1">
                   <span>{msg.timestamp}</span>
-                  {isMe && <CheckCheck className="w-3 h-3 text-cyan-400" />}
+                  {isMe && <CheckCheck className="w-3 h-3 text-red-400" />}
                 </div>
               </div>
             );
@@ -262,7 +262,7 @@ export const Messaging: React.FC = () => {
             disabled={recordingVoice}
             className={`liquid-glass-btn p-2 rounded-xl transition-colors ${
               recordingVoice
-                ? 'bg-rose-600 text-white animate-pulse'
+                ? 'bg-red-600 text-white animate-pulse'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
             }`}
           >
@@ -274,12 +274,12 @@ export const Messaging: React.FC = () => {
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             placeholder={isEncrypted ? 'Send E2E encrypted message...' : 'Send message...'}
-            className="flex-1 px-3.5 py-2 bg-slate-900 border border-slate-700/60 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500 transition-colors"
+            className="flex-1 px-3.5 py-2 bg-slate-900 border border-slate-700/60 rounded-xl text-xs text-white focus:outline-none focus:border-red-500 transition-colors"
           />
 
           <button
             type="submit"
-            className="liquid-glass-btn px-3.5 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5"
+            className="liquid-glass-btn px-3.5 py-2 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5"
           >
             <Send className="w-3.5 h-3.5" />
             <span>Send</span>

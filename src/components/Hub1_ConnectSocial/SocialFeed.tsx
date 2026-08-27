@@ -72,7 +72,7 @@ export const SocialFeed: React.FC = () => {
       {/* Feed Controls Header */}
       <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 flex items-center justify-between shadow-xl">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-cyan-500/10 border border-cyan-500/30 rounded-xl text-cyan-400">
+          <div className="p-2 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400">
             <Sparkles className="w-5 h-5" />
           </div>
           <div>
@@ -83,7 +83,7 @@ export const SocialFeed: React.FC = () => {
 
         <button
           onClick={() => setShowAlgoModal(!showAlgoModal)}
-          className="liquid-glass-btn flex items-center gap-2 px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-cyan-300 rounded-xl border border-cyan-500/20 transition-all shadow-md"
+          className="liquid-glass-btn flex items-center gap-2 px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-red-300 rounded-xl border border-red-500/20 transition-all shadow-md"
         >
           <Sliders className="w-4 h-4" />
           <span>Tune Feed Algorithm</span>
@@ -92,8 +92,8 @@ export const SocialFeed: React.FC = () => {
 
       {/* Algorithm Tuning Modal / Drawer */}
       {showAlgoModal && (
-        <div className="bg-slate-900 border border-cyan-500/30 rounded-2xl p-5 shadow-2xl space-y-4 animate-in fade-in">
-          <h4 className="text-xs font-bold text-cyan-400 uppercase tracking-wider">Feed Algorithm Parameters</h4>
+        <div className="bg-slate-900 border border-red-500/30 rounded-2xl p-5 shadow-2xl space-y-4 animate-in fade-in">
+          <h4 className="text-xs font-bold text-red-400 uppercase tracking-wider">Feed Algorithm Parameters</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
             <div>
               <label className="block text-slate-300 font-medium mb-1">
@@ -105,7 +105,7 @@ export const SocialFeed: React.FC = () => {
                 max="100"
                 value={algorithmSettings.recencyWeight}
                 onChange={(e) => setAlgorithmSettings((s) => ({ ...s, recencyWeight: Number(e.target.value) }))}
-                className="w-full accent-cyan-500"
+                className="w-full accent-red-500"
               />
             </div>
 
@@ -119,7 +119,7 @@ export const SocialFeed: React.FC = () => {
                 max="100"
                 value={algorithmSettings.engagementWeight}
                 onChange={(e) => setAlgorithmSettings((s) => ({ ...s, engagementWeight: Number(e.target.value) }))}
-                className="w-full accent-cyan-500"
+                className="w-full accent-red-500"
               />
             </div>
 
@@ -133,7 +133,7 @@ export const SocialFeed: React.FC = () => {
                 max="100"
                 value={algorithmSettings.echoChamberFilter}
                 onChange={(e) => setAlgorithmSettings((s) => ({ ...s, echoChamberFilter: Number(e.target.value) }))}
-                className="w-full accent-cyan-500"
+                className="w-full accent-red-500"
               />
             </div>
 
@@ -147,7 +147,7 @@ export const SocialFeed: React.FC = () => {
                 max="100"
                 value={algorithmSettings.decryptedPrivacyRank}
                 onChange={(e) => setAlgorithmSettings((s) => ({ ...s, decryptedPrivacyRank: Number(e.target.value) }))}
-                className="w-full accent-cyan-500"
+                className="w-full accent-red-500"
               />
             </div>
           </div>
@@ -161,7 +161,7 @@ export const SocialFeed: React.FC = () => {
           onChange={(e) => setPostText(e.target.value)}
           placeholder="Broadcast an encrypted or public message to the Brio network..."
           rows={3}
-          className="w-full p-3 bg-slate-950 border border-slate-700/60 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-colors resize-none"
+          className="w-full p-3 bg-slate-950 border border-slate-700/60 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-red-500 transition-colors resize-none"
         />
 
         <div className="flex items-center justify-between">
@@ -170,7 +170,7 @@ export const SocialFeed: React.FC = () => {
             onClick={() => setEncryptPost(!encryptPost)}
             className={`liquid-glass-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
               encryptPost
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                ? 'bg-red-500/10 border-red-500/30 text-red-400'
                 : 'bg-slate-800 border-slate-700 text-slate-400'
             }`}
           >
@@ -180,7 +180,7 @@ export const SocialFeed: React.FC = () => {
 
           <button
             type="submit"
-            className="liquid-glass-btn px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center gap-1.5"
+            className="liquid-glass-btn px-4 py-2 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center gap-1.5"
           >
             <Send className="w-3.5 h-3.5" />
             <span>Broadcast Post</span>
@@ -205,7 +205,7 @@ export const SocialFeed: React.FC = () => {
                 </div>
 
                 {post.isEncrypted && (
-                  <span className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-mono font-semibold text-emerald-400">
+                  <span className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-500/10 border border-red-500/30 text-[10px] font-mono font-semibold text-red-400">
                     <ShieldCheck className="w-3 h-3" /> Encrypted Payload
                   </span>
                 )}
@@ -216,7 +216,7 @@ export const SocialFeed: React.FC = () => {
                 {post.isEncrypted ? (
                   isDecrypted ? (
                     <div className="space-y-1">
-                      <p className="text-emerald-300 font-medium">{isDecrypted}</p>
+                      <p className="text-red-300 font-medium">{isDecrypted}</p>
                       <p className="text-[10px] text-slate-400 font-mono">✅ Decrypted via local Master Key</p>
                     </div>
                   ) : (
@@ -224,7 +224,7 @@ export const SocialFeed: React.FC = () => {
                       <p className="text-slate-400 font-mono italic">{post.content}</p>
                       <button
                         onClick={() => handleDecryptPost(post.id)}
-                        className="liquid-glass-btn px-3 py-1 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-[11px] rounded-lg shadow transition-all shrink-0"
+                        className="liquid-glass-btn px-3 py-1 bg-red-600 hover:bg-red-500 text-white font-semibold text-[11px] rounded-lg shadow transition-all shrink-0"
                       >
                         Decrypt Payload
                       </button>
@@ -240,19 +240,19 @@ export const SocialFeed: React.FC = () => {
                 <button
                   onClick={() => toggleLikePost(post.id)}
                   className={`liquid-glass-btn flex items-center gap-1.5 transition-colors ${
-                    post.userLiked ? 'text-rose-400 font-bold' : 'hover:text-rose-400'
+                    post.userLiked ? 'text-red-400 font-bold' : 'hover:text-red-400'
                   }`}
                 >
-                  <Heart className={`w-4 h-4 ${post.userLiked ? 'fill-rose-400' : ''}`} />
+                  <Heart className={`w-4 h-4 ${post.userLiked ? 'fill-red-400' : ''}`} />
                   <span>{post.likes}</span>
                 </button>
 
-                <button className="liquid-glass-btn flex items-center gap-1.5 hover:text-cyan-400 transition-colors">
+                <button className="liquid-glass-btn flex items-center gap-1.5 hover:text-red-400 transition-colors">
                   <MessageCircle className="w-4 h-4" />
                   <span>{post.commentsCount}</span>
                 </button>
 
-                <button className="liquid-glass-btn flex items-center gap-1.5 hover:text-blue-400 transition-colors">
+                <button className="liquid-glass-btn flex items-center gap-1.5 hover:text-red-400 transition-colors">
                   <Share2 className="liquid-glass-btn w-4 h-4" />
                   <span>{post.shares}</span>
                 </button>

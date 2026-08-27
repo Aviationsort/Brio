@@ -34,9 +34,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     if (/[A-Z]/.test(passphrase)) score++;
     if (/[0-9]/.test(passphrase)) score++;
     if (/[^A-Za-z0-9]/.test(passphrase)) score++;
-    if (score <= 1) return { score, label: 'Weak', color: 'text-rose-400' };
-    if (score <= 3) return { score, label: 'Fair', color: 'text-amber-400' };
-    return { score, label: 'Strong', color: 'text-emerald-400' };
+    if (score <= 1) return { score, label: 'Weak', color: 'text-red-400' };
+    if (score <= 3) return { score, label: 'Fair', color: 'text-red-300' };
+    return { score, label: 'Strong', color: 'text-red-200' };
   })();
 
   const validate = (): boolean => {
@@ -106,14 +106,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl animate-in fade-in">
       <div 
-        className="relative w-full max-w-md rounded-3xl p-8 shadow-2xl text-slate-200 overflow-hidden"
+        className="relative w-full max-w-md rounded-[28px] p-8 shadow-2xl text-slate-200 overflow-hidden aero-glossy aero-panel"
         style={{
-          background: `linear-gradient(135deg, ${theme.bgSecondary}dd, ${theme.bgTertiary}dd)`,
+          background: `linear-gradient(135deg, ${theme.bgSecondary}ee, ${theme.bgTertiary}ee)`,
           border: `1px solid ${theme.glassBorder}`,
-          boxShadow: `0 25px 50px -12px ${theme.shadow}, 0 0 0 1px ${theme.border}`,
-          backdropFilter: 'blur(24px)',
+          boxShadow: `0 30px 60px -12px ${theme.shadow}, 0 0 0 1px ${theme.border}, 0 0 40px ${theme.accentGlow}`,
+          backdropFilter: 'blur(28px)',
         }}
       >
         {/* Ambient glow */}
@@ -127,7 +127,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         />
 
         {/* Theme selector & close */}
-        <div className="relative z-10 flex items-center justify-between pb-4 border-b" style={{ borderColor: theme.border }}>
+        <div className="relative z-10 flex items-center justify-between pb-4 border-b ife-status-bar" style={{ borderColor: theme.border }}>
           <div className="flex items-center gap-2.5">
             <div 
               className="p-2 rounded-xl border shadow-inner"
@@ -178,7 +178,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="e.g. CaptainVance"
-              className="w-full px-4 py-3 rounded-xl text-sm transition-all outline-none"
+              className="w-full px-4 py-3 rounded-xl text-sm transition-all outline-none aero-input"
               style={{
                 background: theme.bgTertiary,
                 border: `1px solid ${theme.border}`,
@@ -216,21 +216,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             </label>
             <div className="relative">
               <Lock className="absolute left-3.5 top-3.5 w-4 h-4" style={{ color: theme.accent }} />
-              <input
-                type={showPassphrase ? 'text' : 'password'}
-                required
-                value={passphrase}
-                onChange={(e) => setPassphrase(e.target.value)}
-                placeholder="Enter your master passphrase"
-                className="w-full pl-10 pr-12 py-3 rounded-xl text-sm transition-all outline-none"
-                style={{
-                  background: theme.bgTertiary,
-                  border: `1px solid ${theme.border}`,
-                  color: theme.textPrimary,
-                  boxShadow: `inset 0 2px 4px ${theme.shadow}`,
-                }}
-                minLength={6}
-              />
+                <input
+                  type={showPassphrase ? 'text' : 'password'}
+                  required
+                  value={passphrase}
+                  onChange={(e) => setPassphrase(e.target.value)}
+                  placeholder="Enter your master passphrase"
+                  className="w-full pl-10 pr-12 py-3 rounded-xl text-sm transition-all outline-none aero-input"
+                  style={{
+                    background: theme.bgTertiary,
+                    border: `1px solid ${theme.border}`,
+                    color: theme.textPrimary,
+                    boxShadow: `inset 0 2px 4px ${theme.shadow}`,
+                  }}
+                  minLength={6}
+                />
               <button
                 type="button"
                 onClick={() => setShowPassphrase((prev) => !prev)}
@@ -276,7 +276,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                   value={confirmPassphrase}
                   onChange={(e) => setConfirmPassphrase(e.target.value)}
                   placeholder="Confirm your master passphrase..."
-                  className="w-full pl-10 pr-12 py-3 rounded-xl text-sm transition-all outline-none"
+                  className="w-full pl-10 pr-12 py-3 rounded-xl text-sm transition-all outline-none aero-input"
                   style={{
                     background: theme.bgTertiary,
                     border: `1px solid ${theme.border}`,
@@ -303,9 +303,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             <div 
               className="p-3 rounded-xl border text-xs font-medium flex items-center gap-2"
               style={{ 
-                background: `${theme.error}15`,
-                borderColor: `${theme.error}40`,
+                background: `${theme.error}18`,
+                borderColor: `${theme.error}50`,
                 color: theme.error,
+                boxShadow: `0 0 20px ${theme.error}25`,
               }}
             >
               <AlertTriangle className="w-4 h-4 shrink-0" />
@@ -317,11 +318,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-extrabold disabled:opacity-50 active:scale-[0.97]"
+            className="w-full py-3.5 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 font-extrabold disabled:opacity-50 active:scale-[0.97] wiiu-btn"
             style={{
               background: `linear-gradient(135deg, ${theme.accent}, ${theme.accentHover})`,
               color: theme.buttonText,
-              boxShadow: `0 10px 25px ${theme.accentGlow}`,
+              boxShadow: `0 14px 32px ${theme.accentGlow}`,
             }}
           >
             {loading ? (

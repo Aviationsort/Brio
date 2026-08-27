@@ -104,10 +104,10 @@ export const UnoGame: React.FC = () => {
 
   const getBgColor = (color: UnoCard['color']) => {
     if (color === 'red') return 'bg-rose-600 text-white';
-    if (color === 'blue') return 'bg-blue-600 text-white';
-    if (color === 'green') return 'bg-emerald-600 text-white';
-    if (color === 'yellow') return 'bg-amber-500 text-slate-950 font-bold';
-    return 'bg-gradient-to-tr from-purple-600 via-pink-600 to-amber-500 text-white font-bold';
+    if (color === 'blue') return 'bg-red-600 text-white';
+    if (color === 'green') return 'bg-red-600 text-white';
+    if (color === 'yellow') return 'bg-red-500 text-slate-950 font-bold';
+    return 'bg-gradient-to-tr from-red-600 via-red-600 to-red-500 text-white font-bold';
   };
 
   return (
@@ -120,7 +120,7 @@ export const UnoGame: React.FC = () => {
         {!gameStarted ? (
           <button
             onClick={startUno}
-            className="liquid-glass-btn px-3.5 py-1.5 bg-gradient-to-r from-rose-600 to-pink-600 text-white text-xs font-bold rounded-xl shadow transition-all flex items-center gap-1.5"
+            className="liquid-glass-btn px-3.5 py-1.5 bg-gradient-to-r from-rose-600 to-red-600 text-white text-xs font-bold rounded-xl shadow transition-all flex items-center gap-1.5"
           >
             <Sparkles className="w-4 h-4" /> Start UNO Match
           </button>
@@ -169,7 +169,7 @@ export const UnoGame: React.FC = () => {
         </div>
 
         {/* Turn Status */}
-        <p className="text-xs font-mono text-cyan-400">
+        <p className="text-xs font-mono text-red-400">
           {turn === 'player' ? '👉 Your Turn to Play or Draw' : '🤖 AI Bots taking turn...'}
         </p>
       </div>

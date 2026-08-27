@@ -37,7 +37,7 @@ export const StickersVault: React.FC = () => {
       {/* Header */}
       <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-xl flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-cyan-500/10 border border-cyan-500/30 rounded-xl text-cyan-400">
+          <div className="p-2.5 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400">
             <Smile className="w-5 h-5" />
           </div>
           <div>
@@ -46,7 +46,7 @@ export const StickersVault: React.FC = () => {
           </div>
         </div>
 
-        <span className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono rounded-full">
+        <span className="flex items-center gap-1.5 px-3 py-1 bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-mono rounded-full">
           <ShieldCheck className="w-3.5 h-3.5" /> AES-256 Vault Stored
         </span>
       </div>
@@ -61,7 +61,7 @@ export const StickersVault: React.FC = () => {
             value={newStickerName}
             onChange={(e) => setNewStickerName(e.target.value)}
             placeholder="e.g. Jet Engine Icon"
-            className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500"
+            className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-red-500"
           />
         </div>
 
@@ -70,7 +70,7 @@ export const StickersVault: React.FC = () => {
           <select
             value={newStickerCategory}
             onChange={(e) => setNewStickerCategory(e.target.value as StickerItem['category'])}
-            className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500"
+            className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-red-500"
           >
             <option value="Aviation">Aviation</option>
             <option value="Cyber">Cyber</option>
@@ -88,14 +88,14 @@ export const StickersVault: React.FC = () => {
             value={newStickerData}
             onChange={(e) => setNewStickerData(e.target.value)}
             placeholder="e.g. 🚀 or https://..."
-            className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500"
+            className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-red-500"
           />
         </div>
 
         <div className="flex items-end">
           <button
             type="submit"
-            className="liquid-glass-btn w-full py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5"
+            className="liquid-glass-btn w-full py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5"
           >
             <Plus className="w-4 h-4" />
             <span>Add to Vault</span>
@@ -108,7 +108,7 @@ export const StickersVault: React.FC = () => {
         {stickers.map((st) => (
           <div
             key={st.id}
-            className="bg-slate-900/90 border border-slate-800 hover:border-cyan-500/50 rounded-2xl p-4 shadow-xl flex flex-col items-center justify-between text-center transition-all group"
+            className="bg-slate-900/90 border border-slate-800 hover:border-red-500/50 rounded-2xl p-4 shadow-xl flex flex-col items-center justify-between text-center transition-all group"
           >
             <div className="w-16 h-16 rounded-xl bg-slate-950 flex items-center justify-center text-3xl shadow-inner mb-3 group-hover:scale-110 transition-transform">
               {st.dataUrl.startsWith('http') ? (
@@ -120,14 +120,14 @@ export const StickersVault: React.FC = () => {
 
             <div className="w-full mb-2">
               <h4 className="text-xs font-bold text-white truncate">{st.name}</h4>
-              <p className="text-[10px] text-cyan-400 font-mono">{st.category}</p>
+              <p className="text-[10px] text-red-400 font-mono">{st.category}</p>
             </div>
 
             <button
               onClick={() => handleCopy(st)}
-              className="liquid-glass-btn w-full py-1.5 bg-slate-800 hover:bg-cyan-600 text-slate-300 hover:text-white text-[11px] font-semibold rounded-xl transition-all flex items-center justify-center gap-1"
+              className="liquid-glass-btn w-full py-1.5 bg-slate-800 hover:bg-red-600 text-slate-300 hover:text-white text-[11px] font-semibold rounded-xl transition-all flex items-center justify-center gap-1"
             >
-              {copiedId === st.id ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="liquid-glass-btn w-3.5 h-3.5" />}
+              {copiedId === st.id ? <Check className="w-3.5 h-3.5 text-red-400" /> : <Copy className="liquid-glass-btn w-3.5 h-3.5" />}
               <span>{copiedId === st.id ? 'Copied!' : 'Copy'}</span>
             </button>
           </div>

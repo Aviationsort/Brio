@@ -28,7 +28,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onBack }) => {
 
       <div className="p-4 bg-zinc-900 rounded-2xl border border-zinc-800 space-y-3">
         <div className="flex items-center gap-3">
-          <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-[#FF5F1F] to-purple-600 flex items-center justify-center text-white font-bold text-xl">
+          <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-[#C8102E] to-red-600 flex items-center justify-center text-white font-bold text-xl">
             {user ? user.username.charAt(0).toUpperCase() : '?'}
           </div>
           <div>
@@ -36,7 +36,7 @@ export const ProfilePage: React.FC<ProfilePageProps> = ({ onBack }) => {
             <p className="text-[10px] text-zinc-400 font-mono flex items-center gap-1">
               <Mail className="w-3 h-3" /> {user ? user.email : 'operator@brio.vault'}
             </p>
-            <span className="text-[9px] text-emerald-400 font-mono flex items-center gap-1">
+            <span className="text-[9px] text-red-400 font-mono flex items-center gap-1">
               <ShieldCheck className="w-3 h-3" /> Brio Cryptographic Account Active
             </span>
           </div>

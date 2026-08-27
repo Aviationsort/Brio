@@ -70,7 +70,7 @@ export const ScientificCalculator: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between pb-2 border-b border-white/10">
         <div className="flex items-center gap-2">
-          <span className="p-2 bg-gradient-to-b from-[#FF5F1F] to-[#cc4d19] rounded-xl text-black shadow-lg">
+          <span className="p-2 bg-gradient-to-b from-[#C8102E] to-[#cc4d19] rounded-xl text-black shadow-lg">
             <Calculator className="w-4 h-4" />
           </span>
           <div>
@@ -111,11 +111,11 @@ export const ScientificCalculator: React.FC = () => {
                   }}
                   className={`py-4 rounded-2xl font-bold font-mono text-lg transition-all shadow-md active:scale-95 ${
                     btn === '='
-                      ? 'bg-gradient-to-b from-[#FF5F1F] to-[#cc4d19] text-black font-black shadow-[0_4px_12px_rgba(255,95,31,0.4)]'
+                      ? 'bg-gradient-to-b from-[#C8102E] to-[#cc4d19] text-black font-black shadow-[0_4px_12px_rgba(255,95,31,0.4)]'
                       : btn === 'C'
                       ? 'bg-gradient-to-b from-rose-500 to-rose-700 text-white shadow-[0_4px_12px_rgba(220,38,38,0.3)]'
                       : isSpecial
-                      ? 'bg-gradient-to-b from-[#333] to-[#222] border border-white/10 text-[#FF5F1F] shadow-[0_2px_8px_rgba(0,0,0,0.4)]'
+                      ? 'bg-gradient-to-b from-[#333] to-[#222] border border-white/10 text-[#C8102E] shadow-[0_2px_8px_rgba(0,0,0,0.4)]'
                       : isOperator
                       ? 'bg-gradient-to-b from-[#444] to-[#333] text-white shadow-[0_2px_8px_rgba(0,0,0,0.4)]'
                       : 'bg-gradient-to-b from-[#555] to-[#444] text-white shadow-[0_2px_8px_rgba(0,0,0,0.4)]'

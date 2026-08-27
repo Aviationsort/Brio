@@ -298,17 +298,17 @@ export const IPTVPlayer: React.FC = () => {
       {/* Header */}
       <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-purple-500/20 border border-purple-500/40 rounded-2xl text-purple-400">
+          <div className="p-3 bg-red-500/20 border border-red-500/40 rounded-2xl text-red-400">
             <Tv className="w-6 h-6 animate-pulse" />
           </div>
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-base font-bold text-white">Live IPTV Stream Tuner</h3>
-              <span className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono rounded flex items-center gap-1 font-semibold">
+              <span className="px-2 py-0.5 bg-red-500/10 border border-red-500/30 text-red-400 text-[10px] font-mono rounded flex items-center gap-1 font-semibold">
                 <ShieldCheck className="w-3 h-3" /> Real-time M3U Parser
               </span>
               {iptvChannels.length > 0 && (
-                <span className="px-2 py-0.5 bg-purple-500/10 border border-purple-500/30 text-purple-400 text-[10px] font-mono rounded font-semibold">
+                <span className="px-2 py-0.5 bg-red-500/10 border border-red-500/30 text-red-400 text-[10px] font-mono rounded font-semibold">
                   {iptvChannels.length} channels loaded
                 </span>
               )}
@@ -323,7 +323,7 @@ export const IPTVPlayer: React.FC = () => {
           <button
             onClick={handleLoadDefaultM3U}
             disabled={isLoadingDefault}
-            className="liquid-glass-btn px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            className="liquid-glass-btn px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-red-300 border border-red-500/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
           >
             <Globe className="w-3.5 h-3.5" />
             <span>{isLoadingDefault ? (loadProgress || 'Loading...') : 'Load Default Playlist'}</span>
@@ -331,7 +331,7 @@ export const IPTVPlayer: React.FC = () => {
 
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="liquid-glass-btn px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+            className="liquid-glass-btn px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-red-300 border border-red-500/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
           >
             <Upload className="w-3.5 h-3.5" />
             <span>Upload .m3u</span>
@@ -369,7 +369,7 @@ export const IPTVPlayer: React.FC = () => {
               </h4>
             </div>
             {selectedIPTVChannel && (
-              <span className="text-[10px] font-mono text-purple-400 bg-purple-950/80 px-2.5 py-1 rounded-md border border-purple-500/30 font-bold">
+              <span className="text-[10px] font-mono text-red-400 bg-red-950/80 px-2.5 py-1 rounded-md border border-red-500/30 font-bold">
                 {selectedIPTVChannel.category} • {selectedIPTVChannel.country}
               </span>
             )}
@@ -387,7 +387,7 @@ export const IPTVPlayer: React.FC = () => {
               />
             ) : (
               <div className="text-center text-slate-500 p-8 space-y-3">
-                <Radio className="w-14 h-14 mx-auto text-purple-500/40 animate-pulse" />
+                <Radio className="w-14 h-14 mx-auto text-red-500/40 animate-pulse" />
                 <h4 className="text-sm font-bold text-white">IPTV Stream Waiting Room</h4>
                 <p className="text-xs font-mono max-w-sm mx-auto text-slate-400">
                   Load the default playlist, upload an .m3u file, or paste playlist content to populate channels.
@@ -402,7 +402,7 @@ export const IPTVPlayer: React.FC = () => {
           {/* M3U Loader Form & File Upload */}
           <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-3">
             <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-              <Plus className="w-4 h-4 text-purple-400" />
+              <Plus className="w-4 h-4 text-red-400" />
               <span>Load Custom M3U Playlist</span>
             </h4>
 
@@ -412,12 +412,12 @@ export const IPTVPlayer: React.FC = () => {
                 onChange={(e) => setM3uText(e.target.value)}
                 placeholder="Paste raw M3U playlist file content (#EXTM3U ...)"
                 rows={3}
-                className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-purple-500 resize-none font-mono placeholder-slate-600"
+                className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-red-500 resize-none font-mono placeholder-slate-600"
               />
               <button
                 type="submit"
                 disabled={!m3uText.trim()}
-                className="liquid-glass-btn w-full py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-extrabold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                className="liquid-glass-btn w-full py-2.5 bg-gradient-to-r from-red-600 to-red-600 hover:from-red-500 hover:to-red-500 text-white font-extrabold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Parse & Append Channels</span>
@@ -431,7 +431,7 @@ export const IPTVPlayer: React.FC = () => {
               <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider">
                 Live Channels ({filteredChannels.length})
               </h4>
-              <span className="text-[10px] font-mono text-purple-400">Total: {iptvChannels.length}</span>
+              <span className="text-[10px] font-mono text-red-400">Total: {iptvChannels.length}</span>
             </div>
 
             {/* Search Bar */}
@@ -442,7 +442,7 @@ export const IPTVPlayer: React.FC = () => {
                 placeholder="Search channels, country, category..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 font-sans"
+                className="w-full pl-9 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-red-500 font-sans"
               />
             </div>
 
@@ -453,7 +453,7 @@ export const IPTVPlayer: React.FC = () => {
                   onClick={() => setSelectedCategory('all')}
                   className={`liquid-glass-btn px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold transition-all shrink-0 cursor-pointer ${
                     selectedCategory === 'all'
-                      ? 'bg-purple-600 text-white'
+                      ? 'bg-red-600 text-white'
                       : 'bg-slate-800 text-slate-400 hover:text-white'
                   }`}
                 >
@@ -465,7 +465,7 @@ export const IPTVPlayer: React.FC = () => {
                     onClick={() => setSelectedCategory(cat)}
                     className={`liquid-glass-btn px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold transition-all shrink-0 cursor-pointer ${
                       selectedCategory === cat
-                        ? 'bg-purple-600 text-white'
+                        ? 'bg-red-600 text-white'
                         : 'bg-slate-800 text-slate-400 hover:text-white'
                     }`}
                   >
@@ -486,7 +486,7 @@ export const IPTVPlayer: React.FC = () => {
                       onClick={() => setSelectedIPTVChannel(ch)}
                       className={`liquid-glass-btn w-full p-2.5 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer ${
                         isSelected
-                          ? 'bg-purple-950/90 border-purple-500 text-white shadow-lg'
+                          ? 'bg-red-950/90 border-red-500 text-white shadow-lg'
                           : 'bg-slate-950 border-slate-800/80 text-slate-300 hover:bg-slate-800/80'
                       }`}
                     >
@@ -505,7 +505,7 @@ export const IPTVPlayer: React.FC = () => {
                       </div>
 
                       {isSelected ? (
-                        <span className="text-[10px] font-mono text-emerald-400 font-bold shrink-0 ml-2">LIVE</span>
+                        <span className="text-[10px] font-mono text-red-400 font-bold shrink-0 ml-2">LIVE</span>
                       ) : (
                         <Play className="w-3.5 h-3.5 text-slate-500 shrink-0 ml-2" />
                       )}

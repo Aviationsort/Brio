@@ -15,22 +15,22 @@ export const ToastContainer: React.FC = () => {
     <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
       {toasts.map((toast) => {
         let Icon = Info;
-        let borderClass = 'border-blue-500/30 bg-blue-950/80 text-blue-200';
+        let borderClass = 'border-red-500/30 bg-red-950/80 text-red-200';
         if (toast.type === 'success') {
           Icon = CheckCircle2;
-          borderClass = 'border-emerald-500/30 bg-emerald-950/80 text-emerald-200';
+          borderClass = 'border-red-400/30 bg-red-900/80 text-red-100';
         } else if (toast.type === 'error') {
           Icon = ShieldAlert;
-          borderClass = 'border-rose-500/30 bg-rose-950/80 text-rose-200';
+          borderClass = 'border-red-800/30 bg-[#8B0000]/80 text-red-100';
         } else if (toast.type === 'warning') {
           Icon = AlertCircle;
-          borderClass = 'border-amber-500/30 bg-amber-950/80 text-amber-200';
+          borderClass = 'border-red-600/30 bg-red-950/80 text-red-200';
         }
 
         return (
           <div
             key={toast.id}
-            className={`pointer-events-auto flex items-start gap-3 p-3.5 rounded-xl border backdrop-blur-md shadow-2xl transition-all duration-300 animate-in slide-in-from-bottom-3 ${borderClass}`}
+            className={`pointer-events-auto flex items-start gap-3 p-3.5 rounded-xl border backdrop-blur-md shadow-2xl transition-all duration-300 animate-in slide-in-from-bottom-3 ife-card ${borderClass}`}
           >
             <Icon className="w-5 h-5 shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
@@ -41,9 +41,9 @@ export const ToastContainer: React.FC = () => {
             </div>
             <button
               onClick={() => removeToast(toast.id)}
-              className="liquid-glass-btn p-1 hover:bg-white/10 rounded-lg transition-colors text-white/60 hover:text-white"
+              className="ife-btn p-1 hover:bg-white/10 rounded-lg transition-colors text-white/60 hover:text-white"
             >
-              <X className="liquid-glass-btn w-4 h-4" />
+              <X className="w-4 h-4" />
             </button>
           </div>
         );

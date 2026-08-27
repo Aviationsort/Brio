@@ -63,16 +63,16 @@ export const BlackjackGame: React.FC = () => {
           <Coins className="w-5 h-5" />
           <h3 className="text-base font-bold text-white">Casino Blackjack 21</h3>
         </div>
-        <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-amber-400 bg-amber-950/80 px-3 py-1 rounded-full border border-amber-500/30">
+        <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-red-400 bg-red-950/80 px-3 py-1 rounded-full border border-red-500/30">
           <span>{chips} Chips</span>
         </div>
       </div>
 
       {/* Dealer & Player Felt Table */}
-      <div className="bg-emerald-950/90 border-4 border-amber-800 rounded-3xl p-6 shadow-2xl space-y-6 text-center">
+      <div className="bg-red-950/90 border-4 border-red-800 rounded-3xl p-6 shadow-2xl space-y-6 text-center">
         {/* Dealer Hand */}
         <div>
-          <p className="text-xs font-mono text-emerald-300 mb-2">
+          <p className="text-xs font-mono text-red-300 mb-2">
             Dealer Score: {gameState === 'playing' ? '?' : calcScore(dealerHand)}
           </p>
           <div className="flex justify-center gap-2">
@@ -88,16 +88,16 @@ export const BlackjackGame: React.FC = () => {
         </div>
 
         {/* Message Banner */}
-        <p className="text-xs font-bold font-mono text-amber-300">{message || 'Place your bet and press Deal'}</p>
+        <p className="text-xs font-bold font-mono text-red-300">{message || 'Place your bet and press Deal'}</p>
 
         {/* Player Hand */}
         <div>
-          <p className="text-xs font-mono text-emerald-300 mb-2">Your Score: {calcScore(playerHand)}</p>
+          <p className="text-xs font-mono text-red-300 mb-2">Your Score: {calcScore(playerHand)}</p>
           <div className="flex justify-center gap-2">
             {playerHand.map((val, i) => (
               <div
                 key={i}
-                className="w-12 h-16 rounded-xl bg-slate-900 border-2 border-amber-400 text-amber-300 font-black text-sm flex items-center justify-center shadow-xl"
+                className="w-12 h-16 rounded-xl bg-slate-900 border-2 border-red-400 text-red-300 font-black text-sm flex items-center justify-center shadow-xl"
               >
                 {val}
               </div>
@@ -111,13 +111,13 @@ export const BlackjackGame: React.FC = () => {
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={handleHit}
-            className="liquid-glass-btn py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs rounded-xl shadow transition-all"
+            className="liquid-glass-btn py-3 bg-red-500 hover:bg-red-400 text-slate-950 font-black text-xs rounded-xl shadow transition-all"
           >
             HIT CARD
           </button>
           <button
             onClick={handleStand}
-            className="liquid-glass-btn py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs rounded-xl shadow transition-all"
+            className="liquid-glass-btn py-3 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl shadow transition-all"
           >
             STAND
           </button>
@@ -125,7 +125,7 @@ export const BlackjackGame: React.FC = () => {
       ) : (
         <button
           onClick={startDeal}
-          className="liquid-glass-btn w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-xs rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2"
+          className="liquid-glass-btn w-full py-3.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-white font-bold text-xs rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2"
         >
           <Sparkles className="w-4 h-4" />
           <span>DEAL HAND ($50)</span>

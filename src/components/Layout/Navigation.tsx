@@ -21,35 +21,35 @@ const HUBS: HubTab[] = [
     labelKey: 'connectHub',
     icon: MessageSquare,
     badge: 'Messaging & Feed',
-    gradient: 'from-cyan-500 to-blue-600',
+    gradient: 'from-red-500 to-[#8B0000]',
   },
   {
     id: 'media',
     labelKey: 'mediaHub',
     icon: Music,
     badge: 'Nightcore & IPTV',
-    gradient: 'from-purple-500 to-pink-600',
+    gradient: 'from-red-600 to-[#8B0000]',
   },
   {
     id: 'arcade',
     labelKey: 'arcadeHub',
     icon: Gamepad2,
     badge: '11 Arcade Games',
-    gradient: 'from-amber-500 to-rose-600',
+    gradient: 'from-red-500 to-[#8B0000]',
   },
   {
     id: 'office',
     labelKey: 'officeHub',
     icon: Briefcase,
     badge: 'PDF & Notes & Calc',
-    gradient: 'from-emerald-500 to-teal-600',
+    gradient: 'from-red-600 to-[#8B0000]',
   },
   {
     id: 'telemetry',
     labelKey: 'telemetryHub',
     icon: Plane,
     badge: 'Optics & Timetables',
-    gradient: 'from-sky-500 to-indigo-600',
+    gradient: 'from-red-500 to-[#8B0000]',
   },
 ];
 
@@ -57,7 +57,7 @@ export const Navigation: React.FC = () => {
   const { activeHub, setActiveHub, t } = useApp();
 
   return (
-    <nav className="bg-[#0A0A0A]/90 border-b border-white/10 px-4 py-2.5 sticky top-[61px] z-30 backdrop-blur-md">
+    <nav className="bg-[#0a0a0c]/90 border-b border-white/10 px-4 py-2.5 sticky top-[61px] z-30 backdrop-blur-md">
       <div className="max-w-7xl mx-auto flex items-center justify-start sm:justify-center overflow-x-auto no-scrollbar gap-2.5">
         {HUBS.map((hub) => {
           const Icon = hub.icon;
@@ -68,15 +68,15 @@ export const Navigation: React.FC = () => {
             <button
               key={hub.id}
               onClick={() => setActiveHub(hub.id)}
-              className={`liquid-glass-btn relative flex items-center gap-2.5 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shrink-0 select-none ${
+              className={`ife-btn relative flex items-center gap-2.5 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shrink-0 select-none ${
                 isActive
-                  ? 'bg-[#FF5F1F] text-black shadow-lg shadow-[#FF5F1F]/20'
-                  : 'bg-[#141414] border border-white/10 text-zinc-400 hover:text-white hover:bg-zinc-800'
+                  ? 'bg-gradient-to-r from-[#C8102E] to-[#8B0000] text-white shadow-lg shadow-red-900/20 border border-red-400/40'
+                  : 'bg-[#1a1a1a] border border-white/10 text-zinc-400 hover:text-white hover:bg-zinc-800'
               }`}
             >
               <div
-                className={`liquid-glass-btn p-1.5 rounded-xl transition-colors ${
-                  isActive ? 'bg-black text-[#FF5F1F]' : 'bg-zinc-900 text-zinc-400'
+                className={`ife-btn p-1.5 rounded-xl transition-colors ${
+                  isActive ? 'bg-black text-red-400' : 'bg-zinc-900 text-zinc-400'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -84,7 +84,7 @@ export const Navigation: React.FC = () => {
 
               <div className="text-left">
                 <p className="leading-tight font-extrabold">{label}</p>
-                <p className={`text-[9px] font-medium hidden lg:block mt-0.5 ${isActive ? 'text-black/70' : 'text-zinc-500'}`}>
+                <p className={`text-[9px] font-medium hidden lg:block mt-0.5 ${isActive ? 'text-white/70' : 'text-zinc-500'}`}>
                   {hub.badge}
                 </p>
               </div>

@@ -121,7 +121,7 @@ export const FlappyBirdGame: React.FC = () => {
           <Bird className="w-5 h-5" />
           <h3 className="text-base font-bold text-white">Aircraft Flappy</h3>
         </div>
-        <span className="flex items-center gap-1 text-xs font-mono font-bold text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded-full border border-emerald-500/30">
+        <span className="flex items-center gap-1 text-xs font-mono font-bold text-red-400 bg-red-950/80 px-2.5 py-1 rounded-full border border-red-500/30">
           <ShieldCheck className="w-3.5 h-3.5" /> High Score: {highScore}
         </span>
       </div>
@@ -143,7 +143,7 @@ export const FlappyBirdGame: React.FC = () => {
       {!isPlaying ? (
         <button
           onClick={startGame}
-          className="liquid-glass-btn w-full py-3.5 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-bold text-xs rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2"
+          className="liquid-glass-btn w-full py-3.5 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-bold text-xs rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2"
         >
           <Play className="w-4 h-4" />
           <span>Takeoff Aircraft</span>

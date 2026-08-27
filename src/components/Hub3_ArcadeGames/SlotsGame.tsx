@@ -70,22 +70,22 @@ export const SlotsGame: React.FC = () => {
   return (
     <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl max-w-md mx-auto space-y-6 text-center">
       <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div className="flex items-center gap-2 text-amber-400">
+        <div className="flex items-center gap-2 text-red-400">
           <Sparkles className="w-5 h-5" />
           <h3 className="text-base font-bold text-white">Casino Slots</h3>
         </div>
-        <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-amber-400 bg-amber-950/80 px-3 py-1 rounded-full border border-amber-500/30">
+        <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-red-400 bg-red-950/80 px-3 py-1 rounded-full border border-red-500/30">
           <Coins className="w-4 h-4" />
           <span>{balance} Credits</span>
         </div>
       </div>
 
       {/* 3 Reels Display */}
-      <div className="bg-slate-950 p-6 rounded-3xl border-2 border-amber-500/30 shadow-2xl flex items-center justify-center gap-4">
+      <div className="bg-slate-950 p-6 rounded-3xl border-2 border-red-500/30 shadow-2xl flex items-center justify-center gap-4">
         {reels.map((sym, i) => (
           <div
             key={i}
-            className={`liquid-glass-btn w-20 h-24 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 border border-amber-500/40 flex items-center justify-center text-4xl shadow-inner transition-all ${
+            className={`liquid-glass-btn w-20 h-24 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 border border-red-500/40 flex items-center justify-center text-4xl shadow-inner transition-all ${
               spinning ? 'animate-bounce' : ''
             }`}
           >
@@ -95,7 +95,7 @@ export const SlotsGame: React.FC = () => {
       </div>
 
       {lastWin > 0 && (
-        <p className="text-sm font-black font-mono text-emerald-400 animate-pulse">
+        <p className="text-sm font-black font-mono text-red-400 animate-pulse">
           🎉 YOU WON +{lastWin} CREDITS!
         </p>
       )}
@@ -110,7 +110,7 @@ export const SlotsGame: React.FC = () => {
               onClick={() => setBet(val)}
               className={`liquid-glass-btn px-3 py-1 rounded-xl text-xs font-bold transition-all ${
                 bet === val
-                  ? 'bg-amber-500 text-slate-950 font-black shadow'
+                  ? 'bg-red-500 text-slate-950 font-black shadow'
                   : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
               }`}
             >
@@ -122,7 +122,7 @@ export const SlotsGame: React.FC = () => {
         <button
           onClick={handleSpin}
           disabled={spinning}
-          className="liquid-glass-btn w-full py-4 bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 hover:scale-[1.02] active:scale-95 text-slate-950 font-black text-sm rounded-2xl shadow-xl shadow-amber-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+          className="liquid-glass-btn w-full py-4 bg-gradient-to-r from-red-500 via-red-600 to-rose-500 hover:scale-[1.02] active:scale-95 text-slate-950 font-black text-sm rounded-2xl shadow-xl shadow-red-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
         >
           <RefreshCw className={`w-5 h-5 ${spinning ? 'animate-spin' : ''}`} />
           <span>{spinning ? 'SPINNING...' : 'SPIN REELS'}</span>

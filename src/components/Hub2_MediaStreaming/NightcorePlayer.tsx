@@ -989,9 +989,9 @@ export const NightcorePlayer: React.FC = () => {
       />
 
       {isMiniPlayer && currentTrack && (
-        <div className="fixed bottom-4 right-4 z-50 bg-slate-900/95 backdrop-blur-xl border border-cyan-500/30 rounded-2xl shadow-2xl p-3 flex items-center gap-3 w-80 cursor-pointer"
+        <div className="fixed bottom-4 right-4 z-50 bg-slate-900/95 backdrop-blur-xl border border-red-500/30 rounded-2xl shadow-2xl p-3 flex items-center gap-3 w-80 cursor-pointer"
           onClick={() => setIsMiniPlayer(false)}>
-          <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 border border-cyan-500/20"
+          <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 border border-red-500/20"
             style={currentTrack.coverUrl ? {} : { background: `linear-gradient(135deg, ${hashColor(currentTrack.title)}, ${hashColor(currentTrack.artist)})` }}>
             {currentTrack.coverUrl ? (
               <img src={currentTrack.coverUrl} alt="" className="w-full h-full object-cover" />
@@ -1007,7 +1007,7 @@ export const NightcorePlayer: React.FC = () => {
           </div>
           <button
             onClick={(e) => { e.stopPropagation(); togglePlay(); }}
-            className="p-2 bg-cyan-500 hover:bg-cyan-400 text-black rounded-xl transition-all cursor-pointer"
+            className="p-2 bg-red-500 hover:bg-red-400 text-black rounded-xl transition-all cursor-pointer"
           >
             {isPlayingMusic ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
           </button>
@@ -1021,23 +1021,23 @@ export const NightcorePlayer: React.FC = () => {
       )}
 
       <div
-        className={`bg-slate-900/90 border ${isDragOver ? 'border-cyan-400 border-dashed' : 'border-slate-800'} rounded-3xl p-5 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-4 transition-all`}
+        className={`bg-slate-900/90 border ${isDragOver ? 'border-red-400 border-dashed' : 'border-slate-800'} rounded-3xl p-5 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-4 transition-all`}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
       >
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-cyan-500/20 border border-cyan-500/40 rounded-2xl text-cyan-400">
+          <div className="p-3 bg-red-500/20 border border-red-500/40 rounded-2xl text-red-400">
             <Music className="w-6 h-6" />
           </div>
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-base font-bold text-white">Nightcore Player</h3>
-              <span className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono rounded flex items-center gap-1 font-semibold">
+              <span className="px-2 py-0.5 bg-red-500/10 border border-red-500/30 text-red-400 text-[10px] font-mono rounded flex items-center gap-1 font-semibold">
                 <ShieldCheck className="w-3 h-3" /> Pro
               </span>
               {audioFormat && (
-                <span className="px-2 py-0.5 bg-purple-500/10 border border-purple-500/30 text-purple-400 text-[10px] font-mono rounded font-semibold">
+                <span className="px-2 py-0.5 bg-red-500/10 border border-red-500/30 text-red-400 text-[10px] font-mono rounded font-semibold">
                   {audioFormat}
                 </span>
               )}
@@ -1051,13 +1051,13 @@ export const NightcorePlayer: React.FC = () => {
         <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={() => setMediaType('audio')}
-            className={`liquid-glass-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${mediaType === 'audio' ? 'bg-cyan-500 text-black shadow-lg' : 'bg-slate-800 text-slate-400'}`}
+            className={`liquid-glass-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${mediaType === 'audio' ? 'bg-red-500 text-black shadow-lg' : 'bg-slate-800 text-slate-400'}`}
           >
             <Music className="w-3.5 h-3.5 inline mr-1" /> Audio
           </button>
           <button
             onClick={() => setMediaType('video')}
-            className={`liquid-glass-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${mediaType === 'video' ? 'bg-purple-500 text-black shadow-lg' : 'bg-slate-800 text-slate-400'}`}
+            className={`liquid-glass-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${mediaType === 'video' ? 'bg-red-500 text-black shadow-lg' : 'bg-slate-800 text-slate-400'}`}
           >
             <Video className="w-3.5 h-3.5 inline mr-1" /> Video
           </button>
@@ -1073,10 +1073,10 @@ export const NightcorePlayer: React.FC = () => {
 
       {!isMiniPlayer && (
         <>
-          <div ref={playerContainerRef} className="bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 border-2 border-cyan-500/30 rounded-3xl p-6 shadow-2xl relative overflow-hidden">
+          <div ref={playerContainerRef} className="bg-gradient-to-br from-slate-950 via-slate-900 to-red-950 border-2 border-red-500/30 rounded-3xl p-6 shadow-2xl relative overflow-hidden">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
               <div className="flex flex-col items-center">
-                <div className="relative group w-44 h-44 rounded-2xl overflow-hidden shadow-2xl border border-cyan-400/30 mb-3 bg-black flex-shrink-0">
+                <div className="relative group w-44 h-44 rounded-2xl overflow-hidden shadow-2xl border border-red-400/30 mb-3 bg-black flex-shrink-0">
                   {currentTrack ? (
                     <>
                       {isYoutube && youtubeId ? (
@@ -1102,7 +1102,7 @@ export const NightcorePlayer: React.FC = () => {
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-3">
-                        <span className="text-[10px] font-mono font-black text-cyan-300 bg-cyan-950/90 px-2 py-0.5 rounded-md border border-cyan-500/40 w-max">
+                        <span className="text-[10px] font-mono font-black text-red-300 bg-red-950/90 px-2 py-0.5 rounded-md border border-red-500/40 w-max">
                           {mediaType.toUpperCase()}
                         </span>
                         <span className="text-xs font-extrabold text-white truncate mt-1">
@@ -1117,7 +1117,7 @@ export const NightcorePlayer: React.FC = () => {
                   )}
                 </div>
 
-                <canvas ref={canvasRef} width={BARS * 3} height={36} className="w-44 h-9 rounded-lg bg-black/60 border border-cyan-500/20" />
+                <canvas ref={canvasRef} width={BARS * 3} height={36} className="w-44 h-9 rounded-lg bg-black/60 border border-red-500/20" />
               </div>
 
               <div className="lg:col-span-2 space-y-4">
@@ -1197,15 +1197,15 @@ export const NightcorePlayer: React.FC = () => {
                     </div>
                   )}
                   {isDragOver && (
-                    <div className="absolute inset-0 bg-cyan-500/10 border-2 border-cyan-400 border-dashed rounded-2xl flex items-center justify-center">
-                      <div className="text-cyan-300 text-sm font-bold flex items-center gap-2">
+                    <div className="absolute inset-0 bg-red-500/10 border-2 border-red-400 border-dashed rounded-2xl flex items-center justify-center">
+                      <div className="text-red-300 text-sm font-bold flex items-center gap-2">
                         <Upload className="w-6 h-6" /> Drop files to add to playlist
                       </div>
                     </div>
                   )}
                 </div>
 
-                <div className="bg-slate-950/60 border border-cyan-500/10 rounded-2xl p-3 backdrop-blur-xl">
+                <div className="bg-slate-950/60 border border-red-500/10 rounded-2xl p-3 backdrop-blur-xl">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-mono text-slate-400">{formatTime(elapsed)}</span>
                     <span className="text-xs font-mono text-slate-400">{formatTime(duration)}</span>
@@ -1222,9 +1222,9 @@ export const NightcorePlayer: React.FC = () => {
                       }
                     }}>
                     <canvas ref={waveformCanvasRef} width={300} height={32} className="w-full h-full" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 pointer-events-none"
+                    <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 to-red-500/20 pointer-events-none"
                       style={{ width: `${progressPercent}%` }} />
-                    <div className="absolute top-0 bottom-0 w-0.5 bg-pink-500 pointer-events-none shadow-lg shadow-pink-500/50"
+                    <div className="absolute top-0 bottom-0 w-0.5 bg-red-500 pointer-events-none shadow-lg shadow-red-500/50"
                       style={{ left: `${progressPercent}%` }} />
                   </div>
                   <input
@@ -1236,7 +1236,7 @@ export const NightcorePlayer: React.FC = () => {
                     onChange={handleSeek}
                     onMouseUp={handleSeekCommit}
                     onTouchEnd={handleSeekCommit}
-                    className="w-full accent-pink-500 cursor-pointer h-1 bg-slate-800 rounded-lg mt-1 opacity-0 absolute"
+                    className="w-full accent-red-500 cursor-pointer h-1 bg-slate-800 rounded-lg mt-1 opacity-0 absolute"
                     style={{ pointerEvents: 'none' }}
                   />
                 </div>
@@ -1254,7 +1254,7 @@ export const NightcorePlayer: React.FC = () => {
                   <button
                     onClick={togglePlay}
                     disabled={!currentTrack}
-                    className="liquid-glass-btn px-8 py-3.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 hover:scale-105 text-white font-black text-sm rounded-2xl shadow-xl shadow-cyan-500/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="liquid-glass-btn px-8 py-3.5 bg-gradient-to-r from-red-500 via-red-500 to-red-600 hover:scale-105 text-white font-black text-sm rounded-2xl shadow-xl shadow-red-500/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
                   >
                     {isPlayingMusic ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
                     <span>{isPlayingMusic ? 'Pause' : 'Play'}</span>
@@ -1272,7 +1272,7 @@ export const NightcorePlayer: React.FC = () => {
                   <button
                     onClick={togglePlaybackMode}
                     disabled={!currentTrack}
-                    className={`liquid-glass-btn p-3 rounded-xl border transition-all cursor-pointer disabled:opacity-40 ${playbackMode !== 'sequential' ? 'bg-purple-500/20 border-purple-500/40 text-purple-300' : 'bg-slate-800 hover:bg-slate-700 text-slate-400 border-slate-700'}`}
+                    className={`liquid-glass-btn p-3 rounded-xl border transition-all cursor-pointer disabled:opacity-40 ${playbackMode !== 'sequential' ? 'bg-red-500/20 border-red-500/40 text-red-300' : 'bg-slate-800 hover:bg-slate-700 text-slate-400 border-slate-700'}`}
                     title={`${getPlaybackModeLabel()} - Click to change`}
                   >
                     {getPlaybackModeIcon()}
@@ -1289,7 +1289,7 @@ export const NightcorePlayer: React.FC = () => {
                   <button
                     onClick={() => setShowLyrics(!showLyrics)}
                     disabled={!currentTrack}
-                    className={`liquid-glass-btn p-3 rounded-xl border transition-all cursor-pointer disabled:opacity-40 ${showLyrics ? 'bg-pink-500/20 border-pink-500/40 text-pink-300' : 'bg-slate-800 hover:bg-slate-700 text-slate-400 border-slate-700'}`}
+                    className={`liquid-glass-btn p-3 rounded-xl border transition-all cursor-pointer disabled:opacity-40 ${showLyrics ? 'bg-red-500/20 border-red-500/40 text-red-300' : 'bg-slate-800 hover:bg-slate-700 text-slate-400 border-slate-700'}`}
                     title="Lyrics"
                   >
                     <Mic2 className="w-5 h-5" />
@@ -1297,9 +1297,9 @@ export const NightcorePlayer: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="bg-slate-950/60 border border-purple-500/20 rounded-2xl p-3 space-y-2 backdrop-blur-xl">
+                  <div className="bg-slate-950/60 border border-red-500/20 rounded-2xl p-3 space-y-2 backdrop-blur-xl">
                     <div className="flex items-center justify-between text-xs font-mono">
-                      <span className="text-pink-400 font-bold flex items-center gap-1">
+                      <span className="text-red-400 font-bold flex items-center gap-1">
                         <Sparkles className="w-3.5 h-3.5" /> Nightcore Speed ({nightcorePitch.toFixed(2)}x)
                       </span>
                       <span className="text-[10px] text-slate-400">0.80 ➔ 1.50</span>
@@ -1311,13 +1311,13 @@ export const NightcorePlayer: React.FC = () => {
                       step="0.05"
                       value={nightcorePitch}
                       onChange={(e) => setNightcorePitch(Number(e.target.value))}
-                      className="w-full accent-pink-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
+                      className="w-full accent-red-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
                     />
                   </div>
 
-                  <div className="bg-slate-950/60 border border-indigo-500/20 rounded-2xl p-3 space-y-2 backdrop-blur-xl md:col-span-2">
+                  <div className="bg-slate-950/60 border border-red-500/20 rounded-2xl p-3 space-y-2 backdrop-blur-xl md:col-span-2">
                     <div className="flex items-center justify-between text-xs font-mono">
-                      <span className="text-indigo-400 font-bold flex items-center gap-1">
+                      <span className="text-red-400 font-bold flex items-center gap-1">
                         <Sliders className="w-3.5 h-3.5" /> EQ & Bass Booster
                       </span>
                       <div className="flex items-center gap-2">
@@ -1340,7 +1340,7 @@ export const NightcorePlayer: React.FC = () => {
                         </select>
                         <button
                           onClick={() => setShowEqPanel(!showEqPanel)}
-                          className="text-[10px] text-indigo-300 hover:text-indigo-200 cursor-pointer"
+                          className="text-[10px] text-red-300 hover:text-red-200 cursor-pointer"
                         >
                           {showEqPanel ? 'Hide Bands' : 'Show Bands'}
                         </button>
@@ -1355,9 +1355,9 @@ export const NightcorePlayer: React.FC = () => {
                         step="1"
                         value={bassBoost}
                         onChange={(e) => setBassBoost(Number(e.target.value))}
-                        className="flex-1 accent-indigo-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
+                        className="flex-1 accent-red-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
                       />
-                      <span className="text-[10px] text-indigo-300 font-mono w-12 text-right">{bassBoost}%</span>
+                      <span className="text-[10px] text-red-300 font-mono w-12 text-right">{bassBoost}%</span>
                     </div>
                     {showEqPanel && (
                       <div className="space-y-1.5 pt-1.5 border-t border-slate-800/60">
@@ -1376,10 +1376,10 @@ export const NightcorePlayer: React.FC = () => {
                                   setEqBands(newBands);
                                   setEqPreset('flat');
                                 }}
-                                className="w-full accent-indigo-400 cursor-pointer"
+                                className="w-full accent-red-400 cursor-pointer"
                                 style={{ writingMode: 'vertical-lr', direction: 'rtl', height: '64px' }}
                               />
-                              <span className="text-[9px] text-indigo-300 font-mono">{(eqBands[i] ?? 0) > 0 ? '+' : ''}{eqBands[i] ?? 0}</span>
+                              <span className="text-[9px] text-red-300 font-mono">{(eqBands[i] ?? 0) > 0 ? '+' : ''}{eqBands[i] ?? 0}</span>
                               <span className="text-[9px] text-slate-500 font-mono">{band.label}Hz</span>
                             </div>
                           ))}
@@ -1394,9 +1394,9 @@ export const NightcorePlayer: React.FC = () => {
                     )}
                   </div>
 
-                  <div className="bg-slate-950/60 border border-cyan-500/20 rounded-2xl p-3 space-y-2 backdrop-blur-xl">
+                  <div className="bg-slate-950/60 border border-red-500/20 rounded-2xl p-3 space-y-2 backdrop-blur-xl">
                     <div className="flex items-center justify-between text-xs font-mono">
-                      <span className="text-cyan-400 font-bold flex items-center gap-1">
+                      <span className="text-red-400 font-bold flex items-center gap-1">
                         <Gauge className="w-3.5 h-3.5" /> Playback Speed ({playbackRate.toFixed(1)}x)
                       </span>
                       <span className="text-[10px] text-slate-400">0.5 ➔ 2.0</span>
@@ -1408,13 +1408,13 @@ export const NightcorePlayer: React.FC = () => {
                       step="0.1"
                       value={playbackRate}
                       onChange={handleRateChange}
-                      className="w-full accent-cyan-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
+                      className="w-full accent-red-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
                     />
                   </div>
 
-                  <div className="bg-slate-950/60 border border-emerald-500/20 rounded-2xl p-3 space-y-2 backdrop-blur-xl">
+                  <div className="bg-slate-950/60 border border-red-500/20 rounded-2xl p-3 space-y-2 backdrop-blur-xl">
                     <div className="flex items-center justify-between text-xs font-mono">
-                      <span className="text-emerald-400 font-bold flex items-center gap-1">
+                      <span className="text-red-400 font-bold flex items-center gap-1">
                         <Volume2 className="w-3.5 h-3.5" /> Volume ({Math.round(volumePercent)}%)
                       </span>
                       <span className="text-[10px] text-slate-400">{isMuted ? 'MUTED' : 'ACTIVE'}</span>
@@ -1426,13 +1426,13 @@ export const NightcorePlayer: React.FC = () => {
                       step="0.01"
                       value={isMuted ? 0 : volume}
                       onChange={handleVolumeChange}
-                      className="w-full accent-emerald-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
+                      className="w-full accent-red-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
                     />
                   </div>
 
-                  <div className="bg-slate-950/60 border border-orange-500/20 rounded-2xl p-3 space-y-2 backdrop-blur-xl">
+                  <div className="bg-slate-950/60 border border-red-600/20 rounded-2xl p-3 space-y-2 backdrop-blur-xl">
                     <div className="flex items-center justify-between text-xs font-mono">
-                      <span className="text-orange-400 font-bold flex items-center gap-1">
+                      <span className="text-red-500 font-bold flex items-center gap-1">
                         <Timer className="w-3.5 h-3.5" /> Sleep Timer
                       </span>
                       <span className="text-[10px] text-slate-400">{sleepTimer ? `${sleepTimer}m left` : 'Off'}</span>
@@ -1470,7 +1470,7 @@ export const NightcorePlayer: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => setSkipSilence(!skipSilence)}
-                      className={`liquid-glass-btn px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${skipSilence ? 'bg-green-500/20 border-green-500/40 text-green-300' : 'bg-slate-800 text-slate-400 border border-slate-700'}`}
+                      className={`liquid-glass-btn px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${skipSilence ? 'bg-red-500/20 border-red-500/40 text-green-300' : 'bg-slate-800 text-slate-400 border border-slate-700'}`}
                     >
                       {skipSilence ? 'ON' : 'OFF'}
                     </button>
@@ -1482,15 +1482,15 @@ export const NightcorePlayer: React.FC = () => {
                       value={skipSilenceThreshold}
                       onChange={(e) => setSkipSilenceThreshold(Number(e.target.value))}
                       disabled={!skipSilence}
-                      className="flex-1 accent-orange-500 cursor-pointer h-1 bg-slate-800 rounded-lg disabled:opacity-40"
+                      className="flex-1 accent-red-600 cursor-pointer h-1 bg-slate-800 rounded-lg disabled:opacity-40"
                     />
                   </div>
                 </div>
 
                 {showLyrics && lyrics && (
-                  <div className="bg-slate-950/80 border border-pink-500/20 rounded-2xl p-4 max-h-40 overflow-y-auto backdrop-blur-xl">
+                  <div className="bg-slate-950/80 border border-red-500/20 rounded-2xl p-4 max-h-40 overflow-y-auto backdrop-blur-xl">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold text-pink-300 flex items-center gap-1">
+                      <span className="text-xs font-bold text-red-300 flex items-center gap-1">
                         <Type className="w-3.5 h-3.5" /> Lyrics
                       </span>
                       <button onClick={() => setShowLyrics(false)} className="text-slate-400 hover:text-white cursor-pointer">
@@ -1502,9 +1502,9 @@ export const NightcorePlayer: React.FC = () => {
                 )}
 
                 {showLyrics && !lyrics && currentTrack && (
-                  <div className="bg-slate-950/80 border border-pink-500/20 rounded-2xl p-4 backdrop-blur-xl">
+                  <div className="bg-slate-950/80 border border-red-500/20 rounded-2xl p-4 backdrop-blur-xl">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold text-pink-300 flex items-center gap-1">
+                      <span className="text-xs font-bold text-red-300 flex items-center gap-1">
                         <Type className="w-3.5 h-3.5" /> Lyrics
                       </span>
                       <button onClick={() => setShowLyrics(false)} className="text-slate-400 hover:text-white cursor-pointer">
@@ -1523,12 +1523,12 @@ export const NightcorePlayer: React.FC = () => {
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}>
             <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-              <Upload className="w-4 h-4 text-cyan-400" />
+              <Upload className="w-4 h-4 text-red-400" />
               <span>Local Media</span>
-              {isDragOver && <span className="text-cyan-300 normal-case">Drop files here...</span>}
+              {isDragOver && <span className="text-red-300 normal-case">Drop files here...</span>}
             </h4>
-            <label className="flex items-center justify-center gap-2 p-4 bg-slate-950 border border-dashed border-slate-700 hover:border-cyan-400 rounded-xl text-xs text-slate-300 cursor-pointer transition-colors">
-              <Music className="w-4 h-4 text-cyan-400" />
+            <label className="flex items-center justify-center gap-2 p-4 bg-slate-950 border border-dashed border-slate-700 hover:border-red-400 rounded-xl text-xs text-slate-300 cursor-pointer transition-colors">
+              <Music className="w-4 h-4 text-red-400" />
               <span>Choose Audio or Video File...</span>
               <input
                 ref={fileInputRef}
@@ -1584,13 +1584,13 @@ export const NightcorePlayer: React.FC = () => {
 
           <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-3">
             <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-              <Globe2 className="w-4 h-4 text-cyan-400" />
+              <Globe2 className="w-4 h-4 text-red-400" />
               <span>Stream URL</span>
             </h4>
             {!showStreamInput ? (
               <button
                 onClick={() => setShowStreamInput(true)}
-                className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/30 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-red-300 border border-red-500/30 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Globe2 className="w-4 h-4" /> Paste Stream URL
               </button>
@@ -1601,13 +1601,13 @@ export const NightcorePlayer: React.FC = () => {
                   value={customStreamUrl}
                   onChange={(e) => setCustomStreamUrl(e.target.value)}
                   placeholder="https://example.com/stream.mp3"
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500 placeholder-slate-600"
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-red-500 placeholder-slate-600"
                 />
                 <div className="flex gap-2">
                   <button
                     type="submit"
                     disabled={!customStreamUrl.trim()}
-                    className="liquid-glass-btn flex-1 py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer disabled:opacity-50"
+                    className="liquid-glass-btn flex-1 py-2 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer disabled:opacity-50"
                   >
                     Load Stream
                   </button>
@@ -1626,7 +1626,7 @@ export const NightcorePlayer: React.FC = () => {
           <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl">
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-                <ListMusic className="w-4 h-4 text-purple-400" />
+                <ListMusic className="w-4 h-4 text-red-400" />
                 <span>Playlist ({playlist.length})</span>
               </h4>
               {playlist.length > 0 && (
@@ -1646,7 +1646,7 @@ export const NightcorePlayer: React.FC = () => {
                 playlist.map((track, index) => (
                   <div
                     key={track.id}
-                    className={`flex items-center gap-2 p-2 rounded-xl cursor-pointer transition-all group ${index === currentIndex ? 'bg-cyan-500/10 border border-cyan-500/30' : 'bg-slate-950/60 border border-transparent hover:border-slate-700'}`}
+                    className={`flex items-center gap-2 p-2 rounded-xl cursor-pointer transition-all group ${index === currentIndex ? 'bg-red-500/10 border border-red-500/30' : 'bg-slate-950/60 border border-transparent hover:border-slate-700'}`}
                     onClick={() => playTrackFromPlaylist(track, index)}
                   >
                     <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 border border-slate-700"
@@ -1660,7 +1660,7 @@ export const NightcorePlayer: React.FC = () => {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-xs font-bold truncate ${index === currentIndex ? 'text-cyan-300' : 'text-slate-200'}`}>
+                      <p className={`text-xs font-bold truncate ${index === currentIndex ? 'text-red-300' : 'text-slate-200'}`}>
                         {track.title}
                       </p>
                       <p className="text-[10px] text-slate-400 truncate">
@@ -1670,7 +1670,7 @@ export const NightcorePlayer: React.FC = () => {
                     {index === currentIndex && isPlayingMusic && (
                       <div className="flex items-center gap-0.5">
                         {[0, 1, 2].map(i => (
-                          <div key={i} className="w-0.5 bg-cyan-400 rounded-full animate-pulse" style={{ height: `${8 + Math.random() * 8}px`, animationDelay: `${i * 0.1}s` }} />
+                          <div key={i} className="w-0.5 bg-red-400 rounded-full animate-pulse" style={{ height: `${8 + Math.random() * 8}px`, animationDelay: `${i * 0.1}s` }} />
                         ))}
                       </div>
                     )}

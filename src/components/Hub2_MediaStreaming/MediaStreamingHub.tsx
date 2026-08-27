@@ -17,13 +17,13 @@ export const MediaStreamingHub: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Sub-tab Navigation */}
-      <div className="flex items-center gap-2 p-1.5 nightcore-panel overflow-x-auto no-scrollbar">
+      <div className="flex items-center gap-2 p-1.5 aero-panel overflow-x-auto no-scrollbar">
         <button
           onClick={() => setSubTab('nightcore')}
-          className={`skeuo-button flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+          className={`ife-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
             subTab === 'nightcore'
-              ? 'ring-2 ring-cyan-400/80 shadow-lg shadow-cyan-500/30'
-              : 'opacity-80 hover:opacity-100'
+              ? 'bg-gradient-to-r from-[#C8102E] to-[#8B0000] text-white shadow-lg shadow-red-900/30 border border-red-400/40'
+              : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
           }`}
         >
           <Music className="w-4 h-4" />
@@ -32,10 +32,10 @@ export const MediaStreamingHub: React.FC = () => {
 
         <button
           onClick={() => setSubTab('iptv')}
-          className={`skeuo-button flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+          className={`ife-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
             subTab === 'iptv'
-              ? 'ring-2 ring-purple-400/80 shadow-lg shadow-purple-500/30'
-              : 'opacity-80 hover:opacity-100'
+              ? 'bg-gradient-to-r from-[#C8102E] to-[#8B0000] text-white shadow-lg shadow-red-900/30 border border-red-400/40'
+              : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
           }`}
         >
           <Tv className="w-4 h-4" />
@@ -44,10 +44,10 @@ export const MediaStreamingHub: React.FC = () => {
 
         <button
           onClick={() => setSubTab('rss')}
-          className={`skeuo-button flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+          className={`ife-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
             subTab === 'rss'
-              ? 'ring-2 ring-pink-400/80 shadow-lg shadow-pink-500/30'
-              : 'opacity-80 hover:opacity-100'
+              ? 'bg-gradient-to-r from-[#C8102E] to-[#8B0000] text-white shadow-lg shadow-red-900/30 border border-red-400/40'
+              : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
           }`}
         >
           <Rss className="w-4 h-4" />

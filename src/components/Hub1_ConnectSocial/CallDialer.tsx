@@ -119,20 +119,20 @@ export const CallDialer: React.FC = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 aero-panel">
       {/* Keypad & Dialer */}
-      <div className="md:col-span-2 bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-2xl flex flex-col items-center justify-between min-h-[500px]">
+      <div className="md:col-span-2 bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-2xl flex flex-col items-center justify-between min-h-[500px] ife-card liquid-glass">
         {/* Dial Display Screen */}
         <div className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-center relative mb-6">
           <p className="text-xs text-slate-500 font-mono mb-1">Encrypted Voice Channel Ready</p>
           <div className="h-10 flex items-center justify-center">
-            <span className="text-2xl sm:text-3xl font-black font-mono tracking-widest text-cyan-400">
+            <span className="text-2xl sm:text-3xl font-black font-mono tracking-widest text-red-400">
               {dialedNumber || '—'}
             </span>
           </div>
 
           {inCall && (
-            <div className="mt-2 flex items-center justify-center gap-2 text-xs font-mono text-emerald-400 animate-pulse">
+            <div className="mt-2 flex items-center justify-center gap-2 text-xs font-mono text-red-400 animate-pulse">
               <PhoneCall className="w-4 h-4" />
               <span>
                 IN CALL: {Math.floor(callTimer / 60)}:{(callTimer % 60).toString().padStart(2, '0')}
@@ -142,7 +142,7 @@ export const CallDialer: React.FC = () => {
         </div>
 
         {/* 3x4 Keypad Grid */}
-        <div className="grid grid-cols-3 gap-3 w-full max-w-xs mb-6">
+        <div className="grid grid-cols-3 gap-3 w-full max-w-xs mb-6 wiiu-grid">
           {['1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#'].map((digit) => (
             <button
               key={digit}
@@ -176,7 +176,7 @@ export const CallDialer: React.FC = () => {
             <button
               onClick={() => startCall()}
               disabled={!dialedNumber}
-              className="liquid-glass-btn flex-1 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-40"
+              className="liquid-glass-btn flex-1 py-3.5 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 text-white font-bold rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-40"
             >
               <Phone className="w-5 h-5" />
               <span>Dial Call</span>
@@ -188,8 +188,8 @@ export const CallDialer: React.FC = () => {
       {/* Emergency Shortcuts & Call Logs */}
       <div className="space-y-6">
         {/* Emergency Panel */}
-        <div className="bg-slate-900/90 border border-rose-500/30 rounded-2xl p-4 shadow-xl space-y-3">
-          <div className="flex items-center gap-2 text-rose-400">
+        <div className="bg-slate-900/90 border border-red-500/30 rounded-2xl p-4 shadow-xl space-y-3 ife-status-bar">
+          <div className="flex items-center gap-2 text-red-400">
             <AlertTriangle className="w-4 h-4 animate-bounce" />
             <h4 className="text-xs font-bold uppercase tracking-wider">Emergency Speed-Dial</h4>
           </div>
@@ -202,20 +202,20 @@ export const CallDialer: React.FC = () => {
                   setDialedNumber(em.code);
                   startCall(em.code);
                 }}
-                className="liquid-glass-btn w-full p-2.5 bg-slate-950 border border-slate-800 hover:border-rose-500/40 rounded-xl text-left transition-all group flex items-center justify-between"
+                className="liquid-glass-btn w-full p-2.5 bg-slate-950 border border-slate-800 hover:border-red-500/40 rounded-xl text-left transition-all group flex items-center justify-between"
               >
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-bold text-white group-hover:text-rose-400 transition-colors">
+                    <span className="text-xs font-bold text-white group-hover:text-red-400 transition-colors">
                       {em.name}
                     </span>
-                    <span className="text-[10px] px-1.5 py-0.2 bg-rose-950 text-rose-300 rounded font-mono">
+                    <span className="text-[10px] px-1.5 py-0.2 bg-red-950 text-red-300 rounded font-mono">
                       {em.code}
                     </span>
                   </div>
                   <p className="text-[10px] text-slate-400">{em.details}</p>
                 </div>
-                <PhoneCall className="w-4 h-4 text-slate-500 group-hover:text-rose-400 transition-colors shrink-0" />
+                 <PhoneCall className="w-4 h-4 text-slate-500 group-hover:text-red-400 transition-colors shrink-0" />
               </button>
             ))}
           </div>
@@ -225,10 +225,10 @@ export const CallDialer: React.FC = () => {
         <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-slate-300">
-              <History className="w-4 h-4 text-cyan-400" />
+               <History className="w-4 h-4 text-red-400" />
               <h4 className="text-xs font-bold uppercase tracking-wider">Encrypted Call Logs</h4>
             </div>
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <ShieldCheck className="w-4 h-4 text-red-400" />
           </div>
 
           <div className="space-y-2 max-h-40 overflow-y-auto">
@@ -238,7 +238,7 @@ export const CallDialer: React.FC = () => {
                   <p className="font-bold text-slate-200">{log.name || log.number}</p>
                   <p className="text-[10px] text-slate-400">{log.timestamp} • {log.durationSeconds}s</p>
                 </div>
-                <span className="text-[10px] text-emerald-400 font-mono">Encrypted</span>
+                <span className="text-[10px] text-red-400 font-mono">Encrypted</span>
               </div>
             ))}
           </div>

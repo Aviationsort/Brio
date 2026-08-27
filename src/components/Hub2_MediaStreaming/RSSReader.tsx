@@ -359,9 +359,9 @@ export const RSSReader: React.FC = () => {
   const getSourceBadgeColor = (category: string) => {
     switch (category) {
       case 'Centrist': return 'bg-slate-500/20 text-slate-300 border-slate-500/30';
-      case 'Left-wing': return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
+      case 'Left-wing': return 'bg-red-500/20 text-red-300 border-red-500/30';
       case 'Right-wing': return 'bg-red-500/20 text-red-300 border-red-500/30';
-      case 'State-Controlled': return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
+      case 'State-Controlled': return 'bg-red-500/20 text-red-300 border-red-500/30';
       default: return 'bg-slate-500/20 text-slate-300 border-slate-500/30';
     }
   };
@@ -422,7 +422,7 @@ export const RSSReader: React.FC = () => {
             <button
               onClick={(e) => { e.stopPropagation(); toggleReadLater(art); }}
               className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
-                isReadLater ? 'bg-cyan-500/20 border-cyan-500/40 text-cyan-400' : 'border-transparent text-slate-500 hover:text-white'
+                isReadLater ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'border-transparent text-slate-500 hover:text-white'
               }`}
             >
               <BookMarked className="w-3.5 h-3.5" />
@@ -430,7 +430,7 @@ export const RSSReader: React.FC = () => {
             <button
               onClick={(e) => { e.stopPropagation(); toggleSaveArticle(art); }}
               className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
-                isSaved ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400' : 'border-transparent text-slate-500 hover:text-white'
+                isSaved ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'border-transparent text-slate-500 hover:text-white'
               }`}
             >
               {isSaved ? <Check className="w-3.5 h-3.5" /> : <Bookmark className="w-3.5 h-3.5" />}
@@ -469,7 +469,7 @@ export const RSSReader: React.FC = () => {
               <span className="text-slate-600">·</span>
               <span>{readingTime} min</span>
             </div>
-            <h4 className="text-sm font-semibold text-white leading-snug line-clamp-2 group-hover:text-pink-300 transition-colors">
+            <h4 className="text-sm font-semibold text-white leading-snug line-clamp-2 group-hover:text-red-300 transition-colors">
               {art.title}
             </h4>
             <p className="text-xs text-slate-400 line-clamp-2">{art.summary}</p>
@@ -482,7 +482,7 @@ export const RSSReader: React.FC = () => {
                 <button
                   onClick={(e) => { e.stopPropagation(); toggleSaveArticle(art); }}
                   className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
-                    isSaved ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400' : 'border-white/10 text-slate-400 hover:text-white'
+                    isSaved ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'border-white/10 text-slate-400 hover:text-white'
                   }`}
                 >
                   {isSaved ? <Check className="w-3.5 h-3.5" /> : <Bookmark className="w-3.5 h-3.5" />}
@@ -520,12 +520,12 @@ export const RSSReader: React.FC = () => {
               </span>
               <span className="text-[10px] text-slate-500 font-mono">{art.source}</span>
               {isRead && (
-                <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[9px] font-mono font-bold">
+                <span className="px-1.5 py-0.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-[9px] font-mono font-bold">
                   Read
                 </span>
               )}
             </div>
-            <h4 className="text-sm font-semibold text-white leading-snug line-clamp-2 group-hover:text-pink-300 transition-colors">
+            <h4 className="text-sm font-semibold text-white leading-snug line-clamp-2 group-hover:text-red-300 transition-colors">
               {art.title}
             </h4>
             <p className="text-xs text-slate-400 line-clamp-2">{art.summary}</p>
@@ -541,7 +541,7 @@ export const RSSReader: React.FC = () => {
                 <button
                   onClick={(e) => { e.stopPropagation(); toggleReadLater(art); }}
                   className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
-                    isReadLater ? 'bg-cyan-500/20 border-cyan-500/40 text-cyan-400' : 'border-white/10 text-slate-400 hover:text-white'
+                    isReadLater ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'border-white/10 text-slate-400 hover:text-white'
                   }`}
                 >
                   {isReadLater ? <BookMarked className="w-3.5 h-3.5" /> : <Bookmark className="w-3.5 h-3.5" />}
@@ -549,7 +549,7 @@ export const RSSReader: React.FC = () => {
                 <button
                   onClick={(e) => { e.stopPropagation(); toggleSaveArticle(art); }}
                   className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
-                    isSaved ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400' : 'border-white/10 text-slate-400 hover:text-white'
+                    isSaved ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'border-white/10 text-slate-400 hover:text-white'
                   }`}
                 >
                   {isSaved ? <Check className="w-3.5 h-3.5" /> : <ShieldCheck className="w-3.5 h-3.5" />}
@@ -594,7 +594,7 @@ export const RSSReader: React.FC = () => {
       <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-2xl">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-gradient-to-br from-pink-500/20 to-purple-500/20 border border-pink-500/30 rounded-2xl text-pink-400">
+            <div className="p-3 bg-gradient-to-br from-red-500/20 to-red-500/20 border border-red-500/30 rounded-2xl text-red-400">
               <Rss className="w-5 h-5" />
             </div>
             <div>
@@ -609,7 +609,7 @@ export const RSSReader: React.FC = () => {
             <select
               value={refreshInterval}
               onChange={(e) => setRefreshInterval(Number(e.target.value))}
-              className="px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500"
+              className="px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-red-500"
             >
               <option value={0}>Auto-refresh: Off</option>
               <option value="5">Every 5 min</option>
@@ -631,7 +631,7 @@ export const RSSReader: React.FC = () => {
               className="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition-all cursor-pointer disabled:opacity-50"
               title="Refresh feeds"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-pink-400' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-red-400' : ''}`} />
             </button>
           </div>
         </div>
@@ -646,13 +646,13 @@ export const RSSReader: React.FC = () => {
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${
                 activeTab === tab
-                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
+                  ? 'bg-gradient-to-r from-red-600 to-red-600 text-white shadow-lg'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800'
               }`}
             >
               {tab === 'all' && <Layers className="w-4 h-4" />}
-              {tab === 'aviation' && <Plane className="w-4 h-4 text-sky-400" />}
-              {tab === 'world' && <Globe className="w-4 h-4 text-emerald-400" />}
+              {tab === 'aviation' && <Plane className="w-4 h-4 text-red-400" />}
+              {tab === 'world' && <Globe className="w-4 h-4 text-red-400" />}
               <span>{tab === 'all' ? 'All Live Feeds' : tab === 'aviation' ? 'Aviation' : 'World News'}</span>
               <span className="px-1.5 py-0.5 rounded-full bg-white/10 text-[10px] font-mono">
                 {activeTab === tab ? currentList.length : '—'}
@@ -664,11 +664,11 @@ export const RSSReader: React.FC = () => {
             onClick={() => setActiveTab('saved')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${
               activeTab === 'saved'
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
+                ? 'bg-gradient-to-r from-red-600 to-red-600 text-white shadow-lg'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
             }`}
           >
-            <ShieldCheck className="w-4 h-4 text-amber-400" />
+            <ShieldCheck className="w-4 h-4 text-red-400" />
             <span>Saved ({savedArticles.length})</span>
           </button>
 
@@ -676,11 +676,11 @@ export const RSSReader: React.FC = () => {
             onClick={() => setActiveTab('readlater')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${
               activeTab === 'readlater'
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
+                ? 'bg-gradient-to-r from-red-600 to-red-600 text-white shadow-lg'
                 : 'text-slate-400 hover:text-white hover:bg-slate-800'
             }`}
           >
-            <BookMarked className="w-4 h-4 text-cyan-400" />
+            <BookMarked className="w-4 h-4 text-red-400" />
             <span>Read Later ({readLater.length})</span>
           </button>
         </div>
@@ -698,7 +698,7 @@ export const RSSReader: React.FC = () => {
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
-              showFilters ? 'bg-pink-500/20 border-pink-500/40 text-pink-400' : 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white'
+              showFilters ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white'
             }`}
           >
             <Filter className="w-4 h-4" />
@@ -709,7 +709,7 @@ export const RSSReader: React.FC = () => {
                 key={mode}
                 onClick={() => setViewMode(mode)}
                 className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-                  viewMode === mode ? 'bg-pink-500 text-white' : 'text-slate-400 hover:text-white'
+                  viewMode === mode ? 'bg-red-500 text-white' : 'text-slate-400 hover:text-white'
                 }`}
               >
                 {mode === 'list' && <Newspaper className="w-4 h-4" />}
@@ -731,7 +731,7 @@ export const RSSReader: React.FC = () => {
               placeholder="Search titles, summaries, sources..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500 placeholder-slate-500"
+              className="w-full pl-10 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-red-500 placeholder-slate-500"
             />
           </div>
 
@@ -743,7 +743,7 @@ export const RSSReader: React.FC = () => {
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-3 py-1 rounded-lg text-xs font-mono transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${
                   selectedCategory === cat
-                    ? 'bg-pink-500/20 text-pink-300 border border-pink-500/40 font-bold'
+                    ? 'bg-red-500/20 text-red-300 border border-red-500/40 font-bold'
                     : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-white'
                 }`}
               >
@@ -759,12 +759,12 @@ export const RSSReader: React.FC = () => {
 
       {/* Loading Indicator */}
       {loading && (
-        <div className="bg-slate-900/90 border border-emerald-500/30 rounded-2xl p-3 flex items-center gap-3">
+        <div className="bg-slate-900/90 border border-red-500/30 rounded-2xl p-3 flex items-center gap-3">
           <span className="relative flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500" />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500" />
           </span>
-          <span className="text-xs font-bold text-emerald-400">LIVE</span>
+          <span className="text-xs font-bold text-red-400">LIVE</span>
           {progress.total > 0 && (
             <span className="text-xs font-mono text-slate-500">
               {progress.current}/{progress.total} sources
@@ -776,7 +776,7 @@ export const RSSReader: React.FC = () => {
           {recentlyLoaded.length > 0 && (
             <div className="flex items-center gap-1.5 ml-auto flex-wrap">
               {recentlyLoaded.map((src) => (
-                <span key={src} className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono rounded-full font-bold">
+                <span key={src} className="px-2 py-0.5 bg-red-500/10 border border-red-500/30 text-red-400 text-[10px] font-mono rounded-full font-bold">
                   + {src}
                 </span>
               ))}
@@ -792,10 +792,10 @@ export const RSSReader: React.FC = () => {
           {sources.length > 0 && activeTab !== 'saved' && activeTab !== 'readlater' && (
             <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
               <div className="flex items-center gap-3">
-                <Activity className="w-4 h-4 text-pink-400 animate-pulse" />
+                <Activity className="w-4 h-4 text-red-400 animate-pulse" />
                 <span className="text-slate-300">
                   Active Streams:{' '}
-                  <strong className="text-emerald-400">{successfulSources.length} Live</strong>
+                  <strong className="text-red-400">{successfulSources.length} Live</strong>
                   {failedSources.length > 0 && (
                     <span className="text-red-400 ml-2">({failedSources.length} Offline)</span>
                   )}
@@ -852,13 +852,13 @@ export const RSSReader: React.FC = () => {
                   value={customFeedUrl}
                   onChange={(e) => setCustomFeedUrl(e.target.value)}
                   placeholder="Paste RSS/Atom Feed URL..."
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-pink-500 placeholder-slate-500"
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-red-500 placeholder-slate-500"
                 />
               </div>
               <button
                 type="submit"
                 disabled={addingFeed || !customFeedUrl.trim()}
-                className="px-4 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold text-xs rounded-2xl shadow-lg transition-all flex items-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-50"
+                className="px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-600 hover:from-red-500 hover:to-red-500 text-white font-bold text-xs rounded-2xl shadow-lg transition-all flex items-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-50"
               >
                 <Plus className="w-4 h-4" />
                 <span>{addingFeed ? 'Syncing...' : 'Add'}</span>
@@ -870,7 +870,7 @@ export const RSSReader: React.FC = () => {
           {sources.length > 0 && (
             <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 space-y-3">
               <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4 text-pink-400" />
+                <Activity className="w-4 h-4 text-red-400" />
                 <h4 className="text-xs font-bold text-white uppercase tracking-widest">Source Status</h4>
               </div>
               <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
@@ -879,11 +879,11 @@ export const RSSReader: React.FC = () => {
                   return (
                     <div key={src.name} className="flex items-center justify-between text-xs">
                       <span className="text-slate-300 truncate max-w-[140px] flex items-center gap-1.5">
-                        <span className={`w-2 h-2 rounded-full shrink-0 ${isWorking ? 'bg-emerald-400' : 'bg-red-400'}`} />
+                        <span className={`w-2 h-2 rounded-full shrink-0 ${isWorking ? 'bg-red-400' : 'bg-red-400'}`} />
                         {src.name}
                       </span>
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold border ${
-                        isWorking ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' : 'text-red-400 bg-red-500/10 border-red-500/30'
+                        isWorking ? 'text-red-400 bg-red-500/10 border-red-500/30' : 'text-red-400 bg-red-500/10 border-red-500/30'
                       }`}>
                         {isWorking ? 'Working' : 'Failed'}
                       </span>

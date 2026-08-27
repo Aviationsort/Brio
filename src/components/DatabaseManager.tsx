@@ -86,7 +86,7 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({ isOpen, onClos
     <div className="fixed inset-0 z-[60] bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
       <div className="relative w-full max-w-lg bg-slate-900 border border-slate-700 rounded-3xl p-6 shadow-2xl text-slate-100 space-y-5 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-          <div className="flex items-center gap-2 text-indigo-400">
+          <div className="flex items-center gap-2 text-red-400">
             <HardDrive className="w-6 h-6" />
             <h2 className="text-lg font-bold">Database Manager</h2>
           </div>
@@ -99,7 +99,7 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({ isOpen, onClos
         </div>
 
         <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
-          <div className="flex items-center gap-2 text-xs font-bold text-indigo-300">
+          <div className="flex items-center gap-2 text-xs font-bold text-red-300">
             <HardDrive className="w-4 h-4" />
             <span>Database Storage</span>
           </div>
@@ -109,7 +109,7 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({ isOpen, onClos
           </div>
           <div className="flex items-center justify-between">
             <span className="text-xs text-slate-400">Last Backup</span>
-            <span className="text-xs text-emerald-400 font-mono">{lastBackup}</span>
+            <span className="text-xs text-red-400 font-mono">{lastBackup}</span>
           </div>
           <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono pt-1 border-t border-slate-800">
             <ShieldCheck className="w-3 h-3" />
@@ -121,7 +121,7 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({ isOpen, onClos
           <button
             onClick={handleExport}
             disabled={backingUp || restoring || importing}
-            className="liquid-glass-btn py-3 bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="liquid-glass-btn py-3 bg-gradient-to-r from-red-600 to-red-600 hover:from-red-500 hover:to-red-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             <FileDown className="w-4 h-4" />
             <span>Export .db</span>
@@ -130,7 +130,7 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({ isOpen, onClos
           <button
             onClick={handleBackup}
             disabled={backingUp || restoring || importing}
-            className="liquid-glass-btn py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="liquid-glass-btn py-3 bg-gradient-to-r from-red-600 to-red-600 hover:from-red-500 hover:to-red-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {backingUp ? (
               <span className="animate-pulse">Saving...</span>
@@ -145,7 +145,7 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({ isOpen, onClos
           <button
             onClick={() => importInputRef.current?.click()}
             disabled={backingUp || restoring || importing}
-            className="liquid-glass-btn py-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="liquid-glass-btn py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {importing ? (
               <span className="animate-pulse">Importing...</span>
@@ -160,7 +160,7 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({ isOpen, onClos
           <button
             onClick={() => restoreInputRef.current?.click()}
             disabled={backingUp || restoring || importing}
-            className="liquid-glass-btn py-3 bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-500 hover:to-cyan-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="liquid-glass-btn py-3 bg-gradient-to-r from-red-600 to-red-600 hover:from-red-500 hover:to-red-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {restoring ? (
               <span className="animate-pulse">Restoring...</span>
@@ -188,10 +188,10 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({ isOpen, onClos
           className="hidden"
         />
 
-        <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-950/40 border border-amber-500/30 text-[10px] text-amber-200 font-mono">
+        <div className="flex items-start gap-2 p-3 rounded-xl bg-red-950/40 border border-red-500/30 text-[10px] text-red-200 font-mono">
           <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
           <div>
-            <p className="font-bold text-amber-300">Database Portability</p>
+            <p className="font-bold text-red-300">Database Portability</p>
             <p className="mt-1">
               Export creates an encrypted .db file. Import replaces current data. Always backup before importing.
               Integrity checksum verified on load.

@@ -157,9 +157,9 @@ export const MinesweeperGame: React.FC = () => {
                   cell.revealed
                     ? cell.isMine
                       ? 'bg-rose-600 text-white'
-                      : 'bg-slate-800 text-cyan-400'
+                      : 'bg-slate-800 text-red-400'
                     : cell.flagged
-                    ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
+                    ? 'bg-red-500/20 text-red-400 border border-red-500/40'
                     : 'bg-slate-900 border border-slate-800 hover:bg-slate-800'
                 }`}
               >

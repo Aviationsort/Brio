@@ -50,28 +50,28 @@ export const PokerGame: React.FC = () => {
           <Club className="w-5 h-5" />
           <h3 className="text-base font-bold text-white">Texas Hold'em Poker</h3>
         </div>
-        <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-amber-400 bg-amber-950/80 px-3 py-1 rounded-full border border-amber-500/30">
+        <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-red-400 bg-red-950/80 px-3 py-1 rounded-full border border-red-500/30">
           <Coins className="w-4 h-4" />
           <span>{chips} Chips</span>
         </div>
       </div>
 
       {/* Poker Felt Table */}
-      <div className="bg-emerald-950/90 border-4 border-amber-800 rounded-3xl p-6 shadow-2xl text-center space-y-6">
-        <div className="flex justify-between text-xs font-mono text-emerald-200">
+      <div className="bg-red-950/90 border-4 border-red-800 rounded-3xl p-6 shadow-2xl text-center space-y-6">
+        <div className="flex justify-between text-xs font-mono text-red-200">
           <div>AI Bot 1 ($450)</div>
           <div>AI Bot 2 ($820)</div>
           <div>AI Bot 3 ($310)</div>
         </div>
 
         {/* Pot */}
-        <div className="inline-block px-4 py-1.5 bg-black/60 border border-amber-500/40 rounded-full font-mono text-xs font-bold text-amber-300">
+        <div className="inline-block px-4 py-1.5 bg-black/60 border border-red-500/40 rounded-full font-mono text-xs font-bold text-red-300">
           POT: {pot} CHIPS
         </div>
 
         {/* Community Cards */}
         <div>
-          <p className="text-[10px] text-emerald-300 font-mono mb-2">Community Cards</p>
+          <p className="text-[10px] text-red-300 font-mono mb-2">Community Cards</p>
           <div className="flex justify-center gap-2">
             {communityCards.length > 0 ? (
               communityCards.map((c, i) => (
@@ -83,26 +83,26 @@ export const PokerGame: React.FC = () => {
                 </div>
               ))
             ) : (
-              <p className="text-xs text-emerald-400 italic font-mono">Press Deal to start hand</p>
+              <p className="text-xs text-red-400 italic font-mono">Press Deal to start hand</p>
             )}
           </div>
         </div>
 
         {/* Player Cards */}
         <div>
-          <p className="text-[10px] text-emerald-300 font-mono mb-2">Your Hole Cards</p>
+          <p className="text-[10px] text-red-300 font-mono mb-2">Your Hole Cards</p>
           <div className="flex justify-center gap-3">
             {playerCards.length > 0 ? (
               playerCards.map((c, i) => (
                 <div
                   key={i}
-                  className="w-14 h-20 rounded-xl bg-slate-900 border-2 border-amber-400 text-amber-300 font-black text-base flex items-center justify-center shadow-xl"
+                  className="w-14 h-20 rounded-xl bg-slate-900 border-2 border-red-400 text-red-300 font-black text-base flex items-center justify-center shadow-xl"
                 >
                   {c}
                 </div>
               ))
             ) : (
-              <div className="w-14 h-20 rounded-xl bg-emerald-900/40 border border-emerald-600/30 flex items-center justify-center text-xs text-emerald-300">
+              <div className="w-14 h-20 rounded-xl bg-red-900/40 border border-red-600/30 flex items-center justify-center text-xs text-red-300">
                 🂠
               </div>
             )}
@@ -115,7 +115,7 @@ export const PokerGame: React.FC = () => {
         {!inHand ? (
           <button
             onClick={startHand}
-            className="liquid-glass-btn w-full py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2"
+            className="liquid-glass-btn w-full py-3.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-slate-950 font-black text-xs rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2"
           >
             <Sparkles className="w-4 h-4" />
             <span>Deal New Hand ($50)</span>
@@ -124,13 +124,13 @@ export const PokerGame: React.FC = () => {
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={handleCall}
-              className="liquid-glass-btn py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs rounded-xl shadow transition-all"
+              className="liquid-glass-btn py-3 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl shadow transition-all"
             >
               Call ${currentBet}
             </button>
             <button
               onClick={handleShowdown}
-              className="liquid-glass-btn py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow transition-all"
+              className="liquid-glass-btn py-3 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl shadow transition-all"
             >
               Showdown
             </button>

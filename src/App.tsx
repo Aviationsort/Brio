@@ -10,40 +10,18 @@ import { ThemeProvider } from './context/ThemeContext';
 import { ToastContainer } from './components/Layout/ToastContainer';
 import { AuthModal } from './components/Layout/AuthModal';
 import { InfotainmentMainMenu } from './components/InfotainmentMainMenu';
-import { MobileWindowsPhoneGUI } from './components/MobileWindowsPhoneGUI';
 
 const MainAppContent: React.FC = () => {
   const {
-    activeHub,
-    setActiveHub,
     showAuthModal,
     setShowAuthModal,
-    showMobileGUI,
-    setShowMobileGUI,
-    user,
-    authRequired,
   } = useApp();
-
-  const handleNavigateFromInfotainment = React.useCallback((tabKey: string) => {
-    if (tabKey !== activeHub && ['connect', 'media', 'arcade', 'office', 'telemetry'].includes(tabKey)) {
-      setActiveHub(tabKey as any);
-    }
-  }, [activeHub, setActiveHub]);
 
   return (
     <div className="min-h-screen bg-[var(--brio-bg-primary)] text-[var(--brio-text-primary)] font-sans selection:bg-[var(--brio-accent)] selection:text-[var(--brio-button-text)] flex flex-col max-w-full overflow-x-hidden">
-      {/* Main Automotive, Tablet IFE, or Mobile Phone Display Container */}
+      {/* Main IFE Display Container */}
       <main className="flex-1 w-full max-w-7xl mx-auto p-2 sm:p-4 md:p-6 overflow-x-hidden box-border flex flex-col justify-center my-auto">
-        {showMobileGUI ? (
-          <div className="flex flex-col items-center">
-            <MobileWindowsPhoneGUI
-              onNavigateTab={handleNavigateFromInfotainment}
-              onCloseMobileView={() => setShowMobileGUI(false)}
-            />
-          </div>
-        ) : (
-          <InfotainmentMainMenu onNavigateTab={handleNavigateFromInfotainment} />
-        )}
+        <InfotainmentMainMenu />
       </main>
 
       {/* Auth / Signup Modal overlay */}

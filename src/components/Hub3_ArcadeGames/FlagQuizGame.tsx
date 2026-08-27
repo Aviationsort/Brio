@@ -58,8 +58,8 @@ export const FlagQuizGame: React.FC = () => {
           <h3 className="text-base font-bold text-white">Country Flag Quiz</h3>
         </div>
         <div className="flex items-center gap-3 text-xs font-mono">
-          <span className="text-amber-400 font-bold">Streak: {streak}🔥</span>
-          <span className="text-cyan-400 font-bold">Score: {score}</span>
+          <span className="text-red-400 font-bold">Streak: {streak}🔥</span>
+          <span className="text-red-400 font-bold">Score: {score}</span>
         </div>
       </div>
 
@@ -72,10 +72,10 @@ export const FlagQuizGame: React.FC = () => {
       {/* Options */}
       <div className="grid grid-cols-2 gap-3">
         {currentQ.options.map((opt) => {
-          let btnClass = 'bg-slate-950 border-slate-800 hover:border-cyan-500/50 text-slate-200';
+          let btnClass = 'bg-slate-950 border-slate-800 hover:border-red-500/50 text-slate-200';
           if (selectedOpt) {
             if (opt === currentQ.correctAnswer) {
-              btnClass = 'bg-emerald-600 border-emerald-500 text-white font-bold';
+              btnClass = 'bg-red-600 border-red-500 text-white font-bold';
             } else if (opt === selectedOpt) {
               btnClass = 'bg-rose-600 border-rose-500 text-white font-bold';
             }

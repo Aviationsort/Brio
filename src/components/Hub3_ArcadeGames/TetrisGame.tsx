@@ -166,7 +166,7 @@ export const TetrisGame: React.FC = () => {
           <Grid className="w-5 h-5" />
           <h3 className="text-base font-bold text-white">Classic Tetris</h3>
         </div>
-        <span className="flex items-center gap-1 text-[11px] font-mono text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded-full border border-emerald-500/30">
+        <span className="flex items-center gap-1 text-[11px] font-mono text-red-400 bg-red-950/80 px-2.5 py-1 rounded-full border border-red-500/30">
           <ShieldCheck className="w-3.5 h-3.5" /> High Score Encrypted: {highScore}
         </span>
       </div>
@@ -200,7 +200,7 @@ export const TetrisGame: React.FC = () => {
             </div>
             <div className="flex justify-between">
               <span className="text-slate-400">Level:</span>
-              <span className="font-bold text-cyan-400">{level}</span>
+              <span className="font-bold text-red-400">{level}</span>
             </div>
           </div>
 
@@ -208,7 +208,7 @@ export const TetrisGame: React.FC = () => {
             {!isPlaying ? (
               <button
                 onClick={startGame}
-                className="liquid-glass-btn w-full py-3 bg-gradient-to-r from-rose-600 to-pink-600 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
+                className="liquid-glass-btn w-full py-3 bg-gradient-to-r from-rose-600 to-red-600 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
               >
                 <Play className="w-4 h-4" />
                 <span>{gameOver ? 'Play Again' : 'Start Tetris'}</span>

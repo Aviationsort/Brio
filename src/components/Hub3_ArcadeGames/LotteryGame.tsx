@@ -72,7 +72,7 @@ export const LotteryGame: React.FC = () => {
         </div>
         <button
           onClick={handleQuickPick}
-          className="liquid-glass-btn px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-cyan-300 rounded-xl transition-all"
+          className="liquid-glass-btn px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-red-300 rounded-xl transition-all"
         >
           Quick Pick
         </button>
@@ -111,7 +111,7 @@ export const LotteryGame: React.FC = () => {
                 key={n}
                 className={`liquid-glass-btn w-9 h-9 rounded-full font-bold font-mono text-sm flex items-center justify-center ${
                   selectedNumbers.includes(n)
-                    ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/30 font-black'
+                    ? 'bg-red-500 text-slate-950 shadow-lg shadow-red-500/30 font-black'
                     : 'bg-slate-800 text-slate-300'
                 }`}
               >
@@ -121,7 +121,7 @@ export const LotteryGame: React.FC = () => {
           </div>
 
           {matchedCount !== null && (
-            <p className="text-xs font-bold text-cyan-400 font-mono mt-1">
+            <p className="text-xs font-bold text-red-400 font-mono mt-1">
               Result: Matched {matchedCount} of 5 Numbers
             </p>
           )}
@@ -132,7 +132,7 @@ export const LotteryGame: React.FC = () => {
       <button
         onClick={handleRunDraw}
         disabled={drawing || selectedNumbers.length !== 5}
-        className="liquid-glass-btn w-full py-3.5 bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 text-white font-bold text-xs rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-40"
+        className="liquid-glass-btn w-full py-3.5 bg-gradient-to-r from-rose-600 via-red-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-bold text-xs rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-40"
       >
         <Sparkles className={`w-4 h-4 ${drawing ? 'animate-spin' : ''}`} />
         <span>{drawing ? 'Drawing Lucky Balls...' : 'Simulate Daily Draw'}</span>

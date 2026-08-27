@@ -494,7 +494,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                       {lightboxPhoto.dateCaptured && <p><span className="text-zinc-300 font-bold">Date:</span> {lightboxPhoto.dateCaptured}</p>}
                       {lightboxPhoto.location && <p><span className="text-zinc-300 font-bold">Location:</span> {lightboxPhoto.location}</p>}
                        <p><span className="text-zinc-300 font-bold">Format:</span> {lightboxPhoto.formatPattern}</p>
-                      {lightboxPhoto.isAutoCorrected && <p className="text-amber-400 font-bold">Auto-corrected filename</p>}
+                      {lightboxPhoto.isAutoCorrected && <p className="text-red-400 font-bold">Auto-corrected filename</p>}
                     </div>
                     <button
                       onClick={() => setShowEnhancePanel(!showEnhancePanel)}
@@ -524,7 +524,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                               onClick={() => setEnhancePreset(preset.id as EnhancementPreset)}
                               className={`liquid-glass-btn px-1 py-1 rounded text-[9px] font-bold cursor-pointer ${
                                 enhancePreset === preset.id
-                                  ? 'bg-[#FF5F1F] text-black'
+                                  ? 'bg-[#C8102E] text-black'
                                   : 'bg-zinc-800 text-zinc-300'
                               }`}
                             >
@@ -543,7 +543,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                             max="150"
                             value={enhanceBrightness}
                             onChange={(e) => { setEnhanceBrightness(Number(e.target.value)); setEnhancePreset('none'); }}
-                            className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#FF5F1F]"
+                            className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#C8102E]"
                           />
                         </div>
                         <div className="space-y-1.5">
@@ -557,7 +557,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                             max="150"
                             value={enhanceContrast}
                             onChange={(e) => { setEnhanceContrast(Number(e.target.value)); setEnhancePreset('none'); }}
-                            className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#FF5F1F]"
+                            className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#C8102E]"
                           />
                         </div>
                         <div className="space-y-1.5">
@@ -571,7 +571,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                             max="200"
                             value={enhanceSaturation}
                             onChange={(e) => { setEnhanceSaturation(Number(e.target.value)); setEnhancePreset('none'); }}
-                            className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#FF5F1F]"
+                            className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-[#C8102E]"
                           />
                         </div>
                       </div>
@@ -581,32 +581,16 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
               </div>
             )}
            
-           {/* ANDROID 2.x CLASSIC WHITE STATUS BAR */}
-          <div className="w-full bg-white text-zinc-900 px-2.5 py-0.5 flex items-center justify-between text-[11px] font-bold font-sans z-30 shadow-sm border-b border-zinc-300">
-            <div className="flex items-center gap-1 text-[10px]">
-              <span className="font-extrabold text-zinc-800">BRIO 3G</span>
-              <div className="flex items-center gap-0.5 ml-1">
-                <SignalHigh className="w-3 h-3 text-emerald-600" />
-                <span className="text-[9px] text-zinc-600 font-mono">4G</span>
-              </div>
-              <Wifi className="w-3 h-3 text-zinc-700 ml-1" />
-            </div>
-            <div className="flex items-center gap-1.5">
-              {/* Battery Icon with Green Level */}
-              <div className="flex items-center gap-0.5 bg-zinc-200 px-1 py-0.2 rounded border border-zinc-400 text-[9px]">
-                <div className="w-3.5 h-2 bg-emerald-600 rounded-xs" />
-                <span className="text-[8px] text-zinc-700 font-mono">85%</span>
-              </div>
-              <span className="font-bold text-zinc-900 text-[11px]">{currentTime}</span>
-              <button
-                onClick={() => setActiveOverlay('CLOCK')}
-                className="liquid-glass-btn p-0.5 rounded hover:bg-zinc-300 ml-1"
-                title="Clock Suite"
-              >
-                <Clock className="w-3 h-3 text-indigo-600" />
-              </button>
-            </div>
-          </div>
+            {/* iOS 1 STATUS BAR */}
+           <div className="ios-status-bar w-full z-30">
+             <div className="ios-status-bar-time">{currentTime}</div>
+             <div className="ios-status-bar-right">
+               <div className="ios-status-bar-battery">
+                 <div className="ios-status-bar-battery-fill" />
+                 <span>85%</span>
+               </div>
+             </div>
+           </div>
 
           {/* MAIN SCREEN CANVAS - TEXTURED CONCRETE/STONE WALLPAPER */}
           <div 
@@ -635,14 +619,14 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                   name="googleQ"
                   placeholder="Search Google..."
                   autoComplete="off"
-                  className="flex-1 bg-white/95 text-zinc-800 rounded-lg px-3 py-2 text-xs font-mono placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-sky-400"
+                  className="flex-1 bg-white/95 text-zinc-800 rounded-lg px-3 py-2 text-xs font-mono placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-red-400"
                 />
                 <button
                   type="submit"
                   className="liquid-glass-btn bg-white hover:bg-zinc-100 text-zinc-800 rounded-lg px-3 py-2 shadow border border-white/40 flex items-center gap-1"
                   title="Search Google"
                 >
-                  <Search className="w-4 h-4 text-blue-600" />
+                  <Search className="w-4 h-4 text-red-600" />
                 </button>
               </form>
             </div>
@@ -650,125 +634,160 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
              {/* SCREEN CONTENT VIEW SWITCHER */}
              <div className="flex-1 p-3">
                
-               {/* VIEW 1: BRIO DROID HOME SCREEN WITH LIVE FEATURE WIDGETS */}
-               {screenMode === 'HOME' && (
-                 <div className="space-y-3 pt-1">
-                    {/* Weather Widget */}
-                    <button
-                      onClick={() => { setCurrentFeature('weather'); setScreenMode('FEATURE'); playTouchSound(580); }}
-                      className="liquid-glass-btn w-full p-3 bg-gradient-to-r from-sky-500/20 to-blue-600/20 border border-sky-400/30 rounded-2xl text-left active:scale-[0.98] transition-transform"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-[10px] font-mono text-sky-300 uppercase tracking-wider">{t.weatherWidget}</p>
-                          <p className="text-lg font-black text-white font-mono">
-                            {weatherStationData ? `${weatherUnits === 'metric' ? weatherStationData.tempC : weatherStationData.tempF}°` : '--°'}
-                          </p>
-                           <p className="text-[10px] text-sky-200">{weatherStationData?.city || '—'}</p>
-                        </div>
-                        <div className="p-2 bg-sky-500/20 rounded-xl border border-sky-400/30">
-                          <Cloud className="w-6 h-6 text-sky-300" />
-                        </div>
-                      </div>
-                    </button>
+                {/* VIEW 1: iOS 1 STYLE HOME SCREEN WITH APP ICONS */}
+                {screenMode === 'HOME' && (
+                  <div className="flex-1 flex flex-col overflow-hidden">
+                    {/* iOS 1 Search Bar */}
+                    <div className="ios-search-bar">
+                      <Search className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                      <input
+                        type="text"
+                        placeholder="Search"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onFocus={() => setScreenMode('SEARCH')}
+                        readOnly
+                      />
+                    </div>
 
-                    {/* Notes Widget */}
-                    <button
-                      onClick={() => { setCurrentFeature('notes'); setScreenMode('FEATURE'); playTouchSound(580); }}
-                      className="liquid-glass-btn w-full p-3 bg-gradient-to-r from-amber-500/20 to-orange-600/20 border border-amber-400/30 rounded-2xl text-left active:scale-[0.98] transition-transform"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-[10px] font-mono text-amber-300 uppercase tracking-wider">{t.recentNotes}</p>
-                          <p className="text-sm font-bold text-white truncate max-w-[180px]">{notes.length > 0 ? notes[0].title : t.noValidMedia}</p>
+                    {/* iOS 1 App Icon Grid */}
+                    <div className="flex-1 overflow-y-auto ios-icon-grid">
+                      {/* Weather Icon */}
+                      <div className="ios-app-icon" onClick={() => { setCurrentFeature('weather'); setScreenMode('FEATURE'); playTouchSound(580); }}>
+                        <div className="ios-app-icon-image bg-red-500 text-white">
+                          <Cloud className="w-8 h-8 relative z-10" />
                         </div>
-                        <div className="p-2 bg-amber-500/20 rounded-xl border border-amber-400/30">
-                          <FileText className="w-6 h-6 text-amber-300" />
-                        </div>
+                        <span className="ios-app-icon-label">Weather</span>
                       </div>
-                    </button>
 
-                    {/* Now Playing Widget */}
-                    <button
-                      onClick={() => { setCurrentFeature('music'); setScreenMode('FEATURE'); playTouchSound(580); }}
-                      className="liquid-glass-btn w-full p-3 bg-gradient-to-r from-purple-500/20 to-pink-600/20 border border-purple-400/30 rounded-2xl text-left active:scale-[0.98] transition-transform"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-[10px] font-mono text-purple-300 uppercase tracking-wider">{t.nowPlaying}</p>
-                          <p className="text-sm font-bold text-white truncate max-w-[180px]">{currentTrack ? currentTrack.title : t.noValidMedia}</p>
+                      {/* Notes Icon */}
+                      <div className="ios-app-icon" onClick={() => { setCurrentFeature('notes'); setScreenMode('FEATURE'); playTouchSound(580); }}>
+                        <div className="ios-app-icon-image bg-red-500 text-white">
+                          <FileText className="w-8 h-8 relative z-10" />
                         </div>
-                        <div className="p-2 bg-purple-500/20 rounded-xl border border-purple-400/30">
-                          <Music className="w-6 h-6 text-purple-300" />
-                        </div>
+                        <span className="ios-app-icon-label">Notes</span>
                       </div>
-                    </button>
 
-                    {/* Recent Photos Widget with Paging */}
-                    <button
-                      onClick={() => { setCurrentFeature('photos'); setScreenMode('FEATURE'); playTouchSound(580); }}
-                      className="liquid-glass-btn w-full p-3 bg-gradient-to-r from-[#FF5F1F]/20 to-red-600/20 border border-[#FF5F1F]/30 rounded-2xl text-left active:scale-[0.98] transition-transform"
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <p className="text-[10px] font-mono text-[#FF5F1F] uppercase tracking-wider">{t.recentPhotos}</p>
-                          <p className="text-xs text-white">{myPlanePics.length} {t.media.toLowerCase()}</p>
+                      {/* Music Icon */}
+                      <div className="ios-app-icon" onClick={() => { setCurrentFeature('music'); setScreenMode('FEATURE'); playTouchSound(580); }}>
+                        <div className="ios-app-icon-image bg-red-600 text-white">
+                          <Music className="w-8 h-8 relative z-10" />
                         </div>
-                        <div className="p-2 bg-[#FF5F1F]/20 rounded-xl border border-[#FF5F1F]/30">
-                          <Camera className="w-6 h-6 text-[#FF5F1F]" />
-                        </div>
+                        <span className="ios-app-icon-label">Music</span>
                       </div>
-                      {myPlanePics.length > 0 ? (
-                        <div className="grid grid-cols-4 gap-1">
-                          {myPlanePics.slice(planePicsPage * planePicsPerPage, (planePicsPage + 1) * planePicsPerPage).slice(0, 8).map((photo) => (
-                            <div key={photo.id} className="aspect-square rounded-lg overflow-hidden bg-black border border-white/10">
-                               {photo.mediaType === 'video' && photo.videoUrl ? (
-                                 <video src={photo.videoUrl} className="liquid-glass-btn w-full h-full object-cover" muted />
-                               ) : (
-                                 <img src={photo.thumbnailUrl || photo.imageUrl} alt={photo.registration} className="w-full h-full object-cover" />
-                               )}
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-[10px] text-zinc-400">{t.noPhotosYet}</p>
-                      )}
-                      {myPlanePics.length > planePicsPerPage && (
-                        <div className="flex items-center justify-between mt-2">
-                          <button
-                            onClick={(e) => { e.stopPropagation(); setPlanePicsPage(p => Math.max(0, p - 1)); }}
-                            disabled={planePicsPage === 0}
-                            className="liquid-glass-btn p-1 bg-black/50 rounded text-white disabled:opacity-30"
-                          >
-                            <ChevronLeft className="w-3 h-3" />
-                          </button>
-                          <span className="text-[9px] text-zinc-400 font-mono">{t.page} {planePicsPage + 1} {t.of} {Math.ceil(myPlanePics.length / planePicsPerPage)}</span>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); setPlanePicsPage(p => Math.min(Math.ceil(myPlanePics.length / planePicsPerPage) - 1, p + 1)); }}
-                            disabled={planePicsPage >= Math.ceil(myPlanePics.length / planePicsPerPage) - 1}
-                            className="liquid-glass-btn p-1 bg-black/50 rounded text-white disabled:opacity-30"
-                          >
-                            <ChevronRight className="w-3 h-3" />
-                          </button>
-                        </div>
-                      )}
-                    </button>
 
-                    {/* News Ticker Widget */}
-                    <button
-                      onClick={() => { setScreenMode('rss'); playTouchSound(580); }}
-                      className="liquid-glass-btn w-full p-3 bg-gradient-to-r from-cyan-500/20 to-sky-600/20 border border-cyan-400/30 rounded-2xl text-left active:scale-[0.98] transition-transform"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[10px] font-mono text-cyan-300 uppercase tracking-wider">{t.newsTicker}</p>
-                          <p className="text-xs text-white truncate">{t.rssReader}</p>
+                      {/* Photos Icon */}
+                      <div className="ios-app-icon" onClick={() => { setCurrentFeature('photos'); setScreenMode('FEATURE'); playTouchSound(580); }}>
+                        <div className="ios-app-icon-image bg-[#C8102E] text-white">
+                          <Camera className="w-8 h-8 relative z-10" />
                         </div>
-                        <div className="p-2 bg-cyan-500/20 rounded-xl border border-cyan-400/30 shrink-0 ml-2">
-                          <Newspaper className="w-6 h-6 text-cyan-300" />
-                        </div>
+                        <span className="ios-app-icon-label">Photos</span>
                       </div>
-                    </button>
+
+                      {/* News Icon */}
+                      <div className="ios-app-icon" onClick={() => { setScreenMode('rss'); playTouchSound(580); }}>
+                        <div className="ios-app-icon-image bg-red-600 text-white">
+                          <Newspaper className="w-8 h-8 relative z-10" />
+                        </div>
+                        <span className="ios-app-icon-label">News</span>
+                      </div>
+
+                      {/* Messages Icon */}
+                      <div className="ios-app-icon" onClick={() => onNavigateTab('connect')}>
+                        <div className="ios-app-icon-image bg-red-600 text-white">
+                          <MessageSquare className="w-8 h-8 relative z-10" />
+                        </div>
+                        <span className="ios-app-icon-label">Messages</span>
+                      </div>
+
+                      {/* Media Icon */}
+                      <div className="ios-app-icon" onClick={() => onNavigateTab('media')}>
+                        <div className="ios-app-icon-image bg-red-600 text-white">
+                          <Tv className="w-8 h-8 relative z-10" />
+                        </div>
+                        <span className="ios-app-icon-label">Media</span>
+                      </div>
+
+                      {/* Arcade Icon */}
+                      <div className="ios-app-icon" onClick={() => onNavigateTab('arcade')}>
+                        <div className="ios-app-icon-image bg-red-600 text-white">
+                          <Gamepad2 className="w-8 h-8 relative z-10" />
+                        </div>
+                        <span className="ios-app-icon-label">Arcade</span>
+                      </div>
+
+                      {/* Office Icon */}
+                      <div className="ios-app-icon" onClick={() => onNavigateTab('office')}>
+                        <div className="ios-app-icon-image bg-red-600 text-white">
+                          <Briefcase className="w-8 h-8 relative z-10" />
+                        </div>
+                        <span className="ios-app-icon-label">Office</span>
+                      </div>
+
+                      {/* Telemetry Icon */}
+                      <div className="ios-app-icon" onClick={() => onNavigateTab('telemetry')}>
+                        <div className="ios-app-icon-image bg-red-700 text-white">
+                          <Plane className="w-8 h-8 relative z-10" />
+                        </div>
+                        <span className="ios-app-icon-label">Aviation</span>
+                      </div>
+
+                      {/* Calculator Icon */}
+                      <div className="ios-app-icon" onClick={() => { setCurrentFeature('calculator'); setScreenMode('FEATURE'); playTouchSound(580); }}>
+                        <div className="ios-app-icon-image bg-zinc-700 text-white">
+                          <Calculator className="w-8 h-8 relative z-10" />
+                        </div>
+                        <span className="ios-app-icon-label">Calculator</span>
+                      </div>
+
+                      {/* FM Radio Icon */}
+                      <div className="ios-app-icon" onClick={() => { setCurrentFeature('fmTuner'); setScreenMode('FEATURE'); playTouchSound(580); }}>
+                        <div className="ios-app-icon-image bg-rose-600 text-white">
+                          <Radio className="w-8 h-8 relative z-10" />
+                        </div>
+                        <span className="ios-app-icon-label">FM Radio</span>
+                      </div>
+
+                      {/* World Clock Icon */}
+                      <div className="ios-app-icon" onClick={() => { setCurrentFeature('worldClock'); setScreenMode('FEATURE'); playTouchSound(580); }}>
+                        <div className="ios-app-icon-image bg-red-600 text-white">
+                          <Globe2 className="w-8 h-8 relative z-10" />
+                        </div>
+                        <span className="ios-app-icon-label">Clock</span>
+                      </div>
+
+                      {/* Stopwatch Icon */}
+                      <div className="ios-app-icon" onClick={() => { setCurrentFeature('stopwatch'); setScreenMode('FEATURE'); playTouchSound(580); }}>
+                        <div className="ios-app-icon-image bg-slate-600 text-white">
+                          <Timer className="w-8 h-8 relative z-10" />
+                        </div>
+                        <span className="ios-app-icon-label">Stopwatch</span>
+                      </div>
+
+                      {/* Account Icon */}
+                      <div className="ios-app-icon" onClick={() => setScreenMode('ACCOUNT_OVERLAY')}>
+                        <div className="ios-app-icon-image bg-red-700 text-white">
+                          <Settings className="w-8 h-8 relative z-10" />
+                        </div>
+                        <span className="ios-app-icon-label">Settings</span>
+                      </div>
+                    </div>
+
+                    {/* iOS 1 Bottom Dock */}
+                    <div className="ios-dock">
+                      <div className="ios-dock-icon bg-red-600 text-white" onClick={() => onNavigateTab('connect')}>
+                        <MessageSquare className="w-7 h-7 relative z-10" />
+                      </div>
+                      <div className="ios-dock-icon bg-red-600 text-white" onClick={() => onNavigateTab('media')}>
+                        <Music className="w-7 h-7 relative z-10" />
+                      </div>
+                      <div className="ios-dock-icon bg-red-600 text-white" onClick={() => onNavigateTab('arcade')}>
+                        <Gamepad2 className="w-7 h-7 relative z-10" />
+                      </div>
+                      <div className="ios-dock-icon bg-red-600 text-white" onClick={() => setScreenMode('ACCOUNT_OVERLAY')}>
+                        <User className="w-7 h-7 relative z-10" />
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -794,10 +813,10 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                         <button
                           key={idx}
                           onClick={() => handleAppClick(app.hub, app.name, app.feature)}
-                          className="liquid-glass-btn w-full p-2 rounded-xl bg-zinc-900 hover:bg-sky-600/30 border border-zinc-800 flex items-center justify-between transition-colors cursor-pointer text-left"
+                          className="liquid-glass-btn w-full p-2 rounded-xl bg-zinc-900 hover:bg-red-600/30 border border-zinc-800 flex items-center justify-between transition-colors cursor-pointer text-left"
                         >
                           <div className="flex items-center gap-2.5">
-                            <div className="p-1.5 rounded-lg bg-sky-500/20 text-sky-400 border border-sky-400/30">
+                            <div className="p-1.5 rounded-lg bg-red-500/20 text-red-400 border border-red-400/30">
                               <Icon className="w-4 h-4" />
                             </div>
                             <div>
@@ -823,7 +842,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       autoFocus
-                      className="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-sky-400 font-mono"
+                      className="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-red-400 font-mono"
                     />
                     <button
                       onClick={() => setScreenMode('HOME')}
@@ -840,10 +859,10 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                         <button
                           key={idx}
                           onClick={() => handleAppClick(app.hub, app.name, app.feature)}
-                          className="liquid-glass-btn w-full p-2 rounded-xl bg-zinc-900 hover:bg-sky-600/30 border border-zinc-800 flex items-center justify-between text-left cursor-pointer"
+                          className="liquid-glass-btn w-full p-2 rounded-xl bg-zinc-900 hover:bg-red-600/30 border border-zinc-800 flex items-center justify-between text-left cursor-pointer"
                         >
                           <div className="flex items-center gap-2.5">
-                            <Icon className="w-4 h-4 text-sky-400 shrink-0" />
+                            <Icon className="w-4 h-4 text-red-400 shrink-0" />
                             <div>
                               <span className="text-xs font-bold text-white block">{app.name}</span>
                               <span className="text-[9px] text-zinc-400 font-mono">{app.category}</span>
@@ -872,7 +891,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
 
                   <div className="p-3 bg-zinc-900 rounded-xl border border-zinc-800 space-y-2">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-sky-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-red-500 to-red-600 flex items-center justify-center text-white font-bold text-sm">
                         {user ? user.username.charAt(0).toUpperCase() : '?'}
                       </div>
                       <div>
@@ -889,7 +908,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                           onClick={() => {
                             setShowAuthModal(true);
                                                       }}
-                          className="liquid-glass-btn flex-1 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs rounded-lg text-center"
+                          className="liquid-glass-btn flex-1 py-1.5 bg-red-500 hover:bg-red-400 text-black font-bold text-xs rounded-lg text-center"
                         >
                           {t.loginSignUp}
                         </button>
@@ -908,7 +927,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
 
                   {/* Encryption Security Key Input */}
                   <div className="p-2.5 bg-zinc-900 rounded-xl border border-zinc-800 space-y-2">
-                    <div className="flex items-center gap-2 text-xs font-bold text-emerald-400">
+                    <div className="flex items-center gap-2 text-xs font-bold text-red-400">
                       <ShieldCheck className="w-4 h-4" />
                       <span>{t.aes256VaultKey}</span>
                     </div>
@@ -922,7 +941,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                     />
                     <button
                       onClick={handleSetPassphrase}
-                      className="liquid-glass-btn w-full py-1.5 bg-emerald-600 hover:bg-emerald-500 text-black font-bold text-xs rounded-lg cursor-pointer"
+                      className="liquid-glass-btn w-full py-1.5 bg-red-600 hover:bg-red-500 text-black font-bold text-xs rounded-lg cursor-pointer"
                     >
                       {t.verifySetKey}
                     </button>
@@ -966,7 +985,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                            />
                            <button
                              type="submit"
-                             className="liquid-glass-btn px-3 py-1.5 bg-sky-600 text-white text-xs rounded-lg"
+                             className="liquid-glass-btn px-3 py-1.5 bg-red-600 text-white text-xs rounded-lg"
                            >
                              {t.refresh}
                            </button>
@@ -976,7 +995,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                            <button
                              onClick={() => setWeatherUnits('metric')}
                              className={`liquid-glass-btn px-2 py-1 rounded text-[10px] font-bold cursor-pointer ${
-                               weatherUnits === 'metric' ? 'bg-sky-500 text-black' : 'bg-zinc-800 text-zinc-300'
+                               weatherUnits === 'metric' ? 'bg-red-500 text-black' : 'bg-zinc-800 text-zinc-300'
                              }`}
                            >
                              °C
@@ -984,7 +1003,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                            <button
                              onClick={() => setWeatherUnits('imperial')}
                              className={`liquid-glass-btn px-2 py-1 rounded text-[10px] font-bold cursor-pointer ${
-                               weatherUnits === 'imperial' ? 'bg-sky-500 text-black' : 'bg-zinc-800 text-zinc-300'
+                               weatherUnits === 'imperial' ? 'bg-red-500 text-black' : 'bg-zinc-800 text-zinc-300'
                              }`}
                            >
                              °F
@@ -996,7 +1015,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                              <div className="flex items-center justify-between">
                                <div>
                                  <p className="text-sm font-bold text-white">{weatherStationData.city}</p>
-                                 <p className="text-[10px] text-sky-400 font-mono">
+                                 <p className="text-[10px] text-red-400 font-mono">
                                    {weatherStationData.country || ''} {weatherStationData.datetime ? `• ${weatherStationData.datetime}` : ''}
                                  </p>
                                </div>
@@ -1008,7 +1027,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                                      className="w-10 h-10 inline-block"
                                    />
                                  )}
-                                 <p className="text-lg font-black text-sky-300">
+                                 <p className="text-lg font-black text-red-300">
                                    {weatherUnits === 'metric' ? `${weatherStationData.tempC}°C` : `${weatherStationData.tempF}°F`}
                                  </p>
                                  {weatherStationData.tempMinC !== undefined && (
@@ -1049,7 +1068,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                                </div>
                              </div>
                              {weatherStationData.isRealTime && (
-                               <p className="text-[9px] text-emerald-400 font-mono flex items-center gap-1">
+                               <p className="text-[9px] text-red-400 font-mono flex items-center gap-1">
                                  <Activity className="w-3 h-3 animate-pulse" />
                                  Live • Updated: {weatherStationData.lastUpdated}
                                </p>
@@ -1085,7 +1104,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                                 showToast(t.success, t.save, 'success');
                               }
                             }}
-                            className="liquid-glass-btn w-full py-1.5 bg-amber-600 text-black font-bold text-xs rounded-lg"
+                            className="liquid-glass-btn w-full py-1.5 bg-red-600 text-black font-bold text-xs rounded-lg"
                           >
                             {t.save}
                           </button>
@@ -1119,7 +1138,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                            </button>
                            <button
                              onClick={() => setIsPlayingMusic(!isPlayingMusic)}
-                             className="liquid-glass-btn p-3 bg-purple-600 rounded-full text-white"
+                             className="liquid-glass-btn p-3 bg-red-600 rounded-full text-white"
                            >
                              {isPlayingMusic ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
                            </button>
@@ -1169,7 +1188,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                               placeholder="Search..."
                               value={planePicsSearch}
                               onChange={(e) => setPlanePicsSearch(e.target.value)}
-                              className="w-full pl-7 pr-2 py-1 bg-zinc-900 border border-zinc-800 rounded-lg text-[10px] text-white placeholder-zinc-500 focus:outline-none focus:border-pink-500"
+                              className="w-full pl-7 pr-2 py-1 bg-zinc-900 border border-zinc-800 rounded-lg text-[10px] text-white placeholder-zinc-500 focus:outline-none focus:border-red-500"
                             />
                           </div>
                           <select
@@ -1192,7 +1211,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
 
                           <button
                             onClick={() => setGlobalEnhance(!globalEnhance)}
-                            className={`liquid-glass-btn p-1 rounded-lg text-zinc-300 shrink-0 ${globalEnhance ? 'bg-cyan-600 text-white' : 'bg-zinc-800'}`}
+                            className={`liquid-glass-btn p-1 rounded-lg text-zinc-300 shrink-0 ${globalEnhance ? 'bg-red-600 text-white' : 'bg-zinc-800'}`}
                             title={globalEnhance ? 'Enhancement ON' : 'Enhancement OFF'}
                           >
                             <Wand2 className="w-3.5 h-3.5" />
@@ -1243,7 +1262,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                                         setLightboxPhoto(photo);
                                       }
                                     }}
-                                    className={`relative aspect-square rounded-lg overflow-hidden bg-black border cursor-pointer ${planePicsSelectedIds.has(photo.id) ? 'border-pink-500 ring-1 ring-pink-500' : 'border-white/10'}`}
+                                    className={`relative aspect-square rounded-lg overflow-hidden bg-black border cursor-pointer ${planePicsSelectedIds.has(photo.id) ? 'border-red-500 ring-1 ring-red-500' : 'border-white/10'}`}
                                   >
                                     {photo.mediaType === 'video' && photo.videoUrl ? (
                                       <video src={photo.videoUrl} className="w-full h-full object-cover" muted style={{ filter: globalEnhance ? getMobileEnhancementFilter() : undefined }} />
@@ -1259,7 +1278,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                                     </div>
                                     {isSelectMode && (
                                       <div className="absolute top-1 right-1 w-4 h-4 rounded-full border-2 border-white flex items-center justify-center bg-black/50">
-                                        {planePicsSelectedIds.has(photo.id) && <Check className="w-2.5 h-2.5 text-pink-400" />}
+                                        {planePicsSelectedIds.has(photo.id) && <Check className="w-2.5 h-2.5 text-red-400" />}
                                       </div>
                                     )}
                                     {photo.mediaType === 'video' && (
@@ -1285,7 +1304,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                                         setLightboxPhoto(photo);
                                       }
                                     }}
-                                    className={`flex items-center gap-2 p-1.5 rounded-lg border cursor-pointer ${planePicsSelectedIds.has(photo.id) ? 'bg-pink-900/20 border-pink-500' : 'bg-zinc-900 border-zinc-800'}`}
+                                    className={`flex items-center gap-2 p-1.5 rounded-lg border cursor-pointer ${planePicsSelectedIds.has(photo.id) ? 'bg-red-900/20 border-red-500' : 'bg-zinc-900 border-zinc-800'}`}
                                   >
                                       <div className="w-10 h-10 rounded-md overflow-hidden bg-black shrink-0 relative">
                                         {photo.mediaType === 'video' && photo.videoUrl ? (
@@ -1302,7 +1321,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                                      {photo.mediaType === 'video' && <Video className="w-3 h-3 text-zinc-400 shrink-0" />}
                                      {isSelectMode && (
                                        <div className="w-4 h-4 rounded-full border-2 border-white flex items-center justify-center bg-black/50 shrink-0">
-                                         {planePicsSelectedIds.has(photo.id) && <Check className="w-2.5 h-2.5 text-pink-400" />}
+                                         {planePicsSelectedIds.has(photo.id) && <Check className="w-2.5 h-2.5 text-red-400" />}
                                        </div>
                                      )}
                                    </div>
@@ -1375,7 +1394,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                                 showToast(t.exportFailed, t.unableToExportAlbum, 'error');
                               }
                             }}
-                            className="liquid-glass-btn w-full py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] rounded-lg font-bold flex items-center justify-center gap-1"
+                            className="liquid-glass-btn w-full py-1.5 bg-red-600 hover:bg-red-500 text-white text-[10px] rounded-lg font-bold flex items-center justify-center gap-1"
                           >
                             <FileText className="w-3 h-3" /> {t.exportPdf}
                           </button>
@@ -1514,7 +1533,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                                 <p className="text-xs font-bold text-white">{clock.city}</p>
                                 <p className="text-[10px] text-zinc-400">{date}</p>
                               </div>
-                              <p className="text-lg font-black text-sky-300 font-mono">{time}</p>
+                              <p className="text-lg font-black text-red-300 font-mono">{time}</p>
                             </div>
                           );
                         })}
@@ -1546,7 +1565,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => setFmPlaying(!fmPlaying)}
-                            className="liquid-glass-btn flex-1 py-2 bg-emerald-600 text-black font-bold text-xs rounded-lg"
+                            className="liquid-glass-btn flex-1 py-2 bg-red-600 text-black font-bold text-xs rounded-lg"
                           >
                             {fmPlaying ? 'Stop' : 'Play'}
                           </button>
@@ -1557,7 +1576,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                             <button
                               key={station.freq}
                               onClick={() => setFmFrequency(station.freq)}
-                              className={`liquid-glass-btn w-full p-2 rounded-lg text-left text-xs ${fmFrequency === station.freq ? 'bg-sky-600 text-white' : 'bg-zinc-800 text-zinc-300'}`}
+                              className={`liquid-glass-btn w-full p-2 rounded-lg text-left text-xs ${fmFrequency === station.freq ? 'bg-red-600 text-white' : 'bg-zinc-800 text-zinc-300'}`}
                             >
                               <span className="font-bold">{station.name}</span>
                               <span className="text-[10px] text-zinc-400 ml-2">{station.freq.toFixed(1)} MHz</span>
@@ -1597,88 +1616,71 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                {screenMode === 'telemetry' && <AviationTelemetryHub />}
                {screenMode === 'rss' && <RSSReader />}
 
-             </div>
-
-            {/* APP DRAWER TAB BUTTON AT BOTTOM CENTER OF SCREEN */}
-            {screenMode === 'HOME' && (
-              <div className="w-full flex justify-center pb-2">
-                <button
-                  onClick={() => {
-                    playTouchSound(620);
-                    setScreenMode('APP_DRAWER');
-                  }}
-                  className="liquid-glass-btn px-6 py-1 bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 border border-zinc-700 rounded-t-xl shadow-lg flex items-center gap-1.5 text-xs font-mono font-bold transition-all active:scale-95 cursor-pointer"
-                  title="Open App Drawer"
-                >
-                  <ChevronUp className="w-4 h-4 text-emerald-400 animate-bounce" />
-                  <span>Apps</span>
-                </button>
               </div>
-            )}
 
-          </div>
+            </div>
 
-           {/* HARDWARE CAPACITIVE TOUCH BUTTONS AT BOTTOM OF PHONE BEZEL */}
+            {/* HARDWARE CAPACITIVE TOUCH BUTTONS AT BOTTOM OF PHONE BEZEL */}
            <div className="w-full bg-black py-2.5 px-6 border-t border-zinc-800 flex items-center justify-between text-zinc-400 z-30">
-             {/* 1. Back Key */}
-             <button
-               onClick={() => {
-                 playTouchSound(450);
-                 if (screenMode !== 'HOME') {
-                   setScreenMode('HOME');
-                 } else {
-                   showToast('BRIO DROID', 'Home Screen Active', 'info');
-                 }
-               }}
-               className="liquid-glass-btn p-1.5 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors active:scale-90 cursor-pointer"
-               title="Back Key"
-             >
-               <RotateCcw className="w-5 h-5 text-zinc-300" />
-             </button>
+              {/* 1. Back Key */}
+              <button
+                onClick={() => {
+                  playTouchSound(450);
+                  if (screenMode !== 'HOME') {
+                    setScreenMode('HOME');
+                  } else {
+                    showToast('BRIO', 'Home Screen Active', 'info');
+                  }
+                }}
+                className="liquid-glass-btn p-1.5 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors active:scale-90 cursor-pointer"
+                title="Back Key"
+              >
+                <RotateCcw className="w-5 h-5 text-zinc-300" />
+              </button>
 
-             {/* 2. Menu Key */}
-             <button
-               onClick={() => {
-                 playTouchSound(500);
-                 setScreenMode('ACCOUNT_OVERLAY');
-               }}
-               className="liquid-glass-btn p-1.5 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors active:scale-90 cursor-pointer"
-               title="Menu Key"
-             >
-               <Menu className="w-5 h-5 text-zinc-300" />
-             </button>
+              {/* 2. Menu Key */}
+              <button
+                onClick={() => {
+                  playTouchSound(500);
+                  setScreenMode('ACCOUNT_OVERLAY');
+                }}
+                className="liquid-glass-btn p-1.5 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors active:scale-90 cursor-pointer"
+                title="Menu Key"
+              >
+                <Menu className="w-5 h-5 text-zinc-300" />
+              </button>
 
-             {/* 3. Home Key */}
-             <button
-               onClick={() => {
-                 playTouchSound(650);
-                 setScreenMode('HOME');
-               }}
-               className="liquid-glass-btn p-1.5 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors active:scale-90 cursor-pointer"
-               title="Home Key"
-             >
-               <Home className="w-5 h-5 text-zinc-300" />
-             </button>
+              {/* 3. Home Key */}
+              <button
+                onClick={() => {
+                  playTouchSound(650);
+                  setScreenMode('HOME');
+                }}
+                className="liquid-glass-btn p-1.5 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors active:scale-90 cursor-pointer"
+                title="Home Key"
+              >
+                <Home className="w-5 h-5 text-zinc-300" />
+              </button>
 
-             {/* 4. Search Key */}
-             <button
-               onClick={() => {
-                 playTouchSound(580);
-                 setScreenMode('SEARCH');
-               }}
-               className="liquid-glass-btn p-1.5 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors active:scale-90 cursor-pointer"
-               title="Search Key"
-             >
-               <Search className="w-5 h-5 text-zinc-300" />
-             </button>
-           </div>
+              {/* 4. Search Key */}
+              <button
+                onClick={() => {
+                  playTouchSound(580);
+                  setScreenMode('SEARCH');
+                }}
+                className="liquid-glass-btn p-1.5 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors active:scale-90 cursor-pointer"
+                title="Search Key"
+              >
+                <Search className="w-5 h-5 text-zinc-300" />
+              </button>
+            </div>
 
            {/* WEATHER OVERLAY */}
            {activeOverlay === 'WEATHER' && (
              <div className="absolute inset-0 z-40 bg-black/90 backdrop-blur-md flex items-center justify-center p-3">
                <div className="relative w-full bg-slate-900 border border-slate-700 rounded-2xl p-4 shadow-2xl text-slate-100 space-y-4 max-h-full overflow-y-auto">
                  <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-                   <div className="flex items-center gap-2 text-sky-400">
+                   <div className="flex items-center gap-2 text-red-400">
                      <CloudSun className="w-5 h-5" />
                      <h2 className="text-sm font-bold">Aviation Weather</h2>
                    </div>
@@ -1697,7 +1699,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                          onClick={() => loadWeatherForCity(city)}
                          className={`liquid-glass-btn px-3 py-1.5 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer shrink-0 ${
                            weatherStationData.city === city
-                             ? 'bg-sky-500 text-black font-extrabold shadow-lg'
+                             ? 'bg-red-500 text-black font-extrabold shadow-lg'
                              : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
                          }`}
                        >
@@ -1711,7 +1713,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                      <button
                        onClick={() => setWeatherUnits('metric')}
                        className={`liquid-glass-btn px-2 py-1 rounded text-[10px] font-bold cursor-pointer ${
-                         weatherUnits === 'metric' ? 'bg-sky-500 text-black shadow' : 'bg-slate-800 text-slate-300'
+                         weatherUnits === 'metric' ? 'bg-red-500 text-black shadow' : 'bg-slate-800 text-slate-300'
                        }`}
                      >
                        °C / m/s
@@ -1719,7 +1721,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                      <button
                        onClick={() => setWeatherUnits('imperial')}
                        className={`liquid-glass-btn px-2 py-1 rounded text-[10px] font-bold cursor-pointer ${
-                         weatherUnits === 'imperial' ? 'bg-sky-500 text-black shadow' : 'bg-slate-800 text-slate-300'
+                         weatherUnits === 'imperial' ? 'bg-red-500 text-black shadow' : 'bg-slate-800 text-slate-300'
                        }`}
                      >
                        °F / mph
@@ -1730,7 +1732,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                      <div className="flex items-center justify-between">
                        <div>
                          <h3 className="text-sm font-bold text-white">{weatherStationData.city}</h3>
-                         <p className="text-[10px] text-sky-400 font-mono">
+                         <p className="text-[10px] text-red-400 font-mono">
                            {weatherStationData.country || ''} {weatherStationData.datetime ? `• ${weatherStationData.datetime}` : ''}
                          </p>
                          <p className="text-[10px] text-slate-400 capitalize">{weatherStationData.description}</p>
@@ -1743,7 +1745,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                              className="w-12 h-12"
                            />
                          )}
-                         <span className="text-2xl font-black text-sky-300">
+                         <span className="text-2xl font-black text-red-300">
                            {weatherUnits === 'metric' ? `${weatherStationData.tempC}°C` : `${weatherStationData.tempF}°F`}
                          </span>
                          {weatherStationData.tempMinC !== undefined && (
@@ -1790,7 +1792,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
                      </div>
 
                      {weatherStationData.isRealTime && (
-                       <div className="flex items-center gap-2 text-[10px] font-mono text-emerald-400 pt-2 border-t border-slate-800">
+                       <div className="flex items-center gap-2 text-[10px] font-mono text-red-400 pt-2 border-t border-slate-800">
                          <Activity className="w-3 h-3 animate-pulse" />
                          <span>Live data from OpenWeatherMap • Updated: {weatherStationData.lastUpdated}</span>
                        </div>
@@ -1815,7 +1817,7 @@ export const MobileWindowsPhoneGUI: React.FC<MobileWindowsPhoneGUIProps> = ({
         <div className="w-full pt-2.5 pb-0.5 flex items-center justify-between px-3 text-[10px] font-mono font-bold text-zinc-400">
           <span className="tracking-widest">BRIO</span>
           <div className="flex items-center gap-1 italic text-zinc-300">
-            <span className="text-emerald-500 font-black">✓</span>
+            <span className="text-red-500 font-black">✓</span>
             <span className="tracking-wider">{carrierName}</span>
           </div>
         </div>
