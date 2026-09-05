@@ -150,9 +150,9 @@ export const RSSReader: React.FC = () => {
         );
         showToast('All Feeds Synced', 'All live feeds loaded', 'success');
       }
-    } catch (err: any) {
-      console.error('Error loading news feeds:', err);
-      showToast('RSS Stream Notice', `Network update notice: ${err.message || 'Stream sync interrupted'}`, 'info');
+    } catch {
+      console.error('Error loading news feeds:');
+      showToast('RSS Stream Notice', 'Stream sync interrupted. Please try again later.', 'info');
     } finally {
       setLoading(false);
       setProgress((prev) => ({ ...prev, sourceName: '' }));
@@ -266,8 +266,8 @@ export const RSSReader: React.FC = () => {
       } else {
         throw new Error('No valid RSS items found in feed.');
       }
-    } catch (err: any) {
-      showToast('Feed Sync Error', `Unable to parse feed at ${feedUrl}: ${err.message}`, 'error');
+    } catch {
+      showToast('Feed Sync Error', 'Unable to parse feed. Please check the URL and try again.', 'error');
     } finally {
       setAddingFeed(false);
     }

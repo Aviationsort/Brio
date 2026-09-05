@@ -115,7 +115,7 @@ export const PokerGame: React.FC = () => {
         {!inHand ? (
           <button
             onClick={startHand}
-            className="liquid-glass-btn w-full py-3.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-slate-950 font-black text-xs rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2"
+            className="skeuo-btn w-full py-3.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-slate-950 font-black text-xs rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2"
           >
             <Sparkles className="w-4 h-4" />
             <span>Deal New Hand ($50)</span>
@@ -124,13 +124,13 @@ export const PokerGame: React.FC = () => {
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={handleCall}
-              className="liquid-glass-btn py-3 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl shadow transition-all"
+              className="skeuo-btn py-3 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl shadow transition-all"
             >
               Call ${currentBet}
             </button>
             <button
               onClick={handleShowdown}
-              className="liquid-glass-btn py-3 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl shadow transition-all"
+              className="skeuo-btn py-3 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl shadow transition-all"
             >
               Showdown
             </button>

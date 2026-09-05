@@ -2,7 +2,7 @@
  * Brio Application Type Definitions
  */
 
-export type HubId = 'connect' | 'media' | 'arcade' | 'office' | 'telemetry' | 'home';
+export type HubId = 'connect' | 'media' | 'arcade' | 'office' | 'telemetry' | 'myplanepics' | 'home' | 'security';
 
 export interface UserAccount {
   id: string;
@@ -10,6 +10,8 @@ export interface UserAccount {
   email: string;
   masterKeyHash: string; // Derived hash for verification
   avatarUrl?: string;
+  status?: 'online' | 'away' | 'dnd' | 'offline';
+  bio?: string;
   createdAt: string;
   isLoggedIn: boolean;
 }
@@ -26,6 +28,7 @@ export interface EncryptedPayload<T = unknown> {
 // Hub 1: Messaging
 export interface ChatMessage {
   id: string;
+  conversationId?: string;
   senderId: string;
   senderName: string;
   text: string;
@@ -33,9 +36,18 @@ export interface ChatMessage {
   isEncrypted: boolean;
   timestamp: string;
   attachmentUrl?: string;
-  attachmentType?: 'image' | 'voice' | 'file' | 'sticker';
-  status: 'sent' | 'delivered' | 'read';
+  attachmentType?: 'image' | 'video' | 'voice' | 'file' | 'sticker';
+  status: 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
   mode: 'online' | 'bluetooth';
+  edited?: boolean;
+  editedAt?: string;
+  disappearingAt?: string;
+  reactions?: string[];
+  replyTo?: { messageId: string; senderName: string; textSnippet: string };
+  forwardedFrom?: { messageId: string; senderName: string };
+  mentions?: string[];
+  linkPreview?: { url: string; title?: string; description?: string; imageUrl?: string };
+  localId?: string;
 }
 
 export interface ChatContact {
@@ -46,13 +58,47 @@ export interface ChatContact {
   bluetoothNearby: boolean;
   signalStrength?: number;
   lastMessage?: string;
+  lastSeen?: string;
   unreadCount: number;
   publicKeyFingerprint: string;
+  bio?: string;
+  isMuted?: boolean;
+  isBlocked?: boolean;
+  typing?: boolean;
+  sharedMediaCount?: number;
+  mutualFriends?: number;
+}
+
+export interface Conversation {
+  id: string;
+  participants: string[];
+  participantDetails: ChatContact[];
+  lastMessageId?: string;
+  unreadCount: number;
+  isPinned: boolean;
+  isMuted: boolean;
+  isGroup: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Comment {
+  id: string;
+  postId: string;
+  authorId: string;
+  authorName: string;
+  authorAvatar: string;
+  text: string;
+  timestamp: string;
+  likes: number;
+  userLiked?: boolean;
+  replies?: Comment[];
 }
 
 // Hub 1: Social Feed
 export interface SocialPost {
   id: string;
+  authorId: string;
   authorName: string;
   authorHandle: string;
   authorAvatar: string;
@@ -60,14 +106,24 @@ export interface SocialPost {
   encryptedContent?: EncryptedPayload<string>;
   isEncrypted: boolean;
   mediaUrl?: string;
-  mediaType?: 'image' | 'video';
+  mediaType?: 'image' | 'video' | 'carousel';
+  mediaUrls?: string[];
   timestamp: string;
   likes: number;
   commentsCount: number;
   shares: number;
   userLiked?: boolean;
+  userSaved?: boolean;
   privacyRank: number; // 1-5 score used by algorithm
   category: 'aviation' | 'tech' | 'cyber' | 'gaming' | 'general';
+  mentions?: string[];
+  hashtags?: string[];
+  location?: string;
+  comments?: Comment[];
+  repostOf?: string;
+  isPinned?: boolean;
+  bookmarkCount?: number;
+  viewCount?: number;
 }
 
 export interface FeedAlgorithmSettings {
@@ -76,6 +132,28 @@ export interface FeedAlgorithmSettings {
   echoChamberFilter: number; // 0-100 (reduces bias)
   decryptedPrivacyRank: number; // 0-100 (prioritize encrypted verified posts)
   mediaWeight: number; // 0-100
+}
+
+export interface Story {
+  id: string;
+  userId: string;
+  authorName: string;
+  authorAvatar: string;
+  mediaUrl: string;
+  mediaType: 'image' | 'video';
+  timestamp: string;
+  expiresAt: string;
+  viewers?: string[];
+}
+
+export interface Notification {
+  id: string;
+  type: 'message' | 'like' | 'comment' | 'follow' | 'system';
+  title: string;
+  body: string;
+  data?: Record<string, any>;
+  read: boolean;
+  timestamp: string;
 }
 
 // Hub 1: Call Dialer
@@ -159,7 +237,10 @@ export type GameId =
   | 'blackjack'
   | 'flappy'
   | 'minesweeper'
-  | 'flagquiz';
+  | 'flagquiz'
+  | 'memory'
+  | 'snake'
+  | 'typing';
 
 export interface GameHighScore {
   gameId: GameId;
@@ -266,6 +347,9 @@ export interface SystemTelemetryData {
   cpuUsage: number;
   ramUsageMb: number;
   ramTotalMb: number;
+  ramAvailableMb?: number;
+  ramCachedMb?: number;
+  ramUsagePercent?: number;
   fps: number;
   networkLatencyMs: number;
   storageUsedMb: number;
@@ -274,13 +358,64 @@ export interface SystemTelemetryData {
   systemLogs: { timestamp: string; level: 'info' | 'warn' | 'error'; message: string }[];
   gpuName?: string;
   gpuDriver?: string;
+  gpuMemoryMb?: number;
+  gpuMemoryTotalMb?: number;
+  gpuUtilization?: number;
   cpuName?: string;
   cpuCores?: number;
   cpuThreads?: number;
-  gpuMemoryMb?: number;
-  gpuMemoryTotalMb?: number;
+  cpuSpeedMhz?: number;
+  cpuTemperature?: number;
   romTotalGb?: number;
   romUsedGb?: number;
+  disks?: { name: string; totalGb: number; usedGb: number; freeGb: number; usagePercent: number }[];
+  batteryLevel?: number;
+  batteryCharging?: boolean;
+  batteryTimeRemainingSec?: number;
+  osPlatform?: string;
+  osVersion?: string;
+  screenResolution?: string;
+  language?: string;
+  uptimeSeconds?: number;
+  networkInterface?: string;
+  networkMac?: string;
+  networkUploadSpeedMbps?: number;
+  networkDownloadSpeedMbps?: number;
+  processes?: { name: string; cpu: number; memoryMb: number }[];
+  cpuHistory?: number[];
+  ramHistory?: number[];
+  fpsHistory?: number[];
+  networkHistory?: number[];
+}
+
+export type ErrorCategory = 'network' | 'auth' | 'crypto' | 'storage' | 'validation' | 'unknown';
+
+export interface BrioError extends Error {
+  category: ErrorCategory;
+  code?: string;
+  isRetryable?: boolean;
+  originalError?: unknown;
+  timestamp: number;
+}
+
+export interface RetryOptions {
+  maxRetries: number;
+  baseDelayMs: number;
+  maxDelayMs: number;
+  backoffFactor: number;
+  retryableCategories: ErrorCategory[];
+}
+
+export interface ErrorHandlerOptions {
+  showToast?: boolean;
+  logToConsole?: boolean;
+  reportCritical?: boolean;
+  retryOptions?: Partial<RetryOptions>;
+}
+
+export interface RateLimitEntry {
+  lastShown: number;
+  count: number;
 }
 
 // MyPlanePics Aircraft Photo Vault, Ranking & Statistics

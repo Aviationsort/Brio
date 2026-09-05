@@ -30,6 +30,18 @@ interface ThemeColors {
   gradientStart: string;
   gradientMid: string;
   gradientEnd: string;
+  skeuoSurface: string;
+  skeuoSurfaceLight: string;
+  skeuoSurfaceDark: string;
+  skeuoBorder: string;
+  skeuoHighlight: string;
+  skeuoShadow: string;
+  skeuoEmboss: string;
+  skeuoTextPrimary: string;
+  skeuoTextSecondary: string;
+  skeuoLedGreen: string;
+  skeuoLedRed: string;
+  skeuoLedAmber: string;
 }
 
 export const THEMES: Record<ThemeId, ThemeColors> = {
@@ -56,6 +68,18 @@ export const THEMES: Record<ThemeId, ThemeColors> = {
     gradientStart: '#FF5F1F',
     gradientMid: '#ff8c42',
     gradientEnd: '#ffaa5c',
+    skeuoSurface: '#2a2a30',
+    skeuoSurfaceLight: '#3a3a40',
+    skeuoSurfaceDark: '#1f1f24',
+    skeuoBorder: 'rgba(255, 255, 255, 0.12)',
+    skeuoHighlight: 'rgba(255, 255, 255, 0.15)',
+    skeuoShadow: 'rgba(0, 0, 0, 0.5)',
+    skeuoEmboss: 'rgba(255, 255, 255, 0.08)',
+    skeuoTextPrimary: '#f0f0f5',
+    skeuoTextSecondary: '#909098',
+    skeuoLedGreen: 'rgba(16, 185, 129, 0.6)',
+    skeuoLedRed: 'rgba(239, 68, 68, 0.6)',
+    skeuoLedAmber: 'rgba(245, 158, 11, 0.6)',
   },
   arctic: {
     id: 'arctic',
@@ -80,6 +104,18 @@ export const THEMES: Record<ThemeId, ThemeColors> = {
     gradientStart: '#0ea5e9',
     gradientMid: '#38bdf8',
     gradientEnd: '#7dd3fc',
+    skeuoSurface: '#e0e7ee',
+    skeuoSurfaceLight: '#f0f4f8',
+    skeuoSurfaceDark: '#c8d2dc',
+    skeuoBorder: 'rgba(14, 165, 233, 0.2)',
+    skeuoHighlight: 'rgba(14, 165, 233, 0.15)',
+    skeuoShadow: 'rgba(0, 0, 0, 0.1)',
+    skeuoEmboss: 'rgba(255, 255, 255, 0.5)',
+    skeuoTextPrimary: '#0c4a6e',
+    skeuoTextSecondary: '#64748b',
+    skeuoLedGreen: 'rgba(5, 150, 105, 0.6)',
+    skeuoLedRed: 'rgba(220, 38, 38, 0.6)',
+    skeuoLedAmber: 'rgba(217, 119, 6, 0.6)',
   },
   forest: {
     id: 'forest',
@@ -104,6 +140,18 @@ export const THEMES: Record<ThemeId, ThemeColors> = {
     gradientStart: '#10b981',
     gradientMid: '#34d399',
     gradientEnd: '#6ee7b7',
+    skeuoSurface: '#1a2e1a',
+    skeuoSurfaceLight: '#243d24',
+    skeuoSurfaceDark: '#142814',
+    skeuoBorder: 'rgba(16, 185, 129, 0.2)',
+    skeuoHighlight: 'rgba(16, 185, 129, 0.12)',
+    skeuoShadow: 'rgba(0, 0, 0, 0.5)',
+    skeuoEmboss: 'rgba(16, 185, 129, 0.08)',
+    skeuoTextPrimary: '#ecfdf5',
+    skeuoTextSecondary: '#6ee7b7',
+    skeuoLedGreen: 'rgba(52, 211, 153, 0.6)',
+    skeuoLedRed: 'rgba(248, 113, 113, 0.6)',
+    skeuoLedAmber: 'rgba(251, 191, 36, 0.6)',
   },
   sunset: {
     id: 'sunset',
@@ -128,6 +176,18 @@ export const THEMES: Record<ThemeId, ThemeColors> = {
     gradientStart: '#f97316',
     gradientMid: '#fb923c',
     gradientEnd: '#fdba74',
+    skeuoSurface: '#3d2218',
+    skeuoSurfaceLight: '#4a2c1e',
+    skeuoSurfaceDark: '#2d1810',
+    skeuoBorder: 'rgba(249, 115, 22, 0.2)',
+    skeuoHighlight: 'rgba(249, 115, 22, 0.12)',
+    skeuoShadow: 'rgba(0, 0, 0, 0.5)',
+    skeuoEmboss: 'rgba(249, 115, 22, 0.08)',
+    skeuoTextPrimary: '#fff7ed',
+    skeuoTextSecondary: '#fdba74',
+    skeuoLedGreen: 'rgba(34, 197, 94, 0.6)',
+    skeuoLedRed: 'rgba(239, 68, 68, 0.6)',
+    skeuoLedAmber: 'rgba(234, 179, 8, 0.6)',
   },
   ocean: {
     id: 'ocean',
@@ -152,6 +212,18 @@ export const THEMES: Record<ThemeId, ThemeColors> = {
     gradientStart: '#6366f1',
     gradientMid: '#818cf8',
     gradientEnd: '#a5b4fc',
+    skeuoSurface: '#2a3548',
+    skeuoSurfaceLight: '#354159',
+    skeuoSurfaceDark: '#1e293b',
+    skeuoBorder: 'rgba(99, 102, 241, 0.2)',
+    skeuoHighlight: 'rgba(99, 102, 241, 0.12)',
+    skeuoShadow: 'rgba(0, 0, 0, 0.5)',
+    skeuoEmboss: 'rgba(99, 102, 241, 0.08)',
+    skeuoTextPrimary: '#f1f5f9',
+    skeuoTextSecondary: '#94a3b8',
+    skeuoLedGreen: 'rgba(16, 185, 129, 0.6)',
+    skeuoLedRed: 'rgba(239, 68, 68, 0.6)',
+    skeuoLedAmber: 'rgba(245, 158, 11, 0.6)',
   },
 };
 
@@ -227,6 +299,18 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     root.style.setProperty('--brio-gradient-start', theme.gradientStart);
     root.style.setProperty('--brio-gradient-mid', theme.gradientMid);
     root.style.setProperty('--brio-gradient-end', theme.gradientEnd);
+    root.style.setProperty('--brio-skeuo-surface', theme.skeuoSurface);
+    root.style.setProperty('--brio-skeuo-surface-light', theme.skeuoSurfaceLight);
+    root.style.setProperty('--brio-skeuo-surface-dark', theme.skeuoSurfaceDark);
+    root.style.setProperty('--brio-skeuo-border', theme.skeuoBorder);
+    root.style.setProperty('--brio-skeuo-highlight', theme.skeuoHighlight);
+    root.style.setProperty('--brio-skeuo-shadow', theme.skeuoShadow);
+    root.style.setProperty('--brio-skeuo-emboss', theme.skeuoEmboss);
+    root.style.setProperty('--brio-skeuo-text-primary', theme.skeuoTextPrimary);
+    root.style.setProperty('--brio-skeuo-text-secondary', theme.skeuoTextSecondary);
+    root.style.setProperty('--brio-skeuo-led-green', theme.skeuoLedGreen);
+    root.style.setProperty('--brio-skeuo-led-red', theme.skeuoLedRed);
+    root.style.setProperty('--brio-skeuo-led-amber', theme.skeuoLedAmber);
   }, [theme]);
 
   return (

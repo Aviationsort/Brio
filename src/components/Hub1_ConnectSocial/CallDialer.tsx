@@ -119,9 +119,9 @@ export const CallDialer: React.FC = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 aero-panel">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 skeuo-panel">
       {/* Keypad & Dialer */}
-      <div className="md:col-span-2 bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-2xl flex flex-col items-center justify-between min-h-[500px] ife-card liquid-glass">
+      <div className="md:col-span-2 bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-2xl flex flex-col items-center justify-between min-h-[500px] skeuo-panel">
         {/* Dial Display Screen */}
         <div className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-center relative mb-6">
           <p className="text-xs text-slate-500 font-mono mb-1">Encrypted Voice Channel Ready</p>
@@ -147,7 +147,7 @@ export const CallDialer: React.FC = () => {
             <button
               key={digit}
               onClick={() => handleKeyPress(digit)}
-              className="liquid-glass-btn py-3.5 bg-slate-800/80 hover:bg-slate-700 active:scale-95 border border-slate-700/60 rounded-2xl text-lg font-bold text-white shadow transition-all"
+              className="skeuo-btn py-3.5 bg-slate-800/80 hover:bg-slate-700 active:scale-95 border border-slate-700/60 rounded-2xl text-lg font-bold text-white shadow transition-all"
             >
               {digit}
             </button>
@@ -159,7 +159,7 @@ export const CallDialer: React.FC = () => {
           <button
             onClick={handleBackspace}
             disabled={!dialedNumber}
-            className="liquid-glass-btn p-3.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-2xl transition-all disabled:opacity-40"
+            className="skeuo-btn p-3.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-2xl transition-all disabled:opacity-40"
           >
             <Delete className="w-5 h-5" />
           </button>
@@ -167,7 +167,7 @@ export const CallDialer: React.FC = () => {
           {inCall ? (
             <button
               onClick={endCall}
-              className="liquid-glass-btn flex-1 py-3.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2"
+              className="skeuo-btn flex-1 py-3.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2"
             >
               <PhoneOff className="w-5 h-5" />
               <span>End Call</span>
@@ -176,7 +176,7 @@ export const CallDialer: React.FC = () => {
             <button
               onClick={() => startCall()}
               disabled={!dialedNumber}
-              className="liquid-glass-btn flex-1 py-3.5 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 text-white font-bold rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-40"
+              className="skeuo-btn flex-1 py-3.5 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 text-white font-bold rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-40"
             >
               <Phone className="w-5 h-5" />
               <span>Dial Call</span>
@@ -188,7 +188,7 @@ export const CallDialer: React.FC = () => {
       {/* Emergency Shortcuts & Call Logs */}
       <div className="space-y-6">
         {/* Emergency Panel */}
-        <div className="bg-slate-900/90 border border-red-500/30 rounded-2xl p-4 shadow-xl space-y-3 ife-status-bar">
+        <div className="bg-slate-900/90 border border-red-500/30 rounded-2xl p-4 shadow-xl space-y-3 skeuo-card">
           <div className="flex items-center gap-2 text-red-400">
             <AlertTriangle className="w-4 h-4 animate-bounce" />
             <h4 className="text-xs font-bold uppercase tracking-wider">Emergency Speed-Dial</h4>
@@ -202,7 +202,7 @@ export const CallDialer: React.FC = () => {
                   setDialedNumber(em.code);
                   startCall(em.code);
                 }}
-                className="liquid-glass-btn w-full p-2.5 bg-slate-950 border border-slate-800 hover:border-red-500/40 rounded-xl text-left transition-all group flex items-center justify-between"
+                className="skeuo-btn w-full p-2.5 bg-slate-950 border border-slate-800 hover:border-red-500/40 rounded-xl text-left transition-all group flex items-center justify-between"
               >
                 <div>
                   <div className="flex items-center gap-1.5">

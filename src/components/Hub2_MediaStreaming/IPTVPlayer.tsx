@@ -172,8 +172,8 @@ export const IPTVPlayer: React.FC = () => {
           showToast('Load Error', `No channels found (${channels.length} total). Reason: ${reason}`, 'warning');
         }
       }
-    } catch (err: any) {
-      showToast('Load Error', `Failed to load default playlist: ${err.message}`, 'error');
+    } catch {
+      showToast('Load Error', 'Failed to load default playlist. Please try again.', 'error');
     } finally {
       setIsLoadingDefault(false);
       setLoadProgress('');
@@ -194,8 +194,8 @@ export const IPTVPlayer: React.FC = () => {
       } else {
         showToast('M3U Parse Warning', 'No valid stream URLs found. Check format (#EXTINF and URL lines).', 'warning');
       }
-    } catch (err: any) {
-      showToast('Parse Error', `Failed to parse M3U content: ${err.message}`, 'error');
+    } catch {
+      showToast('Parse Error', 'Failed to parse M3U content. Please check the format.', 'error');
     }
   };
 
@@ -220,8 +220,8 @@ export const IPTVPlayer: React.FC = () => {
         } else {
           showToast('M3U Empty', 'No channels extracted from selected file.', 'warning');
         }
-      } catch (err: any) {
-        showToast('File Read Error', `Error reading M3U file: ${err.message}`, 'error');
+      } catch {
+        showToast('File Read Error', 'Error reading M3U file. Please try again.', 'error');
       } finally {
         setIsLoadingFile(false);
         setLoadProgress('');
@@ -323,7 +323,7 @@ export const IPTVPlayer: React.FC = () => {
           <button
             onClick={handleLoadDefaultM3U}
             disabled={isLoadingDefault}
-            className="liquid-glass-btn px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-red-300 border border-red-500/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            className="skeuo-btn px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-red-300 border border-red-500/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
           >
             <Globe className="w-3.5 h-3.5" />
             <span>{isLoadingDefault ? (loadProgress || 'Loading...') : 'Load Default Playlist'}</span>
@@ -331,7 +331,7 @@ export const IPTVPlayer: React.FC = () => {
 
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="liquid-glass-btn px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-red-300 border border-red-500/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+            className="skeuo-btn px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-red-300 border border-red-500/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
           >
             <Upload className="w-3.5 h-3.5" />
             <span>Upload .m3u</span>
@@ -340,7 +340,7 @@ export const IPTVPlayer: React.FC = () => {
           {iptvChannels.length > 0 && (
             <button
               onClick={handleClearChannels}
-              className="liquid-glass-btn px-3 py-2 bg-rose-950/60 hover:bg-rose-900 border border-rose-500/30 text-rose-300 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+              className="skeuo-btn px-3 py-2 bg-rose-950/60 hover:bg-rose-900 border border-rose-500/30 text-rose-300 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
               title="Clear all loaded IPTV channels"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -417,7 +417,7 @@ export const IPTVPlayer: React.FC = () => {
               <button
                 type="submit"
                 disabled={!m3uText.trim()}
-                className="liquid-glass-btn w-full py-2.5 bg-gradient-to-r from-red-600 to-red-600 hover:from-red-500 hover:to-red-500 text-white font-extrabold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                className="skeuo-btn w-full py-2.5 bg-gradient-to-r from-red-600 to-red-600 hover:from-red-500 hover:to-red-500 text-white font-extrabold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Parse & Append Channels</span>
@@ -451,7 +451,7 @@ export const IPTVPlayer: React.FC = () => {
               <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
                 <button
                   onClick={() => setSelectedCategory('all')}
-                  className={`liquid-glass-btn px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold transition-all shrink-0 cursor-pointer ${
+                  className={`skeuo-btn px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold transition-all shrink-0 cursor-pointer ${
                     selectedCategory === 'all'
                       ? 'bg-red-600 text-white'
                       : 'bg-slate-800 text-slate-400 hover:text-white'
@@ -463,7 +463,7 @@ export const IPTVPlayer: React.FC = () => {
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`liquid-glass-btn px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold transition-all shrink-0 cursor-pointer ${
+                    className={`skeuo-btn px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold transition-all shrink-0 cursor-pointer ${
                       selectedCategory === cat
                         ? 'bg-red-600 text-white'
                         : 'bg-slate-800 text-slate-400 hover:text-white'
@@ -484,7 +484,7 @@ export const IPTVPlayer: React.FC = () => {
                     <button
                       key={ch.id}
                       onClick={() => setSelectedIPTVChannel(ch)}
-                      className={`liquid-glass-btn w-full p-2.5 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer ${
+                      className={`skeuo-btn w-full p-2.5 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer ${
                         isSelected
                           ? 'bg-red-950/90 border-red-500 text-white shadow-lg'
                           : 'bg-slate-950 border-slate-800/80 text-slate-300 hover:bg-slate-800/80'

@@ -13,6 +13,7 @@ import {
 } from '../../data/planePicsData';
 import { PlanePhoto } from '../../types';
 import { encryptionService } from '../../utils/crypto';
+import { escapeHtml } from '../../utils/htmlSanitizer';
 import {
   Camera,
   FileCode,
@@ -37,8 +38,6 @@ import {
   Maximize2,
   Info,
   Check,
-  RefreshCw,
-  SlidersHorizontal,
   Folder as FolderIcon,
   Video,
   ArrowLeft,
@@ -48,10 +47,8 @@ import {
   Download,
   Grid3x3,
   List,
-  Sun,
-  Contrast,
   Palette,
-  Wand2,
+  Plane,
   FolderOpen,
   Tag as TagsIcon,
   Edit3,
@@ -63,7 +60,7 @@ import {
   FileText,
 } from 'lucide-react';
 
-const generateThumbnail = (file: File, maxWidth = 400, maxHeight = 300): Promise<string> => {
+const generateThumbnail = (file: File, maxWidth = 120, maxHeight = 90): Promise<string> => {
   return new Promise((resolve) => {
     const url = URL.createObjectURL(file);
     const img = new Image();
@@ -77,7 +74,7 @@ const generateThumbnail = (file: File, maxWidth = 400, maxHeight = 300): Promise
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       }
       URL.revokeObjectURL(url);
-      resolve(canvas.toDataURL('image/jpeg', 0.7));
+      resolve(canvas.toDataURL('image/jpeg', 0.6));
     };
     img.onerror = () => {
       URL.revokeObjectURL(url);
@@ -97,8 +94,7 @@ export const MyPlanePicsSuite: React.FC = () => {
   ): Promise<PlanePhoto[]> => {
     const results: PlanePhoto[] = [];
     const total = files.length;
-    const chunkSize = 32;
-    const userFolder = files[0]?.webkitRelativePath?.split('/')[0] || '';
+    const chunkSize = 64;
 
     for (let i = 0; i < total; i += chunkSize) {
       const chunk = files.slice(i, i + chunkSize);
@@ -107,8 +103,6 @@ export const MyPlanePicsSuite: React.FC = () => {
         const globalIndex = i + idx;
         const parsedFilename = parsePlaneFilename(file.name);
         const isVideo = file.type.startsWith('video/');
-
-        onProgress(Math.round(((globalIndex) / total) * 100), `Parsing ${file.name} (${globalIndex + 1}/${total})`);
 
         const relPath = file.webkitRelativePath || file.name;
         const pathParts = relPath.split(/[/\\]/);
@@ -124,17 +118,7 @@ export const MyPlanePicsSuite: React.FC = () => {
         }
 
         const dataUrl = URL.createObjectURL(file);
-
-        const thumbnailUrl = !isVideo ? await generateThumbnail(file) : '';
-
-        const encryptedPayload = await encryptionService.encrypt(
-          JSON.stringify({
-            notes: `Path: ${relPath}`,
-            size: file.size,
-            lastModified: file.lastModified,
-            timestamp: new Date().toISOString(),
-          })
-        );
+        const thumbnailUrl = '';
 
         return {
           id: `photo-${Date.now()}-${globalIndex}-${Math.random().toString(36).substring(2, 6)}`,
@@ -155,8 +139,8 @@ export const MyPlanePicsSuite: React.FC = () => {
           aircraftModel: extractedAircraft,
           airline: extractedAirline,
           spotterName: user?.username || 'Captain Spotter',
-          isEncrypted: true,
-          encryptedData: encryptedPayload,
+          isEncrypted: false,
+          encryptedData: undefined,
           rating: 5,
           notes: `Imported from path: ${relPath}`,
         } as PlanePhoto;
@@ -169,8 +153,10 @@ export const MyPlanePicsSuite: React.FC = () => {
     return results;
   }, [user]);
 
-  // Active Tab: album, parser, ranking, collections
-  const [activeTab, setActiveTab] = useState<'album' | 'parser' | 'ranking' | 'collections'>('album');
+  // Active Tab: album, parser, ranking, collections, liveries
+  const [activeTab, setActiveTab] = useState<'album' | 'parser' | 'ranking' | 'collections' | 'liveries'>('album');
+  const [expandedAirline, setExpandedAirline] = useState<string | null>(null);
+  const [expandedAircraft, setExpandedAircraft] = useState<string | null>(null);
 
   // Hidden Inputs for Single & Folder Upload
   const singleInputRef = useRef<HTMLInputElement | null>(null);
@@ -188,8 +174,6 @@ export const MyPlanePicsSuite: React.FC = () => {
   });
 
   // Folder Storage Strategy Modal State
-  const [pendingFolderFiles, setPendingFolderFiles] = useState<File[]>([]);
-  const [showFolderChoiceModal, setShowFolderChoiceModal] = useState(false);
   const [showFolderStructureModal, setShowFolderStructureModal] = useState(false);
 
   // Import Progress State
@@ -201,17 +185,6 @@ export const MyPlanePicsSuite: React.FC = () => {
   // Photo Collection State
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxMedia, setLightboxMedia] = useState<PlanePhoto | null>(null);
-
-  // Image Enhancement State
-  type EnhancementPreset = 'none' | 'natural' | 'vibrant' | 'film' | 'bw' | 'warm' | 'cool';
-  const [enhancePreset, setEnhancePreset] = useState<EnhancementPreset>('none');
-  const [enhanceBrightness, setEnhanceBrightness] = useState(100);
-  const [enhanceContrast, setEnhanceContrast] = useState(100);
-  const [enhanceSaturation, setEnhanceSaturation] = useState(100);
-  const [enhanceSepia, setEnhanceSepia] = useState(0);
-  const [enhanceHue, setEnhanceHue] = useState(0);
-  const [showEnhancePanel, setShowEnhancePanel] = useState(false);
-  const [globalEnhance, setGlobalEnhance] = useState(false);
 
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState('');
@@ -231,6 +204,10 @@ export const MyPlanePicsSuite: React.FC = () => {
   const [showTagEditor, setShowTagEditor] = useState(false);
   const [editingTagsForId, setEditingTagsForId] = useState<string | null>(null);
 
+  // Watchlist State
+  const [watchlist, setWatchlist] = useState<PlanePhoto[]>([]);
+  const [showWatchlistPanel, setShowWatchlistPanel] = useState(false);
+
   // Batch Edit State
   const [showBatchEdit, setShowBatchEdit] = useState(false);
   const [batchAirline, setBatchAirline] = useState('');
@@ -248,45 +225,6 @@ export const MyPlanePicsSuite: React.FC = () => {
   // Paging state
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(12);
-
-  const getEnhancementFilter = useCallback(() => {
-    const presetFilters: Record<EnhancementPreset, { brightness?: number; contrast?: number; saturate?: number; sepia?: number; hueRotate?: number }> = {
-      none: {},
-      natural: { brightness: 105, contrast: 105, saturate: 100 },
-      vibrant: { brightness: 110, contrast: 120, saturate: 150 },
-      film: { brightness: 95, contrast: 120, saturate: 80, sepia: 20 },
-      bw: { brightness: 110, contrast: 120, saturate: 0 },
-      warm: { brightness: 105, contrast: 105, saturate: 110, sepia: 15, hueRotate: -10 },
-      cool: { brightness: 105, contrast: 105, saturate: 110, hueRotate: 20 },
-    };
-
-    const preset = presetFilters[enhancePreset];
-    const brightness = preset.brightness ?? enhanceBrightness;
-    const contrast = preset.contrast ?? enhanceContrast;
-    const saturate = preset.saturate ?? enhanceSaturation;
-    const sepia = preset.sepia ?? enhanceSepia;
-    const hueRotate = preset.hueRotate ?? enhanceHue;
-
-    const parts = [
-      `brightness(${brightness}%)`,
-      `contrast(${contrast}%)`,
-      `saturate(${saturate}%)`,
-    ];
-
-    if (sepia > 0) parts.push(`sepia(${sepia}%)`);
-    if (hueRotate !== 0) parts.push(`hue-rotate(${hueRotate}deg)`);
-
-    return parts.join(' ');
-  }, [enhancePreset, enhanceBrightness, enhanceContrast, enhanceSaturation, enhanceSepia, enhanceHue]);
-
-  const resetEnhancements = useCallback(() => {
-    setEnhancePreset('none');
-    setEnhanceBrightness(100);
-    setEnhanceContrast(100);
-    setEnhanceSaturation(100);
-    setEnhanceSepia(0);
-    setEnhanceHue(0);
-  }, []);
 
   // Filtered photos
   const filteredPhotos = useMemo(() => {
@@ -314,13 +252,15 @@ export const MyPlanePicsSuite: React.FC = () => {
           ? true
           : selectedCollection === 'favorites'
           ? p.favorite
+          : selectedCollection === 'watchlist'
+          ? watchlist.some(w => w.id === p.id)
           : p.collections?.includes(selectedCollection);
 
       const matchesTags = activeTags.length === 0 || (p.tags && activeTags.every(tag => p.tags!.includes(tag)));
 
       return matchesSearch && matchesFormat && matchesAirline && matchesCollection && matchesTags;
     });
-  }, [myPlanePics, searchQuery, filterFormat, filterAirline, selectedCollection, activeTags]);
+  }, [myPlanePics, searchQuery, filterFormat, filterAirline, selectedCollection, activeTags, watchlist]);
 
   const sortedPhotos = useMemo(() => {
     return [...filteredPhotos].sort((a, b) => {
@@ -333,6 +273,45 @@ export const MyPlanePicsSuite: React.FC = () => {
   }, [filteredPhotos, sortBy]);
 
   const liveStats = useMemo(() => computeLiveStats(myPlanePics), [myPlanePics]);
+
+  // Airline -> aircraft -> special liveries mapping (for the Liveries tab)
+  const airlineAircraftMap = useMemo(() => {
+    const airlineMap: Record<
+      string,
+      { aircrafts: Record<string, { liveries: Set<string>; count: number }>; count: number }
+    > = {};
+
+    myPlanePics.forEach((p) => {
+      const airline = p.airline || 'Unknown Airline';
+      const aircraft = p.aircraftModel || 'Unknown Aircraft';
+
+      if (!airlineMap[airline]) airlineMap[airline] = { aircrafts: {}, count: 0 };
+      airlineMap[airline].count += 1;
+
+      if (!airlineMap[airline].aircrafts[aircraft]) {
+        airlineMap[airline].aircrafts[aircraft] = { liveries: new Set<string>(), count: 0 };
+      }
+      airlineMap[airline].aircrafts[aircraft].count += 1;
+
+      const livery = p.specialLivery;
+      if (livery && livery !== 'None' && livery.trim() !== '') {
+        airlineMap[airline].aircrafts[aircraft].liveries.add(livery);
+      }
+    });
+
+    return Object.entries(airlineMap)
+      .map(([airline, data]) => {
+        const aircrafts = Object.entries(data.aircrafts)
+          .map(([aircraft, a]) => ({
+            aircraft,
+            liveries: Array.from(a.liveries).sort((x, y) => x.localeCompare(y)),
+            count: a.count,
+          }))
+          .sort((x, y) => x.aircraft.localeCompare(y.aircraft));
+        return { airline, aircrafts, count: data.count };
+      })
+      .sort((a, b) => a.airline.localeCompare(b.airline));
+  }, [myPlanePics]);
 
   // Filename Parser Tester State
   const [testFilename, setTestFilename] = useState('HU.26-31A Special Livery (7.30.25).jpg');
@@ -365,6 +344,18 @@ export const MyPlanePicsSuite: React.FC = () => {
   const toggleFavorite = useCallback((id: string) => {
     setMyPlanePics((prev) => prev.map(p => p.id === id ? { ...p, favorite: !p.favorite } : p));
   }, [setMyPlanePics]);
+
+  const toggleWatchlist = useCallback((id: string) => {
+    setWatchlist((prev) => {
+      const exists = prev.some(p => p.id === id);
+      if (exists) {
+        return prev.filter(p => p.id !== id);
+      } else {
+        const photo = myPlanePics.find(p => p.id === id);
+        return photo ? [...prev, photo] : prev;
+      }
+    });
+  }, [myPlanePics]);
 
   const addCollection = useCallback(() => {
     if (!newCollectionName.trim()) return;
@@ -468,6 +459,34 @@ export const MyPlanePicsSuite: React.FC = () => {
       showToast('No Photos', 'Add photos to your vault first', 'warning');
       return;
     }
+    const cards = myPlanePics.map(p => {
+      const safeUrl = escapeHtml(p.thumbnailUrl || p.imageUrl || '');
+      const safeReg = escapeHtml(p.registration || '');
+      const safeAirline = escapeHtml(p.airline || '');
+      const safeModel = escapeHtml(p.aircraftModel || '');
+      const safeLocation = escapeHtml(p.location || '');
+      const safeDate = escapeHtml(p.formattedDate || '');
+      const safeLivery = escapeHtml(p.specialLivery || '');
+      const safeNotes = escapeHtml(p.notes || '');
+      const safeTags = (p.tags || []).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('');
+      return `
+      <div class="card">
+        <img src="${safeUrl}" alt="${safeReg}" onerror="this.src='https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600&auto=format&fit=crop'" />
+        <div class="card-body">
+          <div class="card-title">${safeReg}</div>
+          <div class="card-meta">
+            ${safeAirline ? `<div>Airline: ${safeAirline}</div>` : ''}
+            ${safeModel ? `<div>Model: ${safeModel}</div>` : ''}
+            ${safeLocation ? `<div>Location: ${safeLocation}</div>` : ''}
+            ${safeDate ? `<div>Date: ${safeDate}</div>` : ''}
+            ${safeLivery && safeLivery !== 'None' ? `<div>Livery: ${safeLivery}</div>` : ''}
+            ${safeNotes ? `<div style="margin-top:8px;color:#cbd5e1;">${safeNotes}</div>` : ''}
+          </div>
+          ${safeTags ? `<div class="card-tags">${safeTags}</div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -496,23 +515,7 @@ export const MyPlanePicsSuite: React.FC = () => {
     <p>Exported from Brio — ${new Date().toLocaleDateString()}</p>
   </div>
   <div class="grid">
-    ${myPlanePics.map(p => `
-    <div class="card">
-      <img src="${p.thumbnailUrl || p.imageUrl}" alt="${p.registration}" onerror="this.src='https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600&auto=format&fit=crop'" />
-      <div class="card-body">
-        <div class="card-title">${p.registration}</div>
-        <div class="card-meta">
-          ${p.airline ? `<div>Airline: ${p.airline}</div>` : ''}
-          ${p.aircraftModel ? `<div>Model: ${p.aircraftModel}</div>` : ''}
-          ${p.location ? `<div>Location: ${p.location}</div>` : ''}
-          ${p.formattedDate ? `<div>Date: ${p.formattedDate}</div>` : ''}
-          ${p.specialLivery !== 'None' ? `<div>Livery: ${p.specialLivery}</div>` : ''}
-          ${p.notes ? `<div style="margin-top:8px;color:#cbd5e1;">${p.notes.replace(/</g, '&lt;')}</div>` : ''}
-        </div>
-        ${(p.tags && p.tags.length > 0) ? `<div class="card-tags">${p.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>` : ''}
-      </div>
-    </div>
-    `).join('')}
+    ${cards}
   </div>
   <div class="footer">
     Generated by Brio MyPlanePics Engine — ${myPlanePics.length} photos
@@ -751,6 +754,29 @@ export const MyPlanePicsSuite: React.FC = () => {
   }, [searchQuery, filterFormat, filterAirline, sortBy, myPlanePics.length]);
 
   useEffect(() => {
+    try {
+      const stored = localStorage.getItem('brio_myplanepics_watchlist');
+      if (stored) {
+        const ids: string[] = JSON.parse(stored);
+        if (Array.isArray(ids)) {
+          const initial = myPlanePics.filter(p => ids.includes(p.id));
+          setWatchlist(initial);
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, [myPlanePics]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('brio_myplanepics_watchlist', JSON.stringify(watchlist.map(p => p.id)));
+    } catch (e) {
+      // ignore
+    }
+  }, [watchlist]);
+
+  useEffect(() => {
     if (!isLightboxOpen) return;
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setIsLightboxOpen(false);
@@ -766,12 +792,6 @@ export const MyPlanePicsSuite: React.FC = () => {
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [isLightboxOpen, lightboxMedia, filteredPhotos]);
-
-  useEffect(() => {
-    if (lightboxMedia) {
-      resetEnhancements();
-    }
-  }, [lightboxMedia]);
 
   // Folder Input Trigger (shows structure preview first)
   const handleFolderInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -797,8 +817,7 @@ export const MyPlanePicsSuite: React.FC = () => {
       return;
     }
 
-    setPendingFolderFiles(mediaFiles);
-    setShowFolderChoiceModal(true);
+    importFolder(mediaFiles);
   };
 
   // Show folder structure preview before opening picker
@@ -812,11 +831,7 @@ export const MyPlanePicsSuite: React.FC = () => {
     folderInputRef.current?.click();
   };
 
-  // Execute Folder Upload (Permanent vs Temporary Choice)
-  const executeFolderUpload = async (isPermanent: boolean) => {
-    setShowFolderChoiceModal(false);
-    if (pendingFolderFiles.length === 0) return;
-
+  const importFolder = async (files: File[]) => {
     setIsImporting(true);
     setImportProgress(0);
     setImportStatusText(t.loading || 'Loading...');
@@ -828,7 +843,7 @@ export const MyPlanePicsSuite: React.FC = () => {
           .map(p => p.notes!.replace('Imported from path: ', '').trim())
       );
 
-      const newFiles = pendingFolderFiles.filter(f => {
+      const newFiles = files.filter(f => {
         const key = f.webkitRelativePath || f.name;
         return !existingKeys.has(key) && !processedPaths.has(key);
       });
@@ -847,7 +862,7 @@ export const MyPlanePicsSuite: React.FC = () => {
           setImportProgress(progress);
           setImportStatusText(status);
         },
-        isPermanent
+        false
       );
 
       setImportStatusText(t.loading || 'Finalizing import...');
@@ -856,25 +871,11 @@ export const MyPlanePicsSuite: React.FC = () => {
       if (newUploadedPhotos.length > 0) {
         setMyPlanePics((prev) => [...newUploadedPhotos, ...prev]);
         setLightboxMedia(newUploadedPhotos[0]);
-
-        if (isPermanent) {
-          showToast(
-            t.permanentFolderLinked,
-            `${t.vaultedLinkedMedia} (${user?.username || 'Guest'})`,
-            'success'
-          );
-        } else {
-          showToast(
-            t.temporarySessionImport,
-            `${t.importedMediaFiles} (${newUploadedPhotos.length})`,
-            'info'
-          );
-        }
+        showToast(t.temporarySessionImport, `${t.importedMediaFiles} (${newUploadedPhotos.length})`, 'info');
       }
-    } catch (err: any) {
-      showToast(t.folderImportError, err.message || t.encryptionReadError, 'error');
+    } catch {
+      showToast(t.folderImportError, t.encryptionReadError, 'error');
     } finally {
-      setPendingFolderFiles([]);
       setIsImporting(false);
       setImportProgress(0);
       setImportStatusText('');
@@ -892,81 +893,69 @@ export const MyPlanePicsSuite: React.FC = () => {
     try {
       const newUploadedPhotos: PlanePhoto[] = [];
       const totalFiles = fileList.length;
-      let successCount = 0;
+      const chunkSize = 64;
 
-      for (let i = 0; i < totalFiles; i++) {
-        const file = fileList[i];
-        const ext = file.name.split('.').pop()?.toLowerCase() || '';
-        const isImage = file.type.startsWith('image/') || ['jpg','jpeg','png','gif','bmp','tiff','tif','webp','heic','heif','raw','dng','svg','avif','jxl'].includes(ext);
-        const isVideo = file.type.startsWith('video/') || ['mp4','mov','avi','mkv','flv','wmv','webm','m4v','3gp'].includes(ext);
-        if (!isImage && !isVideo) continue;
+      for (let i = 0; i < totalFiles; i += chunkSize) {
+        const chunk = Array.from(fileList).slice(i, i + chunkSize);
 
-        setImportStatusText(`${t.loading || 'Processing'} ${file.name} (${i + 1}/${totalFiles})`);
-        setImportProgress(Math.round(((i) / totalFiles) * 100));
+        const chunkPhotos = await Promise.all(chunk.map(async (file, idx) => {
+          const globalIndex = i + idx;
+          const ext = file.name.split('.').pop()?.toLowerCase() || '';
+          const isImage = file.type.startsWith('image/') || ['jpg','jpeg','png','gif','bmp','tiff','tif','webp','heic','heif','raw','dng','svg','avif','jxl'].includes(ext);
+          const isVideo = file.type.startsWith('video/') || ['mp4','mov','avi','mkv','flv','wmv','webm','m4v','3gp'].includes(ext);
+          if (!isImage && !isVideo) return null;
 
-        const parsed = parsePlaneFilename(file.name);
+          const parsed = parsePlaneFilename(file.name);
+          const dataUrl = URL.createObjectURL(file);
+          const thumbnailUrl = '';
 
-        const dataUrl = URL.createObjectURL(file);
+          return {
+            id: `photo-${Date.now()}-${globalIndex}-${Math.random().toString(36).substring(2, 6)}`,
+            filename: parsed.filename,
+            imageUrl: dataUrl || 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&fit=crop',
+            mediaType: isVideo ? 'video' : 'image',
+            videoUrl: isVideo ? dataUrl : undefined,
+            thumbnailUrl: thumbnailUrl || undefined,
+            registration: parsed.registration,
+            specialLivery: parsed.specialLivery,
+            dateCaptured: parsed.dateCaptured,
+            formattedDate: parsed.formattedDate,
+            shotNumber: parsed.shotNumber || undefined,
+            formatPattern: parsed.formatPattern,
+            isRangeFormat: parsed.isRangeFormat,
+            isAutoCorrected: parsed.isAutoCorrected,
+            location: 'Local Spotting Vault',
+            aircraftModel: parsed.isRangeFormat ? 'Military Aircraft Range' : 'Commercial Airliner',
+            airline: 'Vault Import',
+            spotterName: user?.username || 'Local Spotter',
+            isEncrypted: false,
+            encryptedData: undefined,
+            rating: 5,
+            notes: `Imported file ${file.name}`,
+          } as PlanePhoto;
+        }));
 
-        const thumbnailUrl = !isVideo ? await generateThumbnail(file) : '';
-
-        const encryptedPayload = await encryptionService.encrypt(
-          JSON.stringify({
-            notes: `Vaulted media ${file.name}`,
-            size: file.size,
-            lastModified: file.lastModified,
-            timestamp: new Date().toISOString(),
-          })
-        );
-
-        const newPhoto: PlanePhoto = {
-          id: `photo-${Date.now()}-${i}-${Math.random().toString(36).substring(2, 6)}`,
-          filename: parsed.filename,
-          imageUrl: dataUrl || 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800&fit=crop',
-          mediaType: isVideo ? 'video' : 'image',
-          videoUrl: isVideo ? dataUrl : undefined,
-          thumbnailUrl: thumbnailUrl || undefined,
-          registration: parsed.registration,
-          specialLivery: parsed.specialLivery,
-          dateCaptured: parsed.dateCaptured,
-          formattedDate: parsed.formattedDate,
-          shotNumber: parsed.shotNumber || undefined,
-          formatPattern: parsed.formatPattern,
-          isRangeFormat: parsed.isRangeFormat,
-          isAutoCorrected: parsed.isAutoCorrected,
-          location: 'Local Spotting Vault',
-          aircraftModel: parsed.isRangeFormat ? 'Military Aircraft Range' : 'Commercial Airliner',
-          airline: 'Vault Import',
-          spotterName: user?.username || 'Local Spotter',
-          isEncrypted: true,
-          encryptedData: encryptedPayload,
-          rating: 5,
-          notes: `Imported file ${file.name}`,
-        };
-
-        newUploadedPhotos.push(newPhoto);
-        successCount++;
-
-        setImportStatusText(`${t.loading || 'Processing'} ${file.name} (${i + 1}/${totalFiles})`);
-        setImportProgress(Math.round(((i + 1) / totalFiles) * 100));
+        newUploadedPhotos.push(...chunkPhotos.filter((p): p is PlanePhoto => p !== null));
+        setImportProgress(Math.round(((i + chunkSize) / totalFiles) * 100));
+        setImportStatusText(`${t.loading || 'Processing'} ${i + chunkSize}/${totalFiles}`);
       }
 
-      setImportStatusText(t.loading || 'Finalizing import...');
       setImportProgress(100);
+      setImportStatusText(t.loading || 'Finalizing import...');
 
       if (newUploadedPhotos.length > 0) {
         setMyPlanePics((prev) => [...newUploadedPhotos, ...prev]);
         setLightboxMedia(newUploadedPhotos[0]);
         showToast(
           t.vaultSyncComplete,
-          `${successCount} ${t.media}${successCount === 1 ? '' : 's'} — ${t.successfullyEncryptedVaulted}`,
+          `${newUploadedPhotos.length} ${t.media}${newUploadedPhotos.length === 1 ? '' : 's'} — ${t.successfullyEncryptedVaulted}`,
           'success'
         );
       } else {
         showToast(t.noValidMedia, t.pleaseSelectImageVideoFiles, 'warning');
       }
-    } catch (err: any) {
-      showToast(t.vaultImportFailure, `${t.encryptionReadError}: ${err.message}`, 'error');
+    } catch {
+      showToast(t.vaultImportFailure, t.encryptionReadError, 'error');
     } finally {
       setIsImporting(false);
       setImportProgress(0);
@@ -1040,8 +1029,8 @@ export const MyPlanePicsSuite: React.FC = () => {
       setLightboxMedia(newPhotoObj);
       setIsAddModalOpen(false);
       showToast(t.photoVaulted, `${parsed.registration} (${parsed.formatPattern})`, 'success');
-    } catch (err: any) {
-      showToast(t.vaultError, `${t.failedToEncryptPhotoMetadata}: ${err.message}`, 'error');
+    } catch {
+      showToast(t.vaultError, t.failedToEncryptPhotoMetadata, 'error');
     }
   };
 
@@ -1058,22 +1047,7 @@ export const MyPlanePicsSuite: React.FC = () => {
 
     try {
         const dataUrl = URL.createObjectURL(file);
-
-        const thumbnailUrl = !isVideo ? await generateThumbnail(file) : '';
-
-      const encryptedPayload = await encryptionService.encrypt(
-        JSON.stringify({
-          notes: `Manual upload: ${file.name}`,
-          size: file.size,
-          lastModified: file.lastModified,
-          timestamp: new Date().toISOString(),
-          registration: uploadFormData.registration,
-          airline: uploadFormData.airline,
-          aircraftModel: uploadFormData.aircraftModel,
-          specialLivery: uploadFormData.specialLivery,
-          dateCaptured: uploadFormData.dateCaptured,
-        })
-      );
+        const thumbnailUrl = '';
 
       const newPhoto: PlanePhoto = {
         id: `photo-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
@@ -1093,8 +1067,8 @@ export const MyPlanePicsSuite: React.FC = () => {
         aircraftModel: uploadFormData.aircraftModel || 'Commercial Airliner',
         airline: uploadFormData.airline || 'Vault Import',
         spotterName: user?.username || 'Local Spotter',
-        isEncrypted: true,
-        encryptedData: encryptedPayload,
+        isEncrypted: false,
+        encryptedData: undefined,
         rating: 5,
         notes: `Manually uploaded: ${file.name}`,
       };
@@ -1102,8 +1076,8 @@ export const MyPlanePicsSuite: React.FC = () => {
       setMyPlanePics((prev) => [newPhoto, ...prev]);
       setLightboxMedia(newPhoto);
       showToast(t.photoVaulted, `${newPhoto.registration} — AES-256 Encrypted`, 'success');
-    } catch (err: any) {
-      showToast(t.vaultError, `${t.failedToEncryptPhotoMetadata}: ${err.message}`, 'error');
+    } catch {
+      showToast(t.vaultError, t.failedToEncryptPhotoMetadata, 'error');
     } finally {
       setIsImporting(false);
       setImportProgress(0);
@@ -1132,7 +1106,7 @@ export const MyPlanePicsSuite: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* 3D LIQUID GLASS CONTROL HEADER - Aero glossy */}
-      <div className="relative overflow-hidden rounded-[28px] bg-slate-900/60 backdrop-blur-2xl border border-white/15 p-5 shadow-[0_14px_48px_rgba(0,0,0,0.7)] aero-glossy">
+      <div className="skeuo-panel relative overflow-hidden p-5 space-y-6">
         {/* Ambient Liquid Glow Effects */}
         <div className="absolute -top-24 -left-24 w-60 h-60 bg-gradient-to-br from-[#C8102E]/30 via-red-600/20 to-transparent rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -right-24 w-60 h-60 bg-gradient-to-tl from-red-500/20 via-red-600/10 to-transparent rounded-full blur-3xl pointer-events-none" />
@@ -1160,10 +1134,10 @@ export const MyPlanePicsSuite: React.FC = () => {
           </div>
 
           {/* Navigation Sub-Tabs */}
-          <div className="flex items-center gap-1.5 bg-black/50 backdrop-blur-xl p-1.5 rounded-2xl border border-white/12 overflow-x-auto max-w-full no-scrollbar aero-glossy">
+          <div className="flex items-center gap-1.5 bg-black/50 backdrop-blur-xl p-1.5 rounded-2xl border border-white/12 flex-wrap max-w-full ">
             <button
               onClick={() => setActiveTab('album')}
-              className={`liquid-glass-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${
+              className={`skeuo-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${
                 activeTab === 'album'
                   ? 'bg-gradient-to-r from-[#C8102E] to-red-600 text-black shadow-[0_4px_15px_rgba(255,95,31,0.4)] border border-white/20'
                   : 'text-slate-300 hover:text-white hover:bg-white/10'
@@ -1175,7 +1149,7 @@ export const MyPlanePicsSuite: React.FC = () => {
 
             <button
               onClick={() => setActiveTab('parser')}
-              className={`liquid-glass-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${
+              className={`skeuo-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${
                 activeTab === 'parser'
                   ? 'bg-gradient-to-r from-[#C8102E] to-red-600 text-black shadow-[0_4px_15px_rgba(255,95,31,0.4)] border border-white/20'
                   : 'text-slate-300 hover:text-white hover:bg-white/10'
@@ -1187,7 +1161,7 @@ export const MyPlanePicsSuite: React.FC = () => {
 
             <button
               onClick={() => setActiveTab('ranking')}
-              className={`liquid-glass-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${
+              className={`skeuo-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${
                 activeTab === 'ranking'
                   ? 'bg-gradient-to-r from-[#C8102E] to-red-600 text-black shadow-[0_4px_15px_rgba(255,95,31,0.4)] border border-white/20'
                   : 'text-slate-300 hover:text-white hover:bg-white/10'
@@ -1199,7 +1173,7 @@ export const MyPlanePicsSuite: React.FC = () => {
 
             <button
               onClick={() => setActiveTab('collections')}
-              className={`liquid-glass-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${
+              className={`skeuo-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${
                 activeTab === 'collections'
                   ? 'bg-gradient-to-r from-[#C8102E] to-red-600 text-black shadow-[0_4px_15px_rgba(255,95,31,0.4)] border border-white/20'
                   : 'text-slate-300 hover:text-white hover:bg-white/10'
@@ -1207,6 +1181,18 @@ export const MyPlanePicsSuite: React.FC = () => {
             >
               <FolderOpen className="w-3.5 h-3.5" />
               <span>Collections</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('liveries')}
+              className={`skeuo-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${
+                activeTab === 'liveries'
+                  ? 'bg-gradient-to-r from-[#C8102E] to-red-600 text-black shadow-[0_4px_15px_rgba(255,95,31,0.4)] border border-white/20'
+                  : 'text-slate-300 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              <Palette className="w-3.5 h-3.5" />
+              <span>Liveries</span>
             </button>
           </div>
         </div>
@@ -1254,7 +1240,7 @@ export const MyPlanePicsSuite: React.FC = () => {
 
        {/* Global Import Progress Bar */}
        {isImporting && (
-         <div className="p-4 rounded-2xl bg-slate-900/80 border border-[#C8102E]/40 space-y-2 relative overflow-hidden aero-glossy">
+         <div className="p-4 rounded-2xl bg-slate-900/80 border border-[#C8102E]/40 space-y-2 relative overflow-hidden ">
            <div className="absolute inset-0 bg-gradient-to-r from-[#C8102E]/5 via-red-600/5 to-transparent animate-pulse" />
            <div className="flex items-center justify-between text-xs font-mono relative z-10">
              <span className="text-slate-300 font-bold">Importing Media...</span>
@@ -1278,9 +1264,7 @@ export const MyPlanePicsSuite: React.FC = () => {
       {activeTab === 'album' && (
         <div className="space-y-6">
            {/* Spotter Profile Summary Card */}
-           <div className="relative overflow-hidden rounded-[28px] bg-slate-900/60 backdrop-blur-2xl border border-white/15 p-5 shadow-[0_14px_48px_rgba(0,0,0,0.7)] aero-glossy">
-            <div className="absolute -top-24 -right-24 w-60 h-60 bg-gradient-to-bl from-[#C8102E]/30 via-red-600/20 to-transparent rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-24 -left-24 w-60 h-60 bg-gradient-to-tr from-red-500/20 via-red-600/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+           <div className="skeuo-panel p-5">
 
             <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4">
@@ -1301,21 +1285,21 @@ export const MyPlanePicsSuite: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="text-center px-4 py-2 bg-black/40 rounded-2xl border border-white/10">
-                  <p className="text-[9px] text-slate-400 font-mono uppercase">Total Photos</p>
-                  <p className="text-xl font-black text-white font-mono">{liveStats.totalPhotos}</p>
-                </div>
-                <div className="text-center px-4 py-2 bg-black/40 rounded-2xl border border-white/10">
-                  <p className="text-[9px] text-slate-400 font-mono uppercase">Auto-Corrected</p>
-                  <p className="text-xl font-black text-red-400 font-mono">{liveStats.autoCorrectedCount}</p>
-                </div>
-              </div>
+               <div className="flex items-center gap-3">
+                 <div className="skeuo-inset-panel text-center px-4 py-2">
+                   <p className="text-[9px] text-slate-400 font-mono uppercase">Total Photos</p>
+                   <p className="text-xl font-black text-white font-mono">{liveStats.totalPhotos}</p>
+                 </div>
+                 <div className="skeuo-inset-panel text-center px-4 py-2">
+                   <p className="text-[9px] text-slate-400 font-mono uppercase">Auto-Corrected</p>
+                   <p className="text-xl font-black text-red-400 font-mono">{liveStats.autoCorrectedCount}</p>
+                 </div>
+               </div>
             </div>
           </div>
 
            {/* Action Bar & Search Bar */}
-           <div className="bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl aero-glossy">
+           <div className="skeuo-panel p-4 flex flex-col md:flex-row items-center justify-between gap-4">
             {/* Search Input */}
             <div className="relative w-full md:w-80">
               <Search className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
@@ -1324,7 +1308,7 @@ export const MyPlanePicsSuite: React.FC = () => {
                  placeholder={t.searchRegistrationLiveryAirline}
                  value={searchQuery}
                  onChange={(e) => setSearchQuery(e.target.value)}
-                 className="w-full pl-10 pr-4 py-2 bg-slate-950/80 border border-white/10 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#C8102E] shadow-inner font-mono aero-input"
+                 className="w-full pl-10 pr-4 py-2 bg-slate-950/80 border border-white/10 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#C8102E] shadow-inner font-mono skeuo-input"
                />
             </div>
 
@@ -1333,11 +1317,11 @@ export const MyPlanePicsSuite: React.FC = () => {
               <div className="flex items-center gap-1.5 text-xs text-slate-300 font-mono">
                 <Filter className="w-3.5 h-3.5 text-[#C8102E]" />
                 <span className="font-bold">{t.format}:</span>
-                   <select
-                     value={filterFormat}
-                     onChange={(e) => setFilterFormat(e.target.value)}
-                     className="bg-slate-950 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#C8102E] font-mono cursor-pointer aero-input"
-                   >
+                    <select
+                      value={filterFormat}
+                      onChange={(e) => setFilterFormat(e.target.value)}
+                      className="skeuo-select text-xs font-mono cursor-pointer"
+                    >
                   <option value="all">{t.allPatterns}</option>
                   <option value="range">{t.rangeFormatOnly}</option>
                   <option value="autocorrect">{t.autoCorrectedOnly}</option>
@@ -1346,11 +1330,11 @@ export const MyPlanePicsSuite: React.FC = () => {
 
                <div className="flex items-center gap-1.5 text-xs text-slate-300 font-mono">
                  <span className="font-bold">{t.airline}:</span>
-                    <select
-                      value={filterAirline}
-                      onChange={(e) => setFilterAirline(e.target.value)}
-                      className="bg-slate-950 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#C8102E] font-mono cursor-pointer aero-input"
-                    >
+                     <select
+                       value={filterAirline}
+                       onChange={(e) => setFilterAirline(e.target.value)}
+                       className="skeuo-select text-xs font-mono cursor-pointer"
+                     >
                    <option value="all">{t.allAirlines}</option>
                    <option value="Middle East Airlines">Middle East Airlines</option>
                    <option value="Emirates">Emirates</option>
@@ -1363,26 +1347,27 @@ export const MyPlanePicsSuite: React.FC = () => {
 
                <div className="flex items-center gap-1.5 text-xs text-slate-300 font-mono">
                  <span className="font-bold">Collection:</span>
-                    <select
-                      value={selectedCollection}
-                      onChange={(e) => setSelectedCollection(e.target.value)}
-                      className="bg-slate-950 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#C8102E] font-mono cursor-pointer aero-input"
-                    >
-                   <option value="all">All Photos</option>
-                   <option value="favorites">Favorites</option>
-                   {collections.map(c => (
-                     <option key={c} value={c}>{c}</option>
-                   ))}
+                     <select
+                       value={selectedCollection}
+                       onChange={(e) => setSelectedCollection(e.target.value)}
+                       className="skeuo-select text-xs font-mono cursor-pointer"
+                     >
+                    <option value="all">All Photos</option>
+                    <option value="favorites">Favorites</option>
+                    <option value="watchlist">Watchlist</option>
+                    {collections.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
                  </select>
                </div>
 
               <div className="flex items-center gap-1.5 text-xs text-slate-300 font-mono">
                 <span className="font-bold">Sort:</span>
-                   <select
-                     value={sortBy}
-                     onChange={(e) => setSortBy(e.target.value as any)}
-                     className="bg-slate-950 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#C8102E] font-mono cursor-pointer aero-input"
-                   >
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value as any)}
+                      className="skeuo-select text-xs font-mono cursor-pointer"
+                    >
                   <option value="newest">Newest First</option>
                   <option value="oldest">Oldest First</option>
                   <option value="registration">Registration A-Z</option>
@@ -1390,7 +1375,7 @@ export const MyPlanePicsSuite: React.FC = () => {
                 </select>
               </div>
 
-               <div className="flex items-center gap-1 bg-slate-950/80 backdrop-blur-xl border border-white/10 rounded-xl p-0.5 aero-glossy">
+               <div className="flex items-center gap-1 bg-slate-950/80 backdrop-blur-xl border border-white/10 rounded-xl p-0.5 ">
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`p-1.5 rounded-lg transition-all cursor-pointer ${viewMode === 'grid' ? 'bg-[#C8102E] text-black' : 'text-slate-400 hover:text-white'}`}
@@ -1408,7 +1393,7 @@ export const MyPlanePicsSuite: React.FC = () => {
               {selectedIds.size > 0 && (
                 <button
                   onClick={deleteSelected}
-                  className="liquid-glass-btn px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="skeuo-btn px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   Delete ({selectedIds.size})
@@ -1419,43 +1404,30 @@ export const MyPlanePicsSuite: React.FC = () => {
                <div className="flex items-center gap-2">
                   <button
                     onClick={() => singleInputRef.current?.click()}
-                    className="liquid-glass-btn px-3.5 py-2 bg-gradient-to-r from-[#C8102E] to-red-600 hover:from-[#ff7236] hover:to-red-500 text-black font-extrabold text-xs rounded-xl shadow-[0_4px_15px_rgba(255,95,31,0.3)] transition-all flex items-center gap-1.5 cursor-pointer"
+                    className="skeuo-btn px-3.5 py-2 bg-gradient-to-r from-[#C8102E] to-red-600 hover:from-[#ff7236] hover:to-red-500 text-black font-extrabold text-xs rounded-xl shadow-[0_4px_15px_rgba(255,95,31,0.3)] transition-all flex items-center gap-1.5 cursor-pointer"
                   >
                     <Plus className="w-4 h-4" />
                     <span>{t.uploadPhoto}</span>
                   </button>
 
-                  <button
-                    onClick={() => handleFolderImportClick()}
-                    className="liquid-glass-btn px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-red-300 border border-red-500/30 font-extrabold text-xs rounded-xl shadow-lg transition-all flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Layers className="w-4 h-4" />
-                    <span>{t.folderImport}</span>
-                  </button>
+                   <button
+                     onClick={() => handleFolderImportClick()}
+                     className="skeuo-btn px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-red-300 border border-red-500/30 font-extrabold text-xs rounded-xl shadow-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                   >
+                     <Layers className="w-4 h-4" />
+                     <span>{t.folderImport}</span>
+                   </button>
 
-                  <button
-                    onClick={() => setGlobalEnhance(!globalEnhance)}
-                    className={`liquid-glass-btn px-3 py-2 font-extrabold text-xs rounded-xl shadow-lg transition-all flex items-center gap-1.5 cursor-pointer ${
-                      globalEnhance
-                        ? 'bg-gradient-to-r from-red-500 to-red-600 text-white'
-                        : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-white/10'
-                    }`}
-                    title="Toggle global image enhancement"
-                  >
-                    <Wand2 className="w-4 h-4" />
-                    <span>{globalEnhance ? 'Enhance ON' : 'Enhance'}</span>
-                  </button>
-
-                  <div className="relative">
+                   <div className="relative">
                     <button
                       onClick={() => setShowExportMenu(!showExportMenu)}
-                      className="liquid-glass-btn px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-white/10 font-extrabold text-xs rounded-xl shadow-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                      className="skeuo-btn px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-white/10 font-extrabold text-xs rounded-xl shadow-lg transition-all flex items-center gap-1.5 cursor-pointer"
                     >
                       <Download className="w-4 h-4" />
                       <span>Export</span>
                     </button>
                      {showExportMenu && (
-                       <div className="absolute right-0 top-10 z-20 bg-slate-900/95 backdrop-blur-xl border border-white/12 rounded-2xl shadow-2xl p-1.5 space-y-1 min-w-[180px] aero-glossy">
+                       <div className="absolute right-0 top-10 z-20 bg-slate-900/95 backdrop-blur-xl border border-white/12 rounded-2xl shadow-2xl p-1.5 space-y-1 min-w-[180px] ">
                          <button onClick={() => { exportToCSV(); setShowExportMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-300 hover:bg-white/10 rounded-lg cursor-pointer transition-colors">
                            <FileDown className="w-3.5 h-3.5" /> Export as CSV
                          </button>
@@ -1469,7 +1441,7 @@ export const MyPlanePicsSuite: React.FC = () => {
                   {selectedIds.size > 0 && (
                     <button
                       onClick={() => setShowBatchEdit(true)}
-                      className="liquid-glass-btn px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                      className="skeuo-btn px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
                       Batch Edit ({selectedIds.size})
@@ -1481,7 +1453,7 @@ export const MyPlanePicsSuite: React.FC = () => {
 
           {/* Liquid 3D Photo Grid / List */}
           {sortedPhotos.length === 0 ? (
-            <div className="text-center py-16 rounded-[28px] border-2 border-dashed border-white/10 bg-slate-900/30 aero-glossy">
+            <div className="text-center py-16 rounded-[28px] border-2 border-dashed border-white/10 bg-slate-900/30 ">
               <Camera className="w-12 h-12 text-slate-600 mx-auto mb-3" />
               <p className="text-sm font-bold text-slate-400">{t.noPhotosMatchFilters}</p>
               <p className="text-xs text-slate-500 mt-1">{t.tryAdjustingSearchOrUpload}</p>
@@ -1506,7 +1478,7 @@ export const MyPlanePicsSuite: React.FC = () => {
                        e.preventDefault();
                        toggleSelect(photo.id);
                      }}
-                     className={`glossy-card relative group rounded-[28px] overflow-hidden bg-slate-900/60 backdrop-blur-xl border transition-all duration-300 cursor-pointer flex flex-col justify-between hover:-translate-y-1.5 shadow-xl hover:shadow-[0_18px_36px_rgba(0,0,0,0.55)] ${isSelected ? 'border-[#C8102E] shadow-[0_0_24px_rgba(255,95,31,0.35)]' : 'border-white/15 hover:border-white/30'}`}
+                     className={`skeuo-panel relative group rounded-[28px] overflow-hidden bg-slate-900/60 backdrop-blur-xl border transition-all duration-300 cursor-pointer flex flex-col justify-between hover:-translate-y-1.5 shadow-xl hover:shadow-[0_18px_36px_rgba(0,0,0,0.55)] ${isSelected ? 'border-[#C8102E] shadow-[0_0_24px_rgba(255,95,31,0.35)]' : 'border-white/15 hover:border-white/30'}`}
                    >
                     {/* Animated Gradient Border on Hover */}
                     <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[#C8102E]/0 via-red-600/0 to-red-500/0 group-hover:from-[#C8102E]/30 group-hover:via-red-600/20 group-hover:to-red-500/30 transition-all duration-500 pointer-events-none z-0" />
@@ -1538,14 +1510,14 @@ export const MyPlanePicsSuite: React.FC = () => {
                            src={photo.videoUrl}
                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                            muted
-                           style={{ filter: globalEnhance ? getEnhancementFilter() : undefined }}
+
                          />
                        ) : (
                          <img
                            src={photo.thumbnailUrl || photo.imageUrl}
                            alt={photo.registration}
                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-                           style={{ filter: globalEnhance ? getEnhancementFilter() : undefined }}
+
                          />
                        )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-black/40 z-10" />
@@ -1582,22 +1554,36 @@ export const MyPlanePicsSuite: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Card Details Footer */}
-                    <div className="p-4 space-y-2.5 text-xs z-20">
-                      <div className="flex items-center justify-between text-slate-300 font-mono text-[11px]">
-                        <span className="font-bold truncate text-slate-200">{photo.airline || 'Commercial Fleet'}</span>
-                        <span className="text-slate-400 truncate">{photo.location}</span>
-                      </div>
+                     {/* Card Details Footer */}
+                     <div className="p-4 space-y-2.5 text-xs z-20">
+                       <div className="flex items-center justify-between text-slate-300 font-mono text-[11px]">
+                         <span className="font-bold truncate text-slate-200">{photo.airline || 'Commercial Fleet'}</span>
+                         <span className="text-slate-400 truncate">{photo.location}</span>
+                       </div>
 
-                      <p className="text-slate-200 font-bold truncate text-xs">{photo.aircraftModel}</p>
+                       <p className="text-slate-200 font-bold truncate text-xs">{photo.aircraftModel}</p>
 
-                      <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[10px] font-mono">
-                        <span className="flex items-center gap-1 text-red-400 font-bold">
-                          <Lock className="w-3 h-3" /> {t.aes256}
-                        </span>
-                        <span className="text-slate-400">{photo.mediaType === 'video' ? t.video : 'Image'}</span>
-                      </div>
-                    </div>
+                       <div className="flex items-center gap-2 pt-1">
+                         <button
+                           onClick={(e) => {
+                             e.stopPropagation();
+                             toggleWatchlist(photo.id);
+                           }}
+                           className={`flex-1 p-2 rounded-lg border transition-all cursor-pointer flex items-center justify-center gap-1 ${watchlist.some(w => w.id === photo.id) ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'bg-slate-800 border-white/10 text-slate-400 hover:text-white'}`}
+                           title={watchlist.some(w => w.id === photo.id) ? 'Remove from Watchlist' : 'Add to Watchlist'}
+                         >
+                           <Bookmark className="w-3.5 h-3.5" />
+                           <span className="text-[10px] font-bold">{watchlist.some(w => w.id === photo.id) ? 'Watching' : 'Watchlist'}</span>
+                         </button>
+                       </div>
+
+                       <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[10px] font-mono">
+                         <span className="flex items-center gap-1 text-red-400 font-bold">
+                           <Lock className="w-3 h-3" /> {t.aes256}
+                         </span>
+                         <span className="text-slate-400">{photo.mediaType === 'video' ? t.video : 'Image'}</span>
+                       </div>
+                     </div>
                   </div>
                 );
               })}
@@ -1622,15 +1608,14 @@ export const MyPlanePicsSuite: React.FC = () => {
                       e.preventDefault();
                       toggleSelect(photo.id);
                     }}
-                     className={`glossy-card flex items-center gap-4 p-3 rounded-2xl bg-slate-900/60 backdrop-blur-xl border transition-all cursor-pointer hover:bg-slate-800/60 ${isSelected ? 'border-[#C8102E] shadow-[0_0_18px_rgba(255,95,31,0.25)]' : 'border-white/10'}`}
+                     className={`skeuo-panel flex items-center gap-4 p-3 rounded-2xl bg-slate-900/60 backdrop-blur-xl border transition-all cursor-pointer hover:bg-slate-800/60 ${isSelected ? 'border-[#C8102E] shadow-[0_0_18px_rgba(255,95,31,0.25)]' : 'border-white/10'}`}
                   >
                     <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-black shrink-0">
                       <img
                         src={photo.thumbnailUrl || photo.imageUrl}
                         alt={photo.registration}
-                        className="w-full h-full object-cover"
-                        style={{ filter: globalEnhance ? getEnhancementFilter() : undefined }}
-                      />
+                         className="w-full h-full object-cover"
+                       />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
@@ -1645,17 +1630,27 @@ export const MyPlanePicsSuite: React.FC = () => {
                       <p className="text-xs text-slate-400 font-mono truncate">{photo.airline || 'Commercial Fleet'} • {photo.aircraftModel}</p>
                       <p className="text-[10px] text-slate-500 font-mono">{photo.formattedDate} • {photo.location}</p>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleSelect(photo.id);
-                        }}
-                        className={`p-2 rounded-xl border transition-all cursor-pointer ${isSelected ? 'bg-[#C8102E] border-[#C8102E] text-black' : 'bg-slate-800 border-white/10 text-slate-400 hover:text-white'}`}
-                      >
-                        <Check className="w-4 h-4" />
-                      </button>
-                    </div>
+                     <div className="flex items-center gap-2 shrink-0">
+                       <button
+                         onClick={(e) => {
+                           e.stopPropagation();
+                           toggleWatchlist(photo.id);
+                         }}
+                         className={`p-2 rounded-xl border transition-all cursor-pointer ${watchlist.some(w => w.id === photo.id) ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'bg-slate-800 border-white/10 text-slate-400 hover:text-white'}`}
+                         title={watchlist.some(w => w.id === photo.id) ? 'Remove from Watchlist' : 'Add to Watchlist'}
+                       >
+                         <Bookmark className="w-4 h-4" />
+                       </button>
+                       <button
+                         onClick={(e) => {
+                           e.stopPropagation();
+                           toggleSelect(photo.id);
+                         }}
+                         className={`p-2 rounded-xl border transition-all cursor-pointer ${isSelected ? 'bg-[#C8102E] border-[#C8102E] text-black' : 'bg-slate-800 border-white/10 text-slate-400 hover:text-white'}`}
+                       >
+                         <Check className="w-4 h-4" />
+                       </button>
+                     </div>
                   </div>
                 );
               })}
@@ -1680,7 +1675,7 @@ export const MyPlanePicsSuite: React.FC = () => {
                 <button
                   onClick={() => goToPage(page - 1)}
                   disabled={page === 0}
-                  className="liquid-glass-btn px-3 py-1.5 bg-slate-800 rounded-lg text-white text-xs disabled:opacity-30 flex items-center gap-1"
+                  className="skeuo-btn px-3 py-1.5 bg-slate-800 rounded-lg text-white text-xs disabled:opacity-30 flex items-center gap-1"
                 >
                   <ArrowLeft className="w-3 h-3" /> {t.previous}
                 </button>
@@ -1690,7 +1685,7 @@ export const MyPlanePicsSuite: React.FC = () => {
                 <button
                   onClick={() => goToPage(page + 1)}
                   disabled={page >= pageCount - 1}
-                  className="liquid-glass-btn px-3 py-1.5 bg-slate-800 rounded-lg text-white text-xs disabled:opacity-30 flex items-center gap-1"
+                  className="skeuo-btn px-3 py-1.5 bg-slate-800 rounded-lg text-white text-xs disabled:opacity-30 flex items-center gap-1"
                 >
                   {t.next} <ArrowRight className="w-3 h-3" />
                 </button>
@@ -1703,7 +1698,7 @@ export const MyPlanePicsSuite: React.FC = () => {
       {/* TAB 2: FILENAME PARSER ENGINE */}
       {activeTab === 'parser' && (
         <div className="space-y-6">
-          <div className="bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-6 shadow-2xl space-y-6 aero-glossy">
+          <div className="bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-6 shadow-2xl space-y-6 ">
             <div className="flex items-center justify-between pb-3 border-b border-white/10">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 bg-[#C8102E]/20 border border-[#C8102E]/40 rounded-xl text-[#C8102E]">
@@ -1742,7 +1737,7 @@ export const MyPlanePicsSuite: React.FC = () => {
                     <button
                       key={sample.name}
                       onClick={() => setTestFilename(sample.file)}
-                      className={`liquid-glass-btn px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
+                      className={`skeuo-btn px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
                         testFilename === sample.file
                           ? 'bg-gradient-to-r from-[#C8102E] to-red-600 text-black font-extrabold shadow-lg'
                           : 'bg-slate-950 hover:bg-slate-800 text-slate-300 border border-white/10'
@@ -1826,7 +1821,7 @@ export const MyPlanePicsSuite: React.FC = () => {
 
       {/* TAB 3: RANKING & ANALYTICS */}
       {activeTab === 'ranking' && (
-        <div className="bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-6 shadow-2xl space-y-8 aero-glossy">
+        <div className="bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-6 shadow-2xl space-y-8 ">
           <div className="flex items-center justify-between pb-3 border-b border-white/10">
             <div className="flex items-center gap-3">
               <div className="p-2.5 bg-[#C8102E]/20 border border-[#C8102E]/40 rounded-xl text-[#C8102E]">
@@ -1845,29 +1840,29 @@ export const MyPlanePicsSuite: React.FC = () => {
           </div>
 
            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-             <div className="glossy-card bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-5 shadow-2xl aero-glossy">
+             <div className="skeuo-panel bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-5 shadow-2xl ">
                <p className="text-[10px] text-slate-400 uppercase tracking-widest font-mono font-bold">{t.totalVaultedPhotos}</p>
                <p className="text-3xl font-black text-[#C8102E] mt-1 font-mono">{liveStats.totalPhotos}</p>
              </div>
 
-             <div className="glossy-card bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-5 shadow-2xl aero-glossy">
+             <div className="skeuo-panel bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-5 shadow-2xl ">
                <p className="text-[10px] text-slate-400 uppercase tracking-widest font-mono font-bold">{t.uniqueRegistrations}</p>
                <p className="text-3xl font-black text-red-400 mt-1 font-mono">{liveStats.uniqueRegistrations}</p>
              </div>
 
-             <div className="glossy-card bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-5 shadow-2xl aero-glossy">
+             <div className="skeuo-panel bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-5 shadow-2xl ">
                <p className="text-[10px] text-slate-400 uppercase tracking-widest font-mono font-bold">{t.militaryRangeFormats}</p>
                <p className="text-3xl font-black text-red-400 mt-1 font-mono">{liveStats.rangeFormatCount}</p>
              </div>
 
-             <div className="glossy-card bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-5 shadow-2xl aero-glossy">
+             <div className="skeuo-panel bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-5 shadow-2xl ">
                <p className="text-[10px] text-slate-400 uppercase tracking-widest font-mono font-bold">{t.autoCorrectedMatches}</p>
                <p className="text-3xl font-black text-red-400 mt-1 font-mono">{liveStats.autoCorrectedCount}</p>
              </div>
            </div>
 
            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-             <div className="glossy-card bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-6 shadow-2xl space-y-4 aero-glossy">
+             <div className="skeuo-panel bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-6 shadow-2xl space-y-4 ">
               <h4 className="text-xs font-black text-slate-300 uppercase tracking-widest font-mono">
                 Top Airlines in Vault
               </h4>
@@ -1889,7 +1884,7 @@ export const MyPlanePicsSuite: React.FC = () => {
               </div>
             </div>
 
-            <div className="glossy-card bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-6 shadow-2xl space-y-4 aero-glossy">
+            <div className="skeuo-panel bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-6 shadow-2xl space-y-4 ">
                <h4 className="text-xs font-black text-slate-300 uppercase tracking-widest font-mono">
                  Monthly Spotting Trends
                </h4>
@@ -1915,241 +1910,95 @@ export const MyPlanePicsSuite: React.FC = () => {
       )}
 
        {/* FULLSCREEN LIGHTBOX MODAL */}
-       {isLightboxOpen && lightboxMedia && (
-         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-2xl flex items-center justify-center p-4 sm:p-6">
-           <div className="glossy-card relative w-full max-w-5xl bg-slate-900/90 border border-white/20 rounded-[28px] p-6 shadow-[0_0_80px_rgba(0,0,0,0.9)] space-y-4 overflow-hidden aero-glossy">
-            {/* Animated gradient border effect */}
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[#C8102E]/20 via-red-600/10 to-red-500/20 opacity-50 pointer-events-none" />
+        {isLightboxOpen && lightboxMedia && (
+          <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-2 sm:p-4" onClick={() => setIsLightboxOpen(false)}>
+            <div className="relative w-full max-w-6xl skeuo-panel rounded-[28px] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
 
-            <div className="flex items-center justify-between pb-3 border-b border-white/10 relative z-10">
-              <div className="flex items-center gap-3 font-mono">
-                <button
-                  onClick={() => {
-                    const currentIndex = sortedPhotos.findIndex(p => p.id === lightboxMedia.id);
-                    const prevIndex = (currentIndex - 1 + sortedPhotos.length) % sortedPhotos.length;
-                    if (sortedPhotos[prevIndex]) {
-                      setLightboxMedia(sortedPhotos[prevIndex]);
-                    }
-                  }}
-                  className="liquid-glass-btn p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all cursor-pointer"
-                >
-                  <ArrowLeft className="w-5 h-5" />
-                </button>
-                <div>
-                  <span className="text-lg font-black text-[#C8102E]">{lightboxMedia.registration}</span>
-                  <span className="text-xs text-slate-400 font-bold block">• {lightboxMedia.filename}</span>
-                </div>
-                <button
-                  onClick={() => {
-                    const currentIndex = sortedPhotos.findIndex(p => p.id === lightboxMedia.id);
-                    const nextIndex = (currentIndex + 1) % sortedPhotos.length;
-                    if (sortedPhotos[nextIndex]) {
-                      setLightboxMedia(sortedPhotos[nextIndex]);
-                    }
-                  }}
-                  className="liquid-glass-btn p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all cursor-pointer"
-                >
-                  <ArrowRight className="w-5 h-5" />
-                </button>
-              </div>
-
-              <button
-                onClick={() => setIsLightboxOpen(false)}
-                className="liquid-glass-btn p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all cursor-pointer"
-              >
-                <X className="liquid-glass-btn w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
-              <div className="lg:col-span-2 relative rounded-2xl overflow-hidden bg-black max-h-[60vh] flex items-center justify-center aero-glossy">
-                {lightboxMedia.mediaType === 'video' && lightboxMedia.videoUrl ? (
-                  <video
-                    src={lightboxMedia.videoUrl}
-                    controls
-                    autoPlay
-                    className="w-full h-full object-contain max-h-[60vh]"
-                    style={{ filter: getEnhancementFilter() }}
-                  />
-                ) : (
-                  <img
-                    src={lightboxMedia.imageUrl}
-                    alt={lightboxMedia.registration}
-                    className="w-full h-full object-contain max-h-[60vh]"
-                    style={{ filter: getEnhancementFilter() }}
-                  />
-                )}
-              </div>
-
-              <div className="space-y-4 text-xs font-mono">
-                <div className="p-4 rounded-2xl bg-slate-950 border border-white/10 space-y-3 aero-glossy">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-black text-[#C8102E] uppercase tracking-wider">Photo Metadata</h4>
-                    <button
-                      onClick={() => setShowEnhancePanel(!showEnhancePanel)}
-                      className="liquid-glass-btn p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white"
-                      title="Image Enhancements"
-                    >
-                      <Wand2 className="w-3.5 h-3.5" />
-                    </button>
+              <div className="flex items-center justify-between p-4 border-b border-white/10">
+                <div className="flex items-center gap-3 font-mono">
+                  <button
+                    onClick={() => {
+                      const currentIndex = sortedPhotos.findIndex(p => p.id === lightboxMedia.id);
+                      const prevIndex = (currentIndex - 1 + sortedPhotos.length) % sortedPhotos.length;
+                      if (sortedPhotos[prevIndex]) {
+                        setLightboxMedia(sortedPhotos[prevIndex]);
+                      }
+                    }}
+                    className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer"
+                  >
+                    <ArrowLeft className="w-5 h-5" />
+                  </button>
+                  <div>
+                    <span className="text-lg font-black text-[#C8102E]">{lightboxMedia.registration}</span>
+                    <span className="text-xs text-slate-400 font-bold block">• {lightboxMedia.filename}</span>
                   </div>
-                  <div className="space-y-2 text-slate-300">
-                    <div className="flex justify-between"><span>Registration</span><span className="text-white font-bold">{lightboxMedia.registration}</span></div>
-                    <div className="flex justify-between"><span>Airline</span><span className="text-white font-bold">{lightboxMedia.airline || 'N/A'}</span></div>
-                    <div className="flex justify-between"><span>Model</span><span className="text-white font-bold">{lightboxMedia.aircraftModel || 'N/A'}</span></div>
-                    <div className="flex justify-between"><span>Location</span><span className="text-white font-bold">{lightboxMedia.location || 'N/A'}</span></div>
-                    <div className="flex justify-between"><span>Livery</span><span className="text-[#C8102E] font-bold">{lightboxMedia.specialLivery}</span></div>
-                    <div className="flex justify-between"><span>Date</span><span className="text-white font-bold">{lightboxMedia.formattedDate || lightboxMedia.dateCaptured || 'N/A'}</span></div>
-                    <div className="flex justify-between"><span>Format</span><span className="text-red-400 font-bold">{lightboxMedia.formatPattern}</span></div>
-                    <div className="flex justify-between"><span>Shot</span><span className="text-white font-bold">{lightboxMedia.shotNumber !== undefined ? `#${lightboxMedia.shotNumber}` : 'Single'}</span></div>
-                    <div className="flex justify-between"><span>Type</span><span className="text-white font-bold">{lightboxMedia.mediaType === 'video' ? t.video : 'Image'}</span></div>
-                  </div>
+                  <button
+                    onClick={() => {
+                      const currentIndex = sortedPhotos.findIndex(p => p.id === lightboxMedia.id);
+                      const nextIndex = (currentIndex + 1) % sortedPhotos.length;
+                      if (sortedPhotos[nextIndex]) {
+                        setLightboxMedia(sortedPhotos[nextIndex]);
+                      }
+                    }}
+                    className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer"
+                  >
+                    <ArrowRight className="w-5 h-5" />
+                  </button>
                 </div>
 
-                 {/* Enhancement Panel */}
-                 {showEnhancePanel && (
-                   <div className="p-4 rounded-2xl bg-slate-950 border border-white/10 space-y-4 aero-glossy">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-black text-red-400 uppercase tracking-wider flex items-center gap-2">
-                        <Sparkles className="w-3.5 h-3.5" /> Enhancements
-                      </h4>
-                      <button
-                        onClick={resetEnhancements}
-                        className="liquid-glass-btn px-2 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white text-[10px] font-bold"
-                      >
-                        Reset
-                      </button>
-                    </div>
+                <button
+                  onClick={() => setIsLightboxOpen(false)}
+                  className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
 
-                    {/* Preset Filters */}
-                    <div className="space-y-2">
-                      <p className="text-[10px] text-slate-400 uppercase font-bold">Presets</p>
-                      <div className="grid grid-cols-3 gap-1.5">
-                        {[
-                          { id: 'none', label: 'None' },
-                          { id: 'natural', label: 'Natural' },
-                          { id: 'vibrant', label: 'Vibrant' },
-                          { id: 'film', label: 'Film' },
-                          { id: 'bw', label: 'B&W' },
-                          { id: 'warm', label: 'Warm' },
-                          { id: 'cool', label: 'Cool' },
-                        ].map((preset) => (
-                          <button
-                            key={preset.id}
-                            onClick={() => setEnhancePreset(preset.id as EnhancementPreset)}
-                            className={`liquid-glass-btn px-2 py-1.5 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
-                              enhancePreset === preset.id
-                                ? 'bg-gradient-to-r from-[#C8102E] to-red-600 text-black'
-                                : 'bg-slate-800 text-slate-300 hover:text-white'
-                            }`}
-                          >
-                            {preset.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+               <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 flex-1 overflow-hidden">
+                 <div className="lg:col-span-2 relative bg-black flex items-center justify-center">
+                   {lightboxMedia.mediaType === 'video' && lightboxMedia.videoUrl ? (
+                     <video
+                       src={lightboxMedia.videoUrl}
+                       controls
+                       autoPlay
+                       className="w-full h-full object-contain"
 
-                    {/* Manual Adjustments */}
-                    <div className="space-y-3">
-                      <p className="text-[10px] text-slate-400 uppercase font-bold">Adjustments</p>
+                     />
+                   ) : (
+                     <img
+                       src={lightboxMedia.imageUrl}
+                       alt={lightboxMedia.registration}
+                       className="w-full h-full object-contain"
 
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-300 flex items-center gap-1.5">
-                            <Sun className="w-3 h-3" /> Brightness
-                          </span>
-                          <span className="text-slate-400 text-[10px] font-mono">{enhanceBrightness}%</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="50"
-                          max="150"
-                          value={enhanceBrightness}
-                          onChange={(e) => { setEnhanceBrightness(Number(e.target.value)); setEnhancePreset('none'); }}
-                          className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#C8102E]"
-                        />
-                      </div>
+                     />
+                   )}
+                 </div>
 
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-300 flex items-center gap-1.5">
-                            <Contrast className="w-3 h-3" /> Contrast
-                          </span>
-                          <span className="text-slate-400 text-[10px] font-mono">{enhanceContrast}%</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="50"
-                          max="150"
-                          value={enhanceContrast}
-                          onChange={(e) => { setEnhanceContrast(Number(e.target.value)); setEnhancePreset('none'); }}
-                          className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#C8102E]"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-300 flex items-center gap-1.5">
-                            <Palette className="w-3 h-3" /> Saturation
-                          </span>
-                          <span className="text-slate-400 text-[10px] font-mono">{enhanceSaturation}%</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="0"
-                          max="200"
-                          value={enhanceSaturation}
-                          onChange={(e) => { setEnhanceSaturation(Number(e.target.value)); setEnhancePreset('none'); }}
-                          className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#C8102E]"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-300 flex items-center gap-1.5">
-                            <Sparkles className="w-3 h-3" /> Sepia
-                          </span>
-                          <span className="text-slate-400 text-[10px] font-mono">{enhanceSepia}%</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="0"
-                          max="100"
-                          value={enhanceSepia}
-                          onChange={(e) => { setEnhanceSepia(Number(e.target.value)); setEnhancePreset('none'); }}
-                          className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#C8102E]"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-slate-300 flex items-center gap-1.5">
-                            <Palette className="w-3 h-3" /> Hue
-                          </span>
-                          <span className="text-slate-400 text-[10px] font-mono">{enhanceHue}°</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="-180"
-                          max="180"
-                          value={enhanceHue}
-                          onChange={(e) => { setEnhanceHue(Number(e.target.value)); setEnhancePreset('none'); }}
-                          className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#C8102E]"
-                        />
-                      </div>
+                  <div className="space-y-4 text-xs font-mono p-4 overflow-y-auto h-full">
+                   <div className="p-4 rounded-xl bg-slate-950 border border-white/10 space-y-3">
+                     <h4 className="text-xs font-black text-[#C8102E] uppercase tracking-wider">Photo Metadata</h4>
+                    <div className="space-y-2 text-slate-300">
+                     <div className="flex justify-between"><span>Registration</span><span className="text-white font-bold">{lightboxMedia.registration}</span></div>
+                     <div className="flex justify-between"><span>Airline</span><span className="text-white font-bold">{lightboxMedia.airline || 'N/A'}</span></div>
+                     <div className="flex justify-between"><span>Model</span><span className="text-white font-bold">{lightboxMedia.aircraftModel || 'N/A'}</span></div>
+                     <div className="flex justify-between"><span>Location</span><span className="text-white font-bold">{lightboxMedia.location || 'N/A'}</span></div>
+                     <div className="flex justify-between"><span>Livery</span><span className="text-[#C8102E] font-bold">{lightboxMedia.specialLivery}</span></div>
+                     <div className="flex justify-between"><span>Date</span><span className="text-white font-bold">{lightboxMedia.formattedDate || lightboxMedia.dateCaptured || 'N/A'}</span></div>
+                     <div className="flex justify-between"><span>Format</span><span className="text-red-400 font-bold">{lightboxMedia.formatPattern}</span></div>
+                     <div className="flex justify-between"><span>Shot</span><span className="text-white font-bold">{lightboxMedia.shotNumber !== undefined ? `#${lightboxMedia.shotNumber}` : 'Single'}</span></div>
+                     <div className="flex justify-between"><span>Type</span><span className="text-white font-bold">{lightboxMedia.mediaType === 'video' ? t.video : 'Image'}</span></div>
                     </div>
                   </div>
-                )}
-              </div>
-            </div>
+                </div>
+             </div>
 
-            <div className="flex items-center justify-between text-xs font-mono text-slate-300 relative z-10">
-              <div className="flex items-center gap-4">
-                <span className="text-slate-400">Airline: <span className="liquid-glass-btn text-white font-bold">{lightboxMedia.airline || 'N/A'}</span></span>
-                <span className="text-slate-400">Model: <span className="liquid-glass-btn text-white font-bold">{lightboxMedia.aircraftModel || 'N/A'}</span></span>
-              </div>
-              <span className="text-slate-400">Location: <span className="liquid-glass-btn text-white font-bold">{lightboxMedia.location || 'N/A'}</span></span>
-            </div>
+             <div className="flex items-center justify-between text-xs font-mono text-slate-300 relative z-10 p-4 border-t border-white/10">
+               <div className="flex items-center gap-4">
+                 <span className="text-slate-400">Airline: <span className="skeuo-btn text-white font-bold">{lightboxMedia.airline || 'N/A'}</span></span>
+                 <span className="text-slate-400">Model: <span className="skeuo-btn text-white font-bold">{lightboxMedia.aircraftModel || 'N/A'}</span></span>
+               </div>
+               <span className="text-slate-400">Location: <span className="skeuo-btn text-white font-bold">{lightboxMedia.location || 'N/A'}</span></span>
+             </div>
           </div>
         </div>
       )}
@@ -2157,7 +2006,7 @@ export const MyPlanePicsSuite: React.FC = () => {
       {/* FOLDER STRUCTURE PREVIEW MODAL */}
       {showFolderStructureModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-fadeIn">
-          <div className="relative w-full max-w-lg bg-slate-900 border-2 border-[#C8102E]/50 rounded-[28px] p-6 shadow-2xl space-y-5 text-white aero-glossy">
+          <div className="relative w-full max-w-lg bg-slate-900 border-2 border-[#C8102E]/50 rounded-[28px] p-6 shadow-2xl space-y-5 text-white ">
             <div className="flex items-center justify-between pb-3 border-b border-white/10">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-2xl bg-[#C8102E]/20 border border-[#C8102E]/40 text-[#C8102E]">
@@ -2174,9 +2023,9 @@ export const MyPlanePicsSuite: React.FC = () => {
               </div>
               <button
                 onClick={() => setShowFolderStructureModal(false)}
-                className="liquid-glass-btn p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white"
+                className="skeuo-btn p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white"
               >
-                <X className="liquid-glass-btn w-5 h-5" />
+                <X className="skeuo-btn w-5 h-5" />
               </button>
             </div>
 
@@ -2199,13 +2048,13 @@ export const MyPlanePicsSuite: React.FC = () => {
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => setShowFolderStructureModal(false)}
-                className="liquid-glass-btn p-4 bg-slate-800 hover:bg-slate-700 border border-white/10 rounded-2xl text-center transition-all cursor-pointer"
+                className="skeuo-btn p-4 bg-slate-800 hover:bg-slate-700 border border-white/10 rounded-2xl text-center transition-all cursor-pointer"
               >
                 <span className="font-extrabold text-sm text-slate-300">{t.exit}</span>
               </button>
               <button
                 onClick={continueToFolderSelect}
-                className="liquid-glass-btn p-4 bg-gradient-to-r from-[#C8102E] to-red-600 hover:from-[#ff7236] hover:to-red-500 text-black font-extrabold text-sm rounded-2xl shadow-lg transition-all cursor-pointer"
+                className="skeuo-btn p-4 bg-gradient-to-r from-[#C8102E] to-red-600 hover:from-[#ff7236] hover:to-red-500 text-black font-extrabold text-sm rounded-2xl shadow-lg transition-all cursor-pointer"
               >
                 {t.continueToSelectFolder}
               </button>
@@ -2217,7 +2066,7 @@ export const MyPlanePicsSuite: React.FC = () => {
       {/* UPLOAD PHOTO METADATA MODAL */}
       {showUploadMetadataModal && pendingUploadFile && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-fadeIn">
-          <div className="glossy-card relative w-full max-w-lg bg-slate-900 border-2 border-[#C8102E]/50 rounded-[28px] p-6 shadow-2xl space-y-5 text-white aero-glossy">
+          <div className="skeuo-panel relative w-full max-w-lg bg-slate-900 border-2 border-[#C8102E]/50 rounded-[28px] p-6 shadow-2xl space-y-5 text-white ">
             {/* Animated border glow */}
             <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[#C8102E]/10 via-transparent to-red-600/10 pointer-events-none" />
 
@@ -2240,9 +2089,9 @@ export const MyPlanePicsSuite: React.FC = () => {
                   setShowUploadMetadataModal(false);
                   setPendingUploadFile(null);
                 }}
-                className="liquid-glass-btn p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white"
+                className="skeuo-btn p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white"
               >
-                <X className="liquid-glass-btn w-5 h-5" />
+                <X className="skeuo-btn w-5 h-5" />
               </button>
             </div>
 
@@ -2317,14 +2166,14 @@ export const MyPlanePicsSuite: React.FC = () => {
                   setPendingUploadFile(null);
                 }}
                 disabled={isImporting}
-                className="liquid-glass-btn p-4 bg-slate-800 hover:bg-slate-700 border border-white/10 rounded-2xl text-center transition-all cursor-pointer disabled:opacity-50"
+                className="skeuo-btn p-4 bg-slate-800 hover:bg-slate-700 border border-white/10 rounded-2xl text-center transition-all cursor-pointer disabled:opacity-50"
               >
                 <span className="font-extrabold text-sm text-slate-300">{t.cancel}</span>
               </button>
               <button
                 onClick={processUploadWithMetadata}
                 disabled={isImporting}
-                className="liquid-glass-btn p-4 bg-gradient-to-r from-[#C8102E] to-red-600 hover:from-[#ff7236] hover:to-red-500 text-black font-extrabold text-sm rounded-2xl shadow-lg transition-all cursor-pointer disabled:opacity-50"
+                className="skeuo-btn p-4 bg-gradient-to-r from-[#C8102E] to-red-600 hover:from-[#ff7236] hover:to-red-500 text-black font-extrabold text-sm rounded-2xl shadow-lg transition-all cursor-pointer disabled:opacity-50"
               >
                 <span className="flex items-center justify-center gap-2">
                   <ShieldCheck className="w-4 h-4" />
@@ -2339,7 +2188,7 @@ export const MyPlanePicsSuite: React.FC = () => {
       {/* BATCH EDIT MODAL */}
       {showBatchEdit && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-fadeIn">
-          <div className="glossy-card relative w-full max-w-lg bg-slate-900 border-2 border-red-500/50 rounded-[28px] p-6 shadow-2xl space-y-5 text-white aero-glossy">
+          <div className="skeuo-panel relative w-full max-w-lg bg-slate-900 border-2 border-red-500/50 rounded-[28px] p-6 shadow-2xl space-y-5 text-white ">
             <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-red-500/10 via-transparent to-red-600/10 pointer-events-none" />
             <div className="flex items-center justify-between pb-3 border-b border-white/10 relative z-10">
               <div className="flex items-center gap-3">
@@ -2351,8 +2200,8 @@ export const MyPlanePicsSuite: React.FC = () => {
                   <p className="text-xs text-slate-400 font-mono">Editing {selectedIds.size} selected photo(s)</p>
                 </div>
               </div>
-              <button onClick={() => setShowBatchEdit(false)} className="liquid-glass-btn p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white">
-                <X className="liquid-glass-btn w-5 h-5" />
+              <button onClick={() => setShowBatchEdit(false)} className="skeuo-btn p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white">
+                <X className="skeuo-btn w-5 h-5" />
               </button>
             </div>
             <div className="p-4 rounded-2xl bg-slate-950 border border-white/10 space-y-4 relative z-10">
@@ -2377,10 +2226,10 @@ export const MyPlanePicsSuite: React.FC = () => {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3 relative z-10">
-              <button onClick={() => setShowBatchEdit(false)} className="liquid-glass-btn p-4 bg-slate-800 hover:bg-slate-700 border border-white/10 rounded-2xl text-center transition-all cursor-pointer">
+              <button onClick={() => setShowBatchEdit(false)} className="skeuo-btn p-4 bg-slate-800 hover:bg-slate-700 border border-white/10 rounded-2xl text-center transition-all cursor-pointer">
                 <span className="font-extrabold text-sm text-slate-300">{t.cancel}</span>
               </button>
-              <button onClick={applyBatchEdit} className="liquid-glass-btn p-4 bg-gradient-to-r from-red-600 to-red-600 hover:from-red-500 hover:to-red-500 text-black font-extrabold text-sm rounded-2xl shadow-lg transition-all cursor-pointer">
+              <button onClick={applyBatchEdit} className="skeuo-btn p-4 bg-gradient-to-r from-red-600 to-red-600 hover:from-red-500 hover:to-red-500 text-black font-extrabold text-sm rounded-2xl shadow-lg transition-all cursor-pointer">
                 <span className="flex items-center justify-center gap-2">
                   <Check className="w-4 h-4" />
                   Apply to {selectedIds.size} Photos
@@ -2394,7 +2243,7 @@ export const MyPlanePicsSuite: React.FC = () => {
       {/* COLLECTIONS TAB */}
       {activeTab === 'collections' && (
         <div className="space-y-6">
-          <div className="bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-6 shadow-2xl space-y-6 aero-glossy">
+          <div className="bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-6 shadow-2xl space-y-6 ">
             <div className="flex items-center justify-between pb-3 border-b border-white/10">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 bg-[#C8102E]/20 border border-[#C8102E]/40 rounded-xl text-[#C8102E]">
@@ -2410,7 +2259,7 @@ export const MyPlanePicsSuite: React.FC = () => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setShowCreateCollection(true)}
-                  className="liquid-glass-btn px-3 py-1.5 bg-[#C8102E] hover:bg-[#ff7236] text-black font-extrabold text-xs rounded-xl transition-all flex items-center gap-1 cursor-pointer"
+                  className="skeuo-btn px-3 py-1.5 bg-[#C8102E] hover:bg-[#ff7236] text-black font-extrabold text-xs rounded-xl transition-all flex items-center gap-1 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" /> New Collection
                 </button>
@@ -2447,16 +2296,25 @@ export const MyPlanePicsSuite: React.FC = () => {
                       <span className="text-xs text-slate-400 font-mono">{myPlanePics.length}</span>
                     </div>
                   </div>
-                  <div
-                    onClick={() => setSelectedCollection('favorites')}
-                    className={`p-3 rounded-xl border cursor-pointer transition-all ${selectedCollection === 'favorites' ? 'bg-[#C8102E]/20 border-[#C8102E]/40' : 'bg-slate-950 border-white/10 hover:border-white/20'}`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-bold text-white flex items-center gap-2"><Star className="w-4 h-4 text-red-400" /> Favorites</span>
-                      <span className="text-xs text-slate-400 font-mono">{myPlanePics.filter(p => p.favorite).length}</span>
-                    </div>
-                  </div>
-                  {collections.map(c => (
+                   <div
+                     onClick={() => setSelectedCollection('favorites')}
+                     className={`p-3 rounded-xl border cursor-pointer transition-all ${selectedCollection === 'favorites' ? 'bg-[#C8102E]/20 border-[#C8102E]/40' : 'bg-slate-950 border-white/10 hover:border-white/20'}`}
+                   >
+                     <div className="flex items-center justify-between">
+                       <span className="text-sm font-bold text-white flex items-center gap-2"><Star className="w-4 h-4 text-red-400" /> Favorites</span>
+                       <span className="text-xs text-slate-400 font-mono">{myPlanePics.filter(p => p.favorite).length}</span>
+                     </div>
+                   </div>
+                   <div
+                     onClick={() => setSelectedCollection('watchlist')}
+                     className={`p-3 rounded-xl border cursor-pointer transition-all ${selectedCollection === 'watchlist' ? 'bg-[#C8102E]/20 border-[#C8102E]/40' : 'bg-slate-950 border-white/10 hover:border-white/20'}`}
+                   >
+                     <div className="flex items-center justify-between">
+                       <span className="text-sm font-bold text-white flex items-center gap-2"><Bookmark className="w-4 h-4 text-red-400" /> Watchlist</span>
+                       <span className="text-xs text-slate-400 font-mono">{watchlist.length}</span>
+                     </div>
+                   </div>
+                   {collections.map(c => (
                     <div key={c} className="p-3 rounded-xl border bg-slate-950 border-white/10 hover:border-white/20 flex items-center justify-between">
                       <div onClick={() => setSelectedCollection(c)} className="flex-1 cursor-pointer">
                         <span className="text-sm font-bold text-white">{c}</span>
@@ -2500,11 +2358,14 @@ export const MyPlanePicsSuite: React.FC = () => {
                       </div>
                     </div>
                   </button>
-                  <button onClick={() => showToast('Coming Soon', 'Aircraft watchlist feature coming in next update', 'info')} className="p-4 rounded-xl bg-slate-950 border border-white/10 hover:border-red-500/40 transition-all text-left cursor-pointer">
-                    <Bookmark className="w-6 h-6 text-red-400 mb-2" />
-                    <p className="text-xs font-bold text-white">Watchlist</p>
-                    <p className="text-[10px] text-slate-400">Track registrations</p>
-                  </button>
+                   <button onClick={() => setShowWatchlistPanel(true)} className="p-4 rounded-xl bg-slate-950 border border-white/10 hover:border-red-500/40 transition-all text-left cursor-pointer">
+                     <div className="flex items-center gap-2 mb-2">
+                       <Bookmark className="w-6 h-6 text-red-400" />
+                       <span className="text-xs font-black text-white bg-red-500/20 border border-red-500/40 px-2 py-0.5 rounded-full">{watchlist.length}</span>
+                     </div>
+                     <p className="text-xs font-bold text-white">Watchlist</p>
+                     <p className="text-[10px] text-slate-400">Track registrations</p>
+                   </button>
                 </div>
               </div>
             </div>
@@ -2512,10 +2373,112 @@ export const MyPlanePicsSuite: React.FC = () => {
         </div>
       )}
 
+      {/* LIVERIES TAB */}
+      {activeTab === 'liveries' && (
+        <div className="space-y-6">
+          <div className="bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-6 shadow-2xl ">
+            <div className="flex items-center gap-3 pb-3 border-b border-white/10">
+              <div className="p-2.5 bg-[#C8102E]/20 border border-[#C8102E]/40 rounded-xl text-[#C8102E]">
+                <Palette className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-[10px] text-slate-400 uppercase tracking-widest font-mono font-bold">
+                  Airlines &amp; Liveries
+                </p>
+                <h3 className="text-base font-black text-white">Special Livery Collection</h3>
+              </div>
+            </div>
+
+            {airlineAircraftMap.length === 0 ? (
+              <div className="text-center py-16 rounded-2xl border-2 border-dashed border-white/10 bg-slate-900/30">
+                <Palette className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+                <p className="text-sm font-bold text-slate-400">No airlines in your vault yet</p>
+                <p className="text-xs text-slate-500 mt-1">Upload plane photos to build your livery collection</p>
+              </div>
+            ) : (
+              <div className="space-y-3 mt-4">
+                {airlineAircraftMap.map(({ airline, aircrafts, count }) => {
+                  const airlineOpen = expandedAirline === airline;
+                  const totalSpecial = aircrafts.reduce((sum, a) => sum + a.liveries.length, 0);
+                  return (
+                    <div key={airline} className="rounded-2xl border border-white/10 bg-slate-950/60 overflow-hidden">
+                      <button
+                        onClick={() => setExpandedAirline(airlineOpen ? null : airline)}
+                        className="w-full flex items-center justify-between p-4 cursor-pointer hover:bg-white/5 transition-all"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-xl bg-[#C8102E]/20 border border-[#C8102E]/40 text-[#C8102E]">
+                            <Layers className="w-4 h-4" />
+                          </div>
+                          <div className="text-left">
+                            <p className="text-sm font-black text-white">{airline}</p>
+                            <p className="text-[10px] text-slate-400 font-mono">
+                              {count} photo{count === 1 ? '' : 's'} • {aircrafts.length} aircraft • {totalSpecial} special livery{totalSpecial === 1 ? '' : 's'}
+                            </p>
+                          </div>
+                        </div>
+                        <ChevronRight className={`w-5 h-5 text-slate-400 transition-transform ${airlineOpen ? 'rotate-90' : ''}`} />
+                      </button>
+
+                      {airlineOpen && (
+                        <div className="px-3 pb-3 border-t border-white/10 space-y-2">
+                          {aircrafts.map(({ aircraft, liveries, count: acCount }) => {
+                            const aircraftKey = `${airline}::${aircraft}`;
+                            const aircraftOpen = expandedAircraft === aircraftKey;
+                            return (
+                              <div key={aircraftKey} className="mt-2 rounded-xl border border-white/10 bg-slate-900/70 overflow-hidden">
+                                <button
+                                  onClick={() => setExpandedAircraft(aircraftOpen ? null : aircraftKey)}
+                                  className="w-full flex items-center justify-between p-3 cursor-pointer hover:bg-white/5 transition-all"
+                                >
+                                  <div className="flex items-center gap-2.5">
+                                    <div className="p-1.5 rounded-lg bg-slate-800 border border-white/10 text-slate-300">
+                                      <Plane className="w-3.5 h-3.5" />
+                                    </div>
+                                    <div className="text-left">
+                                      <p className="text-xs font-bold text-slate-100">{aircraft}</p>
+                                      <p className="text-[10px] text-slate-500 font-mono">
+                                        {acCount} photo{acCount === 1 ? '' : 's'} • {liveries.length} special livery{liveries.length === 1 ? '' : 's'}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <ChevronRight className={`w-4 h-4 text-slate-500 transition-transform ${aircraftOpen ? 'rotate-90' : ''}`} />
+                                </button>
+
+                                {aircraftOpen && (
+                                  <div className="px-3 pb-3 space-y-2 border-t border-white/10">
+                                    <div className="pt-2 flex items-center gap-2">
+                                      <span className="px-3 py-1.5 rounded-full bg-slate-800 border border-white/10 text-xs font-bold text-slate-200 font-mono flex items-center gap-1.5">
+                                        <CheckCircle2 className="w-3.5 h-3.5 text-slate-400" /> Normal livery
+                                      </span>
+                                    </div>
+                                    {liveries.map((livery) => (
+                                      <div key={livery} className="flex items-center gap-2 pl-1">
+                                        <span className="px-3 py-1.5 rounded-full bg-[#C8102E]/15 border border-[#C8102E]/40 text-xs font-bold text-[#C8102E] font-mono flex items-center gap-1.5">
+                                          <Sparkles className="w-3.5 h-3.5" /> {livery}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* LIGHTBOX NOTE EDITOR */}
       {isLightboxOpen && lightboxMedia && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-2xl flex items-center justify-center p-4 sm:p-6">
-          <div className="glossy-card relative w-full max-w-5xl bg-slate-900/90 border border-white/20 rounded-[28px] p-6 shadow-[0_0_80px_rgba(0,0,0,0.9)] space-y-4 overflow-hidden aero-glossy">
+          <div className="skeuo-panel relative w-full max-w-5xl bg-slate-900/90 border border-white/20 rounded-[28px] p-6 shadow-[0_0_80px_rgba(0,0,0,0.9)] space-y-4 overflow-hidden ">
             <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[#C8102E]/20 via-red-600/10 to-red-500/20 opacity-50 pointer-events-none" />
             <div className="flex items-center justify-between pb-3 border-b border-white/10 relative z-10">
               <div className="flex items-center gap-3 font-mono">
@@ -2525,7 +2488,7 @@ export const MyPlanePicsSuite: React.FC = () => {
                     const prevIndex = (currentIndex - 1 + sortedPhotos.length) % sortedPhotos.length;
                     if (sortedPhotos[prevIndex]) setLightboxMedia(sortedPhotos[prevIndex]);
                   }}
-                  className="liquid-glass-btn p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all cursor-pointer"
+                  className="skeuo-btn p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all cursor-pointer"
                 >
                   <ArrowLeft className="w-5 h-5" />
                 </button>
@@ -2539,34 +2502,29 @@ export const MyPlanePicsSuite: React.FC = () => {
                     const nextIndex = (currentIndex + 1) % sortedPhotos.length;
                     if (sortedPhotos[nextIndex]) setLightboxMedia(sortedPhotos[nextIndex]);
                   }}
-                  className="liquid-glass-btn p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all cursor-pointer"
+                  className="skeuo-btn p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all cursor-pointer"
                 >
                   <ArrowRight className="w-5 h-5" />
                 </button>
               </div>
-              <button onClick={() => { setIsLightboxOpen(false); setEditingNotesForId(null); setEditingTagsForId(null); }} className="liquid-glass-btn p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all cursor-pointer">
-                <X className="liquid-glass-btn w-5 h-5" />
+              <button onClick={() => { setIsLightboxOpen(false); setEditingNotesForId(null); setEditingTagsForId(null); }} className="skeuo-btn p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all cursor-pointer">
+                <X className="skeuo-btn w-5 h-5" />
               </button>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
               <div className="lg:col-span-2 relative rounded-2xl overflow-hidden bg-black max-h-[60vh] flex items-center justify-center">
                 {lightboxMedia.mediaType === 'video' && lightboxMedia.videoUrl ? (
-                  <video src={lightboxMedia.videoUrl} controls autoPlay className="w-full h-full object-contain max-h-[60vh]" style={{ filter: getEnhancementFilter() }} />
+                  <video src={lightboxMedia.videoUrl} controls autoPlay className="w-full h-full object-contain max-h-[60vh]" />
                 ) : (
-                  <img src={lightboxMedia.imageUrl} alt={lightboxMedia.registration} className="w-full h-full object-contain max-h-[60vh]" style={{ filter: getEnhancementFilter() }} />
+                  <img src={lightboxMedia.imageUrl} alt={lightboxMedia.registration} className="w-full h-full object-contain max-h-[60vh]" />
                 )}
               </div>
 
               <div className="space-y-4 text-xs font-mono">
-                <div className="p-4 rounded-2xl bg-slate-950 border border-white/10 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-black text-[#C8102E] uppercase tracking-wider">Photo Metadata</h4>
-                    <button onClick={() => setShowEnhancePanel(!showEnhancePanel)} className="liquid-glass-btn p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white" title="Image Enhancements">
-                      <Wand2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                  <div className="space-y-2 text-slate-300">
+                 <div className="p-4 rounded-2xl bg-slate-950 border border-white/10 space-y-3">
+                   <h4 className="text-xs font-black text-[#C8102E] uppercase tracking-wider">Photo Metadata</h4>
+                   <div className="space-y-2 text-slate-300">
                     <div className="flex justify-between"><span>Registration</span><span className="text-white font-bold">{lightboxMedia.registration}</span></div>
                     <div className="flex justify-between"><span>Airline</span><span className="text-white font-bold">{lightboxMedia.airline || 'N/A'}</span></div>
                     <div className="flex justify-between"><span>Model</span><span className="text-white font-bold">{lightboxMedia.aircraftModel || 'N/A'}</span></div>
@@ -2582,7 +2540,7 @@ export const MyPlanePicsSuite: React.FC = () => {
                 <div className="p-4 rounded-2xl bg-slate-950 border border-white/10 space-y-3">
                   <div className="flex items-center justify-between">
                     <h4 className="text-xs font-black text-red-400 uppercase tracking-wider">Notes</h4>
-                    <button onClick={() => { setEditingNotesForId(editingNotesForId === lightboxMedia.id ? null : lightboxMedia.id); setNotesDraft(lightboxMedia.notes || ''); }} className="liquid-glass-btn p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white">
+                    <button onClick={() => { setEditingNotesForId(editingNotesForId === lightboxMedia.id ? null : lightboxMedia.id); setNotesDraft(lightboxMedia.notes || ''); }} className="skeuo-btn p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white">
                       <Edit3 className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -2629,6 +2587,9 @@ export const MyPlanePicsSuite: React.FC = () => {
                   <button onClick={() => { toggleFavorite(lightboxMedia.id); }} className={`flex-1 p-2 rounded-xl border transition-all cursor-pointer ${lightboxMedia.favorite ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'border-white/10 text-slate-400 hover:text-white'}`}>
                     <Star className="w-4 h-4 mx-auto" />
                   </button>
+                  <button onClick={() => { toggleWatchlist(lightboxMedia.id); }} className={`flex-1 p-2 rounded-xl border transition-all cursor-pointer ${watchlist.some(w => w.id === lightboxMedia.id) ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'border-white/10 text-slate-400 hover:text-white'}`}>
+                    <Bookmark className="w-4 h-4 mx-auto" />
+                  </button>
                   <button onClick={() => { navigator.clipboard.writeText(lightboxMedia.registration); showToast('Copied', 'Registration copied', 'success'); }} className="flex-1 p-2 rounded-xl border border-white/10 text-slate-400 hover:text-white transition-all cursor-pointer">
                     <Copy className="w-4 h-4 mx-auto" />
                   </button>
@@ -2637,107 +2598,75 @@ export const MyPlanePicsSuite: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
-      {showFolderChoiceModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-fadeIn">
-          <div className="glossy-card relative w-full max-w-lg bg-slate-900 border-2 border-[#C8102E]/50 rounded-[28px] p-6 shadow-2xl space-y-5 text-white aero-glossy">
-            {/* Animated border glow */}
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[#C8102E]/10 via-transparent to-red-600/10 pointer-events-none" />
+       )}
 
+       {/* WATCHLIST PANEL MODAL */}
+      {showWatchlistPanel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-fadeIn">
+          <div className="skeuo-panel relative w-full max-w-3xl bg-slate-900 border-2 border-red-500/50 rounded-[28px] p-6 shadow-2xl space-y-5 text-white ">
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-red-500/10 via-transparent to-red-600/10 pointer-events-none" />
             <div className="flex items-center justify-between pb-3 border-b border-white/10 relative z-10">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-2xl bg-[#C8102E]/20 border border-[#C8102E]/40 text-[#C8102E]">
-                  <Layers className="w-6 h-6 animate-pulse" />
+                <div className="p-2.5 rounded-2xl bg-red-500/20 border border-red-500/40 text-red-400">
+                  <Bookmark className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-base font-black tracking-wide">
-                    {t.selectFolderMode}
-                  </h3>
-                  <p className="text-xs text-slate-400 font-mono">
-                    {pendingFolderFiles.length} {t.aircraftImagesDetected}
-                  </p>
+                  <h3 className="text-base font-black tracking-wide">Watchlist</h3>
+                  <p className="text-xs text-slate-400 font-mono">{watchlist.length} photo{watchlist.length !== 1 ? 's' : ''} tracked</p>
                 </div>
               </div>
-              <button
-                onClick={() => setShowFolderChoiceModal(false)}
-                className="liquid-glass-btn p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white"
-              >
-                <X className="liquid-glass-btn w-5 h-5" />
+              <button onClick={() => setShowWatchlistPanel(false)} className="skeuo-btn p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white">
+                <X className="skeuo-btn w-5 h-5" />
               </button>
             </div>
-
-             <div className="p-4 rounded-2xl bg-slate-950 border border-white/10 space-y-2 font-mono text-xs text-slate-300 relative z-10">
-                <p className="font-bold text-white flex items-center gap-2">
-                  <FolderIcon className="w-4 h-4 text-[#C8102E]" />
-                  {pendingFolderFiles[0]?.webkitRelativePath?.split('/')[0] || 'Selected Folder'}
-                </p>
-                <p className="text-[11px] text-slate-400">
-                  Structure Format: <span className="text-red-300">SELECTED_FOLDER/AIRLINE/AIRCRAFT_TYPE/FILENAME</span>
-                </p>
-             </div>
-
-             {/* Import Progress Bar */}
-             {isImporting && (
-               <div className="p-4 rounded-2xl bg-slate-950 border border-[#C8102E]/30 space-y-2 relative z-10">
-                 <div className="flex items-center justify-between text-xs font-mono">
-                   <span className="text-slate-300 font-bold">Importing Media...</span>
-                   <span className="text-[#C8102E] font-black">{importProgress}%</span>
-                 </div>
-                 <div className="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-white/10">
-                   <div
-                     className="h-full bg-gradient-to-r from-[#C8102E] to-red-500 rounded-full transition-all duration-300 relative"
-                     style={{ width: `${importProgress}%` }}
-                   >
-                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer" />
-                   </div>
-                 </div>
-                 <p className="text-[11px] text-slate-400 font-mono truncate">
-                   {importStatusText || t.loading}
-                 </p>
-               </div>
-             )}
-
-             <div className="grid grid-cols-1 gap-3 relative z-10">
-               <button
-                 onClick={() => executeFolderUpload(false)}
-                 disabled={isImporting}
-                 className="liquid-glass-btn p-4 bg-slate-800 hover:bg-slate-700 border border-white/10 hover:border-red-400/50 rounded-2xl text-left transition-all cursor-pointer group disabled:opacity-50 disabled:cursor-not-allowed"
-               >
-                 <div className="flex items-center justify-between">
-                   <span className="font-extrabold text-sm text-red-300 group-hover:text-white">
-                      1. {t.temporaryUpload}
-                   </span>
-                   <span className="text-[10px] font-mono bg-red-950 text-red-400 px-2 py-0.5 rounded border border-red-800">
-                     Current Session Only
-                   </span>
-                 </div>
-                 <p className="text-xs text-slate-400 mt-1">
-                   Processes files in memory for current view. Cleared on app restart.
-                 </p>
-               </button>
-
-               <button
-                 onClick={() => executeFolderUpload(true)}
-                 disabled={isImporting}
-                 className="liquid-glass-btn p-4 bg-gradient-to-r from-[#C8102E]/20 via-red-950/40 to-slate-800 hover:from-[#C8102E]/30 border-2 border-[#C8102E]/60 rounded-2xl text-left transition-all cursor-pointer group shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-               >
-                 <div className="flex items-center justify-between">
-                   <span className="font-extrabold text-sm text-[#C8102E] group-hover:text-red-400 flex items-center gap-2">
-                     <ShieldCheck className="w-4 h-4" />
-                      2. {t.permanentUpload}
-                   </span>
-                   <span className="text-[10px] font-mono bg-red-950 text-red-400 px-2 py-0.5 rounded border border-red-800">
-                     Account Linked
-                   </span>
-                 </div>
-                 <p className="text-xs text-slate-300 mt-1">
-                   {t.permanentlyLinksFolderLocation.replace('.', ` (${user?.username || 'Guest'}).`)}
-                 </p>
-               </button>
-             </div>
-           </div>
-         </div>
-       )}
+            <div className="p-4 rounded-2xl bg-slate-950 border border-white/10 space-y-3 relative z-10 max-h-[60vh] overflow-y-auto">
+              {watchlist.length === 0 ? (
+                <div className="text-center py-8">
+                  <Bookmark className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+                  <p className="text-sm font-bold text-slate-400">No photos in watchlist</p>
+                  <p className="text-xs text-slate-500 mt-1">Click the bookmark icon on any photo to add it</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {watchlist.map(photo => (
+                    <div key={photo.id} className="flex items-center gap-3 p-3 rounded-xl bg-slate-900 border border-white/10">
+                      <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-black shrink-0">
+                        <img src={photo.thumbnailUrl || photo.imageUrl} alt={photo.registration} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-black text-white font-mono tracking-wider">{photo.registration}</h4>
+                        <p className="text-xs text-slate-400 font-mono truncate">{photo.airline || 'Commercial Fleet'} • {photo.aircraftModel}</p>
+                        <p className="text-[10px] text-slate-500 font-mono">{photo.formattedDate || photo.dateCaptured}</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          onClick={() => {
+                            setLightboxMedia(photo);
+                            setIsLightboxOpen(true);
+                            setShowWatchlistPanel(false);
+                          }}
+                          className="p-2 rounded-lg bg-slate-800 border border-white/10 text-slate-400 hover:text-white transition-all cursor-pointer"
+                          title="View"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => setWatchlist(prev => prev.filter(p => p.id !== photo.id))}
+                          className="p-2 rounded-lg bg-slate-800 border border-white/10 text-red-400 hover:text-red-300 transition-all cursor-pointer"
+                          title="Remove"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+

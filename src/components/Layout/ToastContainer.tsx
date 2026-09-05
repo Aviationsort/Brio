@@ -4,10 +4,10 @@
 
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { ShieldAlert, CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
+import { ShieldAlert, CheckCircle2, AlertCircle, Info, X, Bug } from 'lucide-react';
 
 export const ToastContainer: React.FC = () => {
-  const { toasts, removeToast } = useApp();
+  const { toasts, removeToast, reportIssue } = useApp();
 
   if (toasts.length === 0) return null;
 
@@ -27,10 +27,12 @@ export const ToastContainer: React.FC = () => {
           borderClass = 'border-red-600/30 bg-red-950/80 text-red-200';
         }
 
+        const showReport = toast.type === 'error' && toast.isCritical;
+
         return (
           <div
             key={toast.id}
-            className={`pointer-events-auto flex items-start gap-3 p-3.5 rounded-xl border backdrop-blur-md shadow-2xl transition-all duration-300 animate-in slide-in-from-bottom-3 ife-card ${borderClass}`}
+            className={`pointer-events-auto flex items-start gap-3 p-3.5 rounded-xl border backdrop-blur-md shadow-2xl transition-all duration-300 animate-in slide-in-from-bottom-3 skeuo-card ${borderClass}`}
           >
             <Icon className="w-5 h-5 shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
@@ -38,10 +40,19 @@ export const ToastContainer: React.FC = () => {
               {toast.description && (
                 <p className="text-xs opacity-85 mt-0.5 leading-relaxed break-words">{toast.description}</p>
               )}
+              {showReport && (
+                <button
+                  onClick={() => reportIssue?.(toast.id)}
+                  className="mt-2 flex items-center gap-1.5 text-xs text-red-300 hover:text-red-100 transition-colors"
+                >
+                  <Bug className="w-3 h-3" />
+                  Report Issue
+                </button>
+              )}
             </div>
             <button
               onClick={() => removeToast(toast.id)}
-              className="ife-btn p-1 hover:bg-white/10 rounded-lg transition-colors text-white/60 hover:text-white"
+              className="skeuo-btn p-1 hover:bg-white/10 rounded-lg transition-colors text-white/60 hover:text-white"
             >
               <X className="w-4 h-4" />
             </button>

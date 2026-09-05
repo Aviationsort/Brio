@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Grid, Play, RotateCcw, ShieldCheck } from 'lucide-react';
+import { Grid, Play, RotateCcw, ShieldCheck, Trophy, Zap } from 'lucide-react';
 
 const COLS = 10;
 const ROWS = 20;
@@ -29,9 +29,11 @@ export const TetrisGame: React.FC = () => {
   const [level, setLevel] = useState(1);
   const [gameOver, setGameOver] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [highScore, setHighScore] = useState(1240);
+  const [highScore, setHighScore] = useState(() => parseInt(localStorage.getItem('tetris_highscore') || '0'));
+  const [showTutorial, setShowTutorial] = useState(true);
 
   const activePieceRef = useRef<{ shape: number[][]; color: string; x: number; y: number } | null>(null);
+  const gameLoopRef = useRef<number | null>(null);
 
   const startGame = () => {
     setGrid(Array(ROWS).fill(null).map(() => Array(COLS).fill('')));
@@ -40,6 +42,7 @@ export const TetrisGame: React.FC = () => {
     setLevel(1);
     setGameOver(false);
     setIsPlaying(true);
+    setShowTutorial(false);
     spawnPiece();
   };
 
@@ -63,7 +66,6 @@ export const TetrisGame: React.FC = () => {
     if (canFit(shape, x, y + 1)) {
       activePieceRef.current.y += 1;
     } else {
-      // Lock piece
       lockPiece(shape, color, x, y);
     }
   };
@@ -101,11 +103,17 @@ export const TetrisGame: React.FC = () => {
     if (over) {
       setGameOver(true);
       setIsPlaying(false);
-      showToast('Game Over', `Tetris score: ${score}`, 'info');
+      if (gameLoopRef.current) clearInterval(gameLoopRef.current);
+      if (score > highScore) {
+        setHighScore(score);
+        localStorage.setItem('tetris_highscore', score.toString());
+        showToast('New High Score!', `Tetris score ${score} saved!`, 'success');
+      } else {
+        showToast('Game Over', `Tetris score: ${score}`, 'info');
+      }
       return;
     }
 
-    // Clear completed lines
     let cleared = 0;
     const filtered = newGrid.filter((row) => row.some((cell) => !cell));
     cleared = ROWS - filtered.length;
@@ -120,29 +128,29 @@ export const TetrisGame: React.FC = () => {
       const newScore = score + addedScore;
       setScore(newScore);
       setLines((prev) => prev + cleared);
+      setLevel((prev) => prev + Math.floor(cleared / 4));
       if (newScore > highScore) {
         setHighScore(newScore);
-        showToast('New High Score!', `Tetris score ${newScore} encrypted in Vault.`, 'success');
+        localStorage.setItem('tetris_highscore', newScore.toString());
+        showToast('New High Score!', `Tetris score ${newScore}`, 'success');
       }
     }
 
     spawnPiece();
   };
 
-  // Game Loop
   useEffect(() => {
     if (!isPlaying || gameOver) return;
     const speed = Math.max(100, 700 - (level - 1) * 60);
-    const interval = setInterval(() => {
+    gameLoopRef.current = window.setInterval(() => {
       moveDown();
     }, speed);
-    return () => clearInterval(interval);
+    return () => { if (gameLoopRef.current) clearInterval(gameLoopRef.current); };
   }, [isPlaying, gameOver, grid, level]);
 
-  // Controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isPlaying || !activePieceRef.current) return;
+      if (!isPlaying || !activePieceRef.current || gameOver) return;
       if (e.key === 'ArrowLeft') {
         if (canFit(activePieceRef.current.shape, activePieceRef.current.x - 1, activePieceRef.current.y)) {
           activePieceRef.current.x -= 1;
@@ -153,11 +161,81 @@ export const TetrisGame: React.FC = () => {
         }
       } else if (e.key === 'ArrowDown') {
         moveDown();
+      } else if (e.key === 'ArrowUp') {
+        const { shape, x, y } = activePieceRef.current;
+        const rotated = shape[0].map((_, i) => shape.map((row) => row[i]).reverse());
+        if (canFit(rotated, x, y)) {
+          activePieceRef.current.shape = rotated;
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isPlaying, grid]);
+  }, [isPlaying, grid, gameOver]);
+
+  if (showTutorial || (!isPlaying && !gameOver)) {
+    return (
+      <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl max-w-xl mx-auto space-y-6">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div className="flex items-center gap-2 text-rose-400">
+            <Grid className="w-5 h-5" />
+            <h3 className="text-base font-bold text-white">Classic Tetris</h3>
+          </div>
+          <div className="flex items-center gap-1 text-xs font-mono text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
+            <Trophy className="w-3.5 h-3.5" /> Best: {highScore}
+          </div>
+        </div>
+        <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-4">
+          <h4 className="text-sm font-bold text-white flex items-center gap-2"><Zap className="w-4 h-4 text-rose-400" /> How to Play</h4>
+          <ul className="text-xs text-zinc-300 space-y-2 list-disc list-inside">
+            <li>Use <strong>Arrow Left/Right</strong> to move blocks horizontally.</li>
+            <li>Use <strong>Arrow Up</strong> to rotate blocks.</li>
+            <li>Use <strong>Arrow Down</strong> to move blocks down faster.</li>
+            <li>Complete horizontal lines to clear them and score points.</li>
+            <li>Speed increases with each level. Try to beat your high score!</li>
+          </ul>
+          <div className="grid grid-cols-2 gap-3 pt-2">
+            <div className="bg-slate-900 p-3 rounded-xl text-center">
+              <p className="text-[10px] text-zinc-400 uppercase">Lines</p>
+              <p className="text-sm font-bold text-white">{lines}</p>
+            </div>
+            <div className="bg-slate-900 p-3 rounded-xl text-center">
+              <p className="text-[10px] text-zinc-400 uppercase">Level</p>
+              <p className="text-sm font-bold text-red-400">{level}</p>
+            </div>
+          </div>
+        </div>
+        <button
+          onClick={startGame}
+          className="skeuo-btn w-full py-4 bg-gradient-to-r from-rose-600 to-red-600 text-white font-bold text-sm rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2"
+        >
+          <Play className="w-5 h-5" />
+          <span>{gameOver ? 'Play Again' : 'Start Tetris'}</span>
+        </button>
+      </div>
+    );
+  }
+
+  if (gameOver) {
+    return (
+      <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl max-w-xl mx-auto space-y-6">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div className="flex items-center gap-2 text-rose-400"><Trophy className="w-5 h-5" /><h3 className="text-base font-bold text-white">Game Over</h3></div>
+        </div>
+        <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-3 text-center">
+          <div className="text-5xl mb-2">🧊</div>
+          <div className="grid grid-cols-3 gap-3">
+            <div><p className="text-[10px] text-zinc-400 uppercase">Score</p><p className="text-lg font-black text-red-400">{score}</p></div>
+            <div><p className="text-[10px] text-zinc-400 uppercase">Lines</p><p className="text-lg font-black text-white">{lines}</p></div>
+            <div><p className="text-[10px] text-zinc-400 uppercase">Level</p><p className="text-lg font-black text-red-400">{level}</p></div>
+          </div>
+        </div>
+        <button onClick={startGame} className="skeuo-btn w-full py-4 bg-gradient-to-r from-rose-600 to-red-600 text-white font-bold text-sm rounded-2xl shadow-lg flex items-center justify-center gap-2">
+          <RotateCcw className="w-5 h-5" />Play Again
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl max-w-xl mx-auto space-y-6">
@@ -166,13 +244,12 @@ export const TetrisGame: React.FC = () => {
           <Grid className="w-5 h-5" />
           <h3 className="text-base font-bold text-white">Classic Tetris</h3>
         </div>
-        <span className="flex items-center gap-1 text-[11px] font-mono text-red-400 bg-red-950/80 px-2.5 py-1 rounded-full border border-red-500/30">
-          <ShieldCheck className="w-3.5 h-3.5" /> High Score Encrypted: {highScore}
-        </span>
+        <div className="flex items-center gap-1 text-[11px] font-mono text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
+          <Trophy className="w-3.5 h-3.5" /> Best: {highScore}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 items-center">
-        {/* Tetris Board */}
         <div className="sm:col-span-2 bg-slate-950 p-3 rounded-2xl border border-slate-800 shadow-inner flex justify-center">
           <div className="grid grid-cols-10 gap-0.5 bg-slate-900 p-1 border border-slate-800 rounded-lg">
             {grid.map((row, r) =>
@@ -187,7 +264,6 @@ export const TetrisGame: React.FC = () => {
           </div>
         </div>
 
-        {/* Stats & Actions */}
         <div className="space-y-4">
           <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-2 text-xs font-mono">
             <div className="flex justify-between">
@@ -208,7 +284,7 @@ export const TetrisGame: React.FC = () => {
             {!isPlaying ? (
               <button
                 onClick={startGame}
-                className="liquid-glass-btn w-full py-3 bg-gradient-to-r from-rose-600 to-red-600 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
+                className="skeuo-btn w-full py-3 bg-gradient-to-r from-rose-600 to-red-600 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
               >
                 <Play className="w-4 h-4" />
                 <span>{gameOver ? 'Play Again' : 'Start Tetris'}</span>
@@ -216,7 +292,7 @@ export const TetrisGame: React.FC = () => {
             ) : (
               <button
                 onClick={startGame}
-                className="liquid-glass-btn w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2"
+                className="skeuo-btn w-full py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2"
               >
                 <RotateCcw className="w-4 h-4" />
                 <span>Restart</span>
@@ -225,7 +301,7 @@ export const TetrisGame: React.FC = () => {
           </div>
 
           <p className="text-[10px] text-slate-500 font-mono text-center">
-            Use Left / Right / Down Arrow keys to control blocks.
+            Left/Right: Move • Up: Rotate • Down: Soft Drop
           </p>
         </div>
       </div>

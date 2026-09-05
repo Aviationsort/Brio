@@ -1,0 +1,39 @@
+# Fly.io deployment for Brio (LiteFS + SQLite auth store).
+#
+# Run `fly deploy` from the project root after `npm run build`.
+# LiteFS is injected as a sidecar via the [mounts] + the litefs.yml config.
+
+app = "brio"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  LITEFS_DIR = "/data"
+  PORT = "3000"
+
+# LiteFS runs as a sidecar; this process is the LiteFS init process.
+[experimental]
+  cmd = ["litefs", "mount"]
+
+[mounts]
+  source = "brio_litefs"
+  destination = "/data"
+
+[[services]]
+  internal_port = 3000
+  protocol = "tcp"
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+[deploy]
+  release_command = "echo litefs-ready"

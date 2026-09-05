@@ -7,6 +7,161 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Calculator, Delete, RotateCcw } from 'lucide-react';
 
+type Token = { type: 'num'; value: number } | { type: 'op'; value: string } | { type: 'func'; value: string } | { type: 'const'; value: string } | { type: 'paren'; value: string };
+
+function tokenize(expr: string): Token[] {
+  const tokens: Token[] = [];
+  let i = 0;
+  while (i < expr.length) {
+    if (expr[i] === ' ') { i++; continue; }
+    if (/[0-9.]/.test(expr[i])) {
+      let num = '';
+      while (i < expr.length && /[0-9.]/.test(expr[i])) {
+        num += expr[i];
+        i++;
+      }
+      tokens.push({ type: 'num', value: parseFloat(num) });
+    } else if (/[+\-*/^(),]/.test(expr[i])) {
+      tokens.push({ type: 'op', value: expr[i] });
+      i++;
+    } else if (/[a-zA-Z_]/.test(expr[i])) {
+      let name = '';
+      while (i < expr.length && /[a-zA-Z0-9_]/.test(expr[i])) {
+        name += expr[i];
+        i++;
+      }
+      if (name === 'pi' || name === 'PI') tokens.push({ type: 'const', value: 'PI' });
+      else if (name === 'e' || name === 'E') tokens.push({ type: 'const', value: 'E' });
+      else tokens.push({ type: 'func', value: name });
+    } else {
+      throw new Error(`Invalid character: ${expr[i]}`);
+    }
+  }
+  return tokens;
+}
+
+function parseExpr(tokens: Token[], pos: { i: number }): { value: number; pos: { i: number } } {
+  let left = parseTerm(tokens, pos);
+
+  while (pos.i < tokens.length && (tokens[pos.i].type === 'op') && (tokens[pos.i].value === '+' || tokens[pos.i].value === '-')) {
+    const op = tokens[pos.i].value;
+    pos.i++;
+    const right = parseTerm(tokens, pos);
+    if (op === '+') left = { value: left.value + right.value, pos };
+    else left = { value: left.value - right.value, pos };
+  }
+
+  return left;
+}
+
+function parseTerm(tokens: Token[], pos: { i: number }): { value: number; pos: { i: number } } {
+  let left = parsePower(tokens, pos);
+
+  while (pos.i < tokens.length && (tokens[pos.i].type === 'op') && (tokens[pos.i].value === '*' || tokens[pos.i].value === '/')) {
+    const op = tokens[pos.i].value;
+    pos.i++;
+    const right = parsePower(tokens, pos);
+    if (op === '*') left = { value: left.value * right.value, pos };
+    else left = { value: right.value === 0 ? (() => { throw new Error('Division by zero'); })() : left.value / right.value, pos };
+  }
+
+  return left;
+}
+
+function parsePower(tokens: Token[], pos: { i: number }): { value: number; pos: { i: number } } {
+  let left = parseUnary(tokens, pos);
+
+  while (pos.i < tokens.length && (tokens[pos.i].type === 'op') && tokens[pos.i].value === '^') {
+    pos.i++;
+    const right = parseUnary(tokens, pos);
+    left = { value: Math.pow(left.value, right.value), pos };
+  }
+
+  return left;
+}
+
+function parseUnary(tokens: Token[], pos: { i: number }): { value: number; pos: { i: number } } {
+  if (pos.i < tokens.length && (tokens[pos.i].type === 'op') && tokens[pos.i].value === '-') {
+    pos.i++;
+    const val = parseUnary(tokens, pos);
+    return { value: -val.value, pos };
+  }
+  if (pos.i < tokens.length && (tokens[pos.i].type === 'op') && tokens[pos.i].value === '+') {
+    pos.i++;
+    return parseUnary(tokens, pos);
+  }
+  return parsePrimary(tokens, pos);
+}
+
+function parsePrimary(tokens: Token[], pos: { i: number }): { value: number; pos: { i: number } } {
+  const token = tokens[pos.i];
+
+  if (!token) {
+    throw new Error('Unexpected end of expression');
+  }
+
+  if (token.type === 'num') {
+    pos.i++;
+    return { value: token.value, pos };
+  }
+
+  if (token.type === 'const') {
+    pos.i++;
+    if (token.value === 'PI') return { value: Math.PI, pos };
+    if (token.value === 'E') return { value: Math.E, pos };
+    throw new Error(`Unknown constant: ${token.value}`);
+  }
+
+  if (token.type === 'func') {
+    pos.i++;
+    if (pos.i >= tokens.length || tokens[pos.i].type !== 'paren' || tokens[pos.i].value !== '(') {
+      throw new Error(`Expected '(' after function ${token.value}`);
+    }
+    pos.i++;
+    const arg = parseExpr(tokens, pos);
+    if (pos.i >= tokens.length || tokens[pos.i].type !== 'paren' || tokens[pos.i].value !== ')') {
+      throw new Error('Expected closing parenthesis');
+    }
+    pos.i++;
+    const fnName = token.value.toLowerCase();
+    switch (fnName) {
+      case 'sin': return { value: Math.sin(arg.value), pos };
+      case 'cos': return { value: Math.cos(arg.value), pos };
+      case 'tan': return { value: Math.tan(arg.value), pos };
+      case 'sqrt': return { value: Math.sqrt(arg.value), pos };
+      case 'log': return { value: Math.log10(arg.value), pos };
+      case 'ln': return { value: Math.log(arg.value), pos };
+      case 'abs': return { value: Math.abs(arg.value), pos };
+      case 'floor': return { value: Math.floor(arg.value), pos };
+      case 'ceil': return { value: Math.ceil(arg.value), pos };
+      case 'round': return { value: Math.round(arg.value), pos };
+      default: throw new Error(`Unknown function: ${token.value}`);
+    }
+  }
+
+  if (token.type === 'paren' && token.value === '(') {
+    pos.i++;
+    const val = parseExpr(tokens, pos);
+    if (pos.i >= tokens.length || tokens[pos.i].type !== 'paren' || tokens[pos.i].value !== ')') {
+      throw new Error('Expected closing parenthesis');
+    }
+    pos.i++;
+    return val;
+  }
+
+  throw new Error(`Unexpected token: ${JSON.stringify(token)}`);
+}
+
+function safeEvaluate(expr: string): number {
+  const tokens = tokenize(expr);
+  const pos = { i: 0 };
+  const result = parseExpr(tokens, pos);
+  if (pos.i < tokens.length) {
+    throw new Error('Unexpected trailing characters');
+  }
+  return result.value;
+}
+
 export const ScientificCalculator: React.FC = () => {
   const { showToast } = useApp();
   const [expression, setExpression] = useState('');
@@ -30,20 +185,7 @@ export const ScientificCalculator: React.FC = () => {
     if (!expression.trim()) return;
 
     try {
-      // Safe replacement for mathematical functions
-      let formatted = expression
-        .replace(/sin\(/g, 'Math.sin(')
-        .replace(/cos\(/g, 'Math.cos(')
-        .replace(/tan\(/g, 'Math.tan(')
-        .replace(/sqrt\(/g, 'Math.sqrt(')
-        .replace(/log\(/g, 'Math.log10(')
-        .replace(/π/g, 'Math.PI')
-        .replace(/e/g, 'Math.E')
-        .replace(/\^/g, '**');
-
-      // Evaluate safely
-      // eslint-disable-next-line no-eval
-      const evalResult = eval(formatted);
+      const evalResult = safeEvaluate(expression);
       const stringRes = String(Number(evalResult.toFixed(6)));
 
       setResult(stringRes);
@@ -57,7 +199,7 @@ export const ScientificCalculator: React.FC = () => {
 
   const BTNS = [
     ['sin(', 'cos(', 'tan(', 'sqrt('],
-    ['log(', '^', 'π', 'e'],
+    ['log(', '^', 'pi', 'e'],
     ['(', ')', '/', '*'],
     ['7', '8', '9', '-'],
     ['4', '5', '6', '+'],
@@ -99,7 +241,7 @@ export const ScientificCalculator: React.FC = () => {
           <div key={rIdx} className="grid grid-cols-4 gap-2">
             {row.map((btn) => {
               const isOperator = ['+', '-', '*', '/', '='].includes(btn);
-              const isSpecial = ['sin(', 'cos(', 'tan(', 'sqrt(', 'log(', '^', 'π', 'e'].includes(btn);
+              const isSpecial = ['sin(', 'cos(', 'tan(', 'sqrt(', 'log(', '^', 'pi', 'e'].includes(btn);
 
               return (
                 <button
@@ -120,10 +262,10 @@ export const ScientificCalculator: React.FC = () => {
                       ? 'bg-gradient-to-b from-[#444] to-[#333] text-white shadow-[0_2px_8px_rgba(0,0,0,0.4)]'
                       : 'bg-gradient-to-b from-[#555] to-[#444] text-white shadow-[0_2px_8px_rgba(0,0,0,0.4)]'
                   }`}
-                  style={{ 
-                    backgroundImage: btn !== '=' && !isSpecial && !isOperator && btn !== 'C' 
-                      ? 'linear-gradient(to bottom, #666 0%, #444 100%)' 
-                      : undefined 
+                  style={{
+                    backgroundImage: btn !== '=' && !isSpecial && !isOperator && btn !== 'C'
+                      ? 'linear-gradient(to bottom, #666 0%, #444 100%)'
+                      : undefined
                   }}
                 >
                   {btn}

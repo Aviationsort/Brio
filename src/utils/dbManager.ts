@@ -5,6 +5,19 @@
  */
 
 import { encryptionService } from './crypto';
+import { apiClient } from './apiClient';
+
+function usernameFromKey(dbKey: string): string {
+  return dbKey.replace(/^vault_/, '');
+}
+
+function readSessionToken(): string {
+  try {
+    return localStorage.getItem('brio_session') || '';
+  } catch {
+    return '';
+  }
+}
 
 export interface DatabaseMetadata {
   version: string;
@@ -28,17 +41,28 @@ export interface BrioDatabaseDump {
     iptvChannels?: any[];
     notes?: any[];
     todos?: any[];
+    calendarEvents?: any[];
     myPlanePics?: any[];
     settings?: any;
   };
 }
 
-const DB_STORAGE_KEY = 'brio_master_db_v1';
-const DB_METADATA_KEY = 'brio_db_metadata';
-const DB_BACKUP_KEY = 'brio_db_last_backup';
+const DB_STORAGE_PREFIX = 'brio_master_db_';
+const DB_METADATA_PREFIX = 'brio_db_metadata_';
+const DB_BACKUP_PREFIX = 'brio_db_last_backup_';
 const DB_INDEXEDDB_NAME = 'brio_vault_store';
 const DB_INDEXEDDB_STORE = 'vaults';
 const DB_INDEXEDDB_KEY = 'default_vault';
+
+function storageKeyFor(dbKey: string): string {
+  return `${DB_STORAGE_PREFIX}${dbKey}`;
+}
+function metadataKeyFor(dbKey: string): string {
+  return `${DB_METADATA_PREFIX}${dbKey}`;
+}
+function backupKeyFor(dbKey: string): string {
+  return `${DB_BACKUP_PREFIX}${dbKey}`;
+}
 
 type MigrationFn = (dump: BrioDatabaseDump) => Promise<BrioDatabaseDump>;
 
@@ -82,14 +106,14 @@ class DatabaseManager {
     }
   }
 
-  async saveVaultToIndexedDB(blob: Blob): Promise<boolean> {
+  async saveVaultToIndexedDB(blob: Blob, key: string = DB_INDEXEDDB_KEY): Promise<boolean> {
     try {
       const db = await this.openIndexedDB();
       if (!db) return false;
       return new Promise((resolve, reject) => {
         const tx = db.transaction(DB_INDEXEDDB_STORE, 'readwrite');
         const store = tx.objectStore(DB_INDEXEDDB_STORE);
-        const request = store.put(blob, DB_INDEXEDDB_KEY);
+        const request = store.put(blob, key);
         request.onerror = () => reject(request.error);
         request.onsuccess = () => resolve(true);
         tx.oncomplete = () => db.close();
@@ -99,14 +123,14 @@ class DatabaseManager {
     }
   }
 
-  async loadVaultFromIndexedDB(): Promise<Blob | null> {
+  async loadVaultFromIndexedDB(key: string = DB_INDEXEDDB_KEY): Promise<Blob | null> {
     try {
       const db = await this.openIndexedDB();
       if (!db) return null;
       return new Promise((resolve, reject) => {
         const tx = db.transaction(DB_INDEXEDDB_STORE, 'readonly');
         const store = tx.objectStore(DB_INDEXEDDB_STORE);
-        const request = store.get(DB_INDEXEDDB_KEY);
+        const request = store.get(key);
         request.onerror = () => reject(request.error);
         request.onsuccess = () => {
           db.close();
@@ -119,14 +143,14 @@ class DatabaseManager {
     }
   }
 
-  async clearVaultFromIndexedDB(): Promise<boolean> {
+  async clearVaultFromIndexedDB(key: string = DB_INDEXEDDB_KEY): Promise<boolean> {
     try {
       const db = await this.openIndexedDB();
       if (!db) return false;
       return new Promise((resolve, reject) => {
         const tx = db.transaction(DB_INDEXEDDB_STORE, 'readwrite');
         const store = tx.objectStore(DB_INDEXEDDB_STORE);
-        const request = store.delete(DB_INDEXEDDB_KEY);
+        const request = store.delete(key);
         request.onerror = () => reject(request.error);
         request.onsuccess = () => resolve(true);
         tx.oncomplete = () => db.close();
@@ -180,7 +204,7 @@ class DatabaseManager {
     }
   }
 
-  async saveDatabase(dumpData: BrioDatabaseDump['data']): Promise<boolean> {
+  async saveDatabase(dumpData: BrioDatabaseDump['data'], dbKey: string = DB_INDEXEDDB_KEY): Promise<boolean> {
     try {
       const recordsCount =
         (dumpData.users?.length || 0) +
@@ -199,7 +223,7 @@ class DatabaseManager {
 
       const metadata: DatabaseMetadata = {
         version: '2.0.0-DB',
-        databaseName: 'brio_master_vault.db',
+        databaseName: dbKey,
         createdAt: new Date().toISOString(),
         lastModified: new Date().toISOString(),
         tables: Object.keys(dumpData).filter(k => k !== 'settings' || dumpData.settings !== undefined),
@@ -217,14 +241,21 @@ class DatabaseManager {
       const encrypted = await encryptionService.encrypt(plainJson);
       const payloadString = JSON.stringify(encrypted);
 
-      const blob = new Blob([payloadString], { type: 'application/octet-stream' });
-      await this.saveVaultToIndexedDB(blob);
+      console.info('[DB] saveDatabase', {
+        dbKey,
+        storageKey: storageKeyFor(dbKey),
+        metadataKey: metadataKeyFor(dbKey),
+        payloadLength: payloadString.length,
+        tables: metadata.tables,
+        totalRecords: metadata.totalRecords,
+      });
 
-      try {
-        localStorage.setItem(DB_STORAGE_KEY, payloadString);
-        localStorage.setItem(DB_METADATA_KEY, JSON.stringify(metadata));
-      } catch {
-        // localStorage full or unavailable; IndexedDB is primary
+      localStorage.setItem(storageKeyFor(dbKey), payloadString);
+      localStorage.setItem(metadataKeyFor(dbKey), JSON.stringify(metadata));
+
+      const token = readSessionToken();
+      if (token) {
+        await apiClient.vault.put(usernameFromKey(dbKey), token, payloadString);
       }
 
       return true;
@@ -234,81 +265,86 @@ class DatabaseManager {
     }
   }
 
-  async loadDatabase(): Promise<BrioDatabaseDump | null> {
-    try {
-      const vaultBlob = await this.loadVaultFromIndexedDB();
-      if (vaultBlob) {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = async () => {
-            try {
-              const stored = reader.result as string;
-              let rawJson = stored;
-              if (stored.startsWith('ENC:')) {
-                const payloadStr = stored.slice(4);
-                let payload: any;
-                try {
-                  payload = JSON.parse(payloadStr);
-                } catch {
-                  payload = payloadStr;
-                }
-                const decrypted = await encryptionService.decryptWithFallback(payload);
-                if (decrypted) {
-                  rawJson = decrypted;
-                } else {
-                  resolve(null);
-                  return;
-                }
-              }
-
-              if (typeof rawJson !== 'string') {
-                resolve(rawJson as BrioDatabaseDump);
-                return;
-              }
-
-              const parsed = JSON.parse(rawJson) as BrioDatabaseDump;
-              const migrated = await this.migrate(parsed);
-              resolve(migrated);
-            } catch (err) {
-              reject(err);
-            }
-          };
-          reader.onerror = () => reject(reader.error);
-          reader.readAsText(vaultBlob);
-        });
+  async loadDatabase(dbKey: string = DB_INDEXEDDB_KEY): Promise<BrioDatabaseDump | null> {
+    const parseDump = async (rawJson: string | null, source: string): Promise<BrioDatabaseDump | null> => {
+      console.info('[DB] loadDatabase parseDump', { source, rawType: rawJson?.slice(0, 20) });
+      if (!rawJson || typeof rawJson !== 'string') {
+        console.warn('[DB] loadDatabase parseDump empty/non-string', { source });
+        return null;
       }
-
-      const stored = localStorage.getItem(DB_STORAGE_KEY);
-      if (!stored) return null;
-
-      let rawJson = stored;
-      if (stored.startsWith('ENC:')) {
-        const payloadStr = stored.slice(4);
-        let payload: any;
+      let parsed: any;
+      try {
+        parsed = JSON.parse(rawJson);
+      } catch (e) {
+        console.warn('[DB] loadDatabase parseDump JSON.parse failed', { source, error: String(e) });
+        return null;
+      }
+      if (parsed && typeof parsed === 'object' && parsed.iv && parsed.cipherText) {
         try {
-          payload = JSON.parse(payloadStr);
-        } catch {
-          payload = payloadStr;
-        }
-        const decrypted = await encryptionService.decryptWithFallback(payload);
-        if (decrypted) {
-          rawJson = decrypted;
-        } else {
-          localStorage.removeItem(DB_STORAGE_KEY);
+          const decrypted = await encryptionService.decrypt<any>(parsed);
+          if (!decrypted) {
+            console.warn('[DB] loadDatabase parseDump decrypt returned null', { source });
+            return null;
+          }
+          const trimmed = typeof decrypted === 'string' ? decrypted.trim() : decrypted;
+          if (typeof trimmed === 'string') {
+            try {
+              const parsed2 = JSON.parse(trimmed) as BrioDatabaseDump;
+              console.info('[DB] loadDatabase parseDump success from decrypted JSON', { source, hasMetadata: !!parsed2.metadata, tables: parsed2.metadata?.tables });
+              return parsed2;
+            } catch (e) {
+              console.warn('[DB] loadDatabase parseDump JSON.parse(decrypted) failed', { source, error: String(e), decryptedSnippet: trimmed.slice(0, 100) });
+              return null;
+            }
+          }
+          console.info('[DB] loadDatabase parseDump success from decrypted object', { source, hasMetadata: !!trimmed.metadata, tables: trimmed.metadata?.tables });
+          return trimmed as BrioDatabaseDump;
+        } catch (e) {
+          console.warn('[DB] loadDatabase parseDump decrypt threw', { source, error: String(e) });
           return null;
         }
       }
+      if (typeof parsed === 'object' && parsed !== null) {
+        console.info('[DB] loadDatabase parseDump success plain object', { source, hasMetadata: !!parsed.metadata, tables: parsed.metadata?.tables });
+        return parsed as BrioDatabaseDump;
+      }
+      console.warn('[DB] loadDatabase parseDump unhandled shape', { source, parsedType: typeof parsed });
+      return null;
+    };
 
-      if (typeof rawJson !== 'string') {
-        return rawJson as BrioDatabaseDump;
+    try {
+      const token = readSessionToken();
+      console.info('[DB] loadDatabase start', { dbKey, username: usernameFromKey(dbKey), hasToken: !!token });
+
+      const data = token ? await apiClient.vault.get(usernameFromKey(dbKey), token) : null;
+      console.info('[DB] loadDatabase server result', { source: 'server', dataType: typeof data, dataSnippet: typeof data === 'string' ? data.slice(0, 60) : data });
+
+      const fromServer = await parseDump(data, 'server');
+      if (fromServer) {
+        console.info('[DB] loadDatabase using server vault');
+        return this.migrate(fromServer);
       }
 
-      const parsed = JSON.parse(rawJson) as BrioDatabaseDump;
-      const migrated = await this.migrate(parsed);
-      return migrated;
-    } catch (err) {
-      console.error('Failed to load database:', err);
+      const cached = localStorage.getItem(storageKeyFor(dbKey));
+      console.info('[DB] loadDatabase cache result', { source: 'localStorage', cachedType: typeof cached, cachedSnippet: typeof cached === 'string' ? cached.slice(0, 60) : cached });
+
+      const fromCache = await parseDump(cached, 'localStorage');
+      if (fromCache) {
+        console.info('[DB] loadDatabase using localStorage cache');
+        return this.migrate(fromCache);
+      }
+      console.warn('[DB] loadDatabase both sources failed', { dbKey, storageKey: storageKeyFor(dbKey), metadataKey: metadataKeyFor(dbKey) });
       return null;
+    } catch (err) {
+      console.error('[DB] loadDatabase outer error:', err);
+      try {
+        const cached = localStorage.getItem(storageKeyFor(dbKey));
+        const fromCache = await parseDump(cached, 'localStorage-fallback');
+        if (fromCache) return this.migrate(fromCache);
+        return null;
+      } catch {
+        return null;
+      }
     }
   }
 
@@ -357,7 +393,6 @@ class DatabaseManager {
 
       const fileContent = JSON.stringify(filePayload, null, 2);
       const blob = new Blob([fileContent], { type: 'application/octet-stream' });
-      localStorage.setItem(DB_BACKUP_KEY, new Date().toISOString());
       return blob;
     } catch (err) {
       console.error('Export DB Error:', err);
@@ -426,7 +461,6 @@ class DatabaseManager {
           }
 
           const migrated = await this.migrate(parsed);
-          await this.saveDatabase(migrated.data);
           resolve(migrated);
         } catch (err: any) {
           reject(new Error(err.message || 'Failed to parse .db database file'));
@@ -437,7 +471,7 @@ class DatabaseManager {
     });
   }
 
-  async importDatabaseFile(file: File): Promise<BrioDatabaseDump> {
+  async importDatabaseFile(file: File, dbKey: string = DB_INDEXEDDB_KEY): Promise<BrioDatabaseDump> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = async (e) => {
@@ -486,7 +520,7 @@ class DatabaseManager {
           }
 
           const migrated = await this.migrate(parsed);
-          await this.saveDatabase(migrated.data);
+          await this.saveDatabase(migrated.data, dbKey);
           resolve(migrated);
         } catch (err: any) {
           reject(new Error(err.message || 'Failed to parse .db database file'));
@@ -497,20 +531,20 @@ class DatabaseManager {
     });
   }
 
-  async backupDatabase(dumpData: BrioDatabaseDump['data']): Promise<string> {
+  async backupDatabase(dumpData: BrioDatabaseDump['data'], dbKey: string = DB_INDEXEDDB_KEY): Promise<string> {
     try {
-      await this.saveDatabase(dumpData);
+      await this.saveDatabase(dumpData, dbKey);
       const blob = await this.exportDatabaseFile(dumpData);
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `brio_vault_backup_${new Date().toISOString().slice(0, 10)}.db`;
+      link.download = `brio_vault_backup_${dbKey}_${new Date().toISOString().slice(0, 10)}.db`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       const now = new Date().toISOString();
-      localStorage.setItem(DB_BACKUP_KEY, now);
+      localStorage.setItem(backupKeyFor(dbKey), now);
       return now;
     } catch (err) {
       console.error('Backup failed:', err);
@@ -521,16 +555,15 @@ class DatabaseManager {
   async restoreDatabase(file: File): Promise<BrioDatabaseDump> {
     try {
       const result = await this.importDatabaseFile(file);
-      localStorage.setItem(DB_BACKUP_KEY, new Date().toISOString());
       return result;
     } catch (err: any) {
       throw new Error(err.message || 'Failed to restore database');
     }
   }
 
-  getDatabaseMetadata(): DatabaseMetadata | null {
+  getDatabaseMetadata(dbKey: string = DB_INDEXEDDB_KEY): DatabaseMetadata | null {
     try {
-      const stored = localStorage.getItem(DB_METADATA_KEY);
+      const stored = localStorage.getItem(metadataKeyFor(dbKey));
       if (stored) return JSON.parse(stored) as DatabaseMetadata;
       return null;
     } catch {
@@ -538,9 +571,9 @@ class DatabaseManager {
     }
   }
 
-  getDatabaseSize(): number {
+  getDatabaseSize(dbKey: string = DB_INDEXEDDB_KEY): number {
     try {
-      const stored = localStorage.getItem(DB_STORAGE_KEY);
+      const stored = localStorage.getItem(storageKeyFor(dbKey));
       if (stored) return new Blob([stored]).size;
       return 0;
     } catch {
@@ -548,15 +581,15 @@ class DatabaseManager {
     }
   }
 
-  getLastBackupTime(): string | null {
-    return localStorage.getItem(DB_BACKUP_KEY);
+  getLastBackupTime(dbKey: string = DB_INDEXEDDB_KEY): string | null {
+    return localStorage.getItem(backupKeyFor(dbKey));
   }
 
-  async clearDatabase(): Promise<boolean> {
+  async clearDatabase(dbKey: string = DB_INDEXEDDB_KEY): Promise<boolean> {
     try {
-      localStorage.removeItem(DB_STORAGE_KEY);
-      localStorage.removeItem(DB_METADATA_KEY);
-      await this.clearVaultFromIndexedDB();
+      localStorage.removeItem(storageKeyFor(dbKey));
+      localStorage.removeItem(metadataKeyFor(dbKey));
+      await this.clearVaultFromIndexedDB(dbKey);
       return true;
     } catch {
       return false;

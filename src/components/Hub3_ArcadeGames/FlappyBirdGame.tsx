@@ -143,7 +143,7 @@ export const FlappyBirdGame: React.FC = () => {
       {!isPlaying ? (
         <button
           onClick={startGame}
-          className="liquid-glass-btn w-full py-3.5 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-bold text-xs rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2"
+          className="skeuo-btn w-full py-3.5 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-bold text-xs rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2"
         >
           <Play className="w-4 h-4" />
           <span>Takeoff Aircraft</span>
@@ -151,7 +151,7 @@ export const FlappyBirdGame: React.FC = () => {
       ) : (
         <button
           onClick={startGame}
-          className="liquid-glass-btn w-full py-2.5 bg-slate-800 text-slate-300 text-xs font-semibold rounded-xl"
+          className="skeuo-btn w-full py-2.5 bg-slate-800 text-slate-300 text-xs font-semibold rounded-xl"
         >
           Restart Flight
         </button>

@@ -6,6 +6,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useApp } from '../../context/AppContext';
 import { encryptionService } from '../../utils/crypto';
+import { sanitizeHtml } from '../../utils/htmlSanitizer';
 import { TodoItem, SpreadsheetCell, Slide, DocumentPage, PDFAnnotation } from '../../types';
 import { AIProvider } from '../../services/AIProvider';
 import {
@@ -196,8 +197,8 @@ export const OfficeHub: React.FC = () => {
       setAiMessages([{ role: 'assistant', content: `**Summary of "${note.title}":**\n\n${summary}` }]);
       setShowAIAssistant(true);
       showToast('Note Summarized', 'AI has generated a summary', 'success');
-    } catch (err) {
-      showToast('Summarization Error', String(err), 'error');
+    } catch {
+      showToast('Summarization Error', 'Unable to generate summary. Please try again.', 'error');
     } finally {
       setAiLoading(false);
     }
@@ -216,8 +217,8 @@ export const OfficeHub: React.FC = () => {
       setNoteContent('');
       addToRecent(noteTitle, 'notes');
       showToast('Note Created', isNoteEncrypted ? 'Note encrypted with AES-256' : 'Note saved successfully', 'success');
-    } catch (err) {
-      showToast('Encryption Error', String(err), 'error');
+    } catch {
+      showToast('Encryption Error', 'Unable to save note. Please try again.', 'error');
     }
   };
 
@@ -246,8 +247,8 @@ export const OfficeHub: React.FC = () => {
       addTodo(todoText, todoPriority, 'Office');
       setTodoText('');
       showToast('Task Created', 'Added to encrypted todo list.', 'success');
-    } catch (err) {
-      showToast('Task Error', String(err), 'error');
+    } catch {
+      showToast('Task Error', 'Unable to add task. Please try again.', 'error');
     }
   };
 
@@ -502,7 +503,7 @@ export const OfficeHub: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`liquid-glass-btn px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${
+                className={`skeuo-btn px-4 py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${
                   isActive
                     ? 'text-white shadow-lg'
                     : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
@@ -532,7 +533,7 @@ export const OfficeHub: React.FC = () => {
                     <Tag className="absolute left-3 top-2.5 w-3.5 h-3.5 text-zinc-500" />
                     <input type="text" placeholder="Tags (comma separated)..." value={noteTags} onChange={(e) => setNoteTags(e.target.value)} className={`w-full pl-9 pr-3 py-2.5 ${neuInput}`} />
                   </div>
-                  <button type="submit" className="liquid-glass-btn w-full sm:w-auto px-5 py-2.5 bg-[#C8102E] hover:bg-[#ff7236] text-black font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 shrink-0">
+                  <button type="submit" className="skeuo-btn w-full sm:w-auto px-5 py-2.5 bg-[#C8102E] hover:bg-[#ff7236] text-black font-bold text-xs rounded-xl shadow-lg transition-all flex items-center justify-center gap-1.5 shrink-0">
                     <Plus className="w-4 h-4" /> Save Encrypted Note
                   </button>
                 </div>
@@ -551,7 +552,7 @@ export const OfficeHub: React.FC = () => {
                 {filteredNotes.map((note) => {
                   const isSelected = selectedNote === note.id;
                   return (
-                    <div key={note.id} onClick={() => { setSelectedNote(note.id); setDecryptedText(null); }} className={`liquid-glass-btn p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between min-h-[120px] ${isSelected ? 'bg-zinc-900 border-[#C8102E] shadow-lg' : 'bg-zinc-950/80 border-white/10 hover:border-zinc-700'}`}>
+                    <div key={note.id} onClick={() => { setSelectedNote(note.id); setDecryptedText(null); }} className={`skeuo-btn p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between min-h-[120px] ${isSelected ? 'bg-zinc-900 border-[#C8102E] shadow-lg' : 'bg-zinc-950/80 border-white/10 hover:border-zinc-700'}`}>
                       <div>
                         <div className="flex items-start justify-between gap-2 mb-1">
                           <h5 className="text-xs font-bold text-white truncate">{note.title}</h5>
@@ -563,7 +564,7 @@ export const OfficeHub: React.FC = () => {
                         <div className="flex gap-1 overflow-x-auto">
                           {note.tags.map((t) => <span key={t} className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 font-mono">#{t}</span>)}
                         </div>
-                        <button onClick={(e) => { e.stopPropagation(); deleteNote(note.id); showToast('Note Deleted', note.title, 'info'); }} className="liquid-glass-btn text-zinc-500 hover:text-rose-400 p-1"><Trash2 className="liquid-glass-btn w-3.5 h-3.5" /></button>
+                        <button onClick={(e) => { e.stopPropagation(); deleteNote(note.id); showToast('Note Deleted', note.title, 'info'); }} className="skeuo-btn text-zinc-500 hover:text-rose-400 p-1"><Trash2 className="skeuo-btn w-3.5 h-3.5" /></button>
                       </div>
                     </div>
                   );
@@ -575,8 +576,8 @@ export const OfficeHub: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-mono font-bold text-[#C8102E]">Decryption Viewer</span>
                     <div className="flex gap-2">
-                      <button onClick={handleSummarizeNote} disabled={aiLoading} className="liquid-glass-btn px-3 py-1.5 bg-red-600 text-white text-[11px] font-bold rounded-lg hover:bg-red-500 transition-all flex items-center gap-1"><Sparkles className="w-3 h-3" /> {aiLoading ? 'Processing...' : 'AI Summarize'}</button>
-                      <button onClick={() => { const target = notes.find((n) => n.id === selectedNote); if (target) handleDecryptNote(target); }} disabled={decrypting} className="liquid-glass-btn px-3 py-1.5 bg-[#C8102E] text-black text-[11px] font-bold rounded-lg hover:bg-[#ff7236] transition-all">{decrypting ? 'Decrypting...' : 'Decrypt Payload'}</button>
+                      <button onClick={handleSummarizeNote} disabled={aiLoading} className="skeuo-btn px-3 py-1.5 bg-red-600 text-white text-[11px] font-bold rounded-lg hover:bg-red-500 transition-all flex items-center gap-1"><Sparkles className="w-3 h-3" /> {aiLoading ? 'Processing...' : 'AI Summarize'}</button>
+                      <button onClick={() => { const target = notes.find((n) => n.id === selectedNote); if (target) handleDecryptNote(target); }} disabled={decrypting} className="skeuo-btn px-3 py-1.5 bg-[#C8102E] text-black text-[11px] font-bold rounded-lg hover:bg-[#ff7236] transition-all">{decrypting ? 'Decrypting...' : 'Decrypt Payload'}</button>
                     </div>
                   </div>
                   <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl text-xs font-mono text-zinc-300 min-h-[60px] whitespace-pre-wrap">{decryptedText || 'Press Decrypt Payload to unlock raw decrypted contents.'}</div>
@@ -593,7 +594,7 @@ export const OfficeHub: React.FC = () => {
                         <h3 className="text-base font-bold text-white">Brio Assistant</h3>
                       </div>
                     </div>
-                    <button onClick={() => { setShowAIAssistant(false); setAiMessages([]); }} className="liquid-glass-btn text-zinc-500 hover:text-white">✕</button>
+                    <button onClick={() => { setShowAIAssistant(false); setAiMessages([]); }} className="skeuo-btn text-zinc-500 hover:text-white">✕</button>
                   </div>
                   <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
                     {aiMessages.length === 0 && <p className="text-xs text-zinc-500 text-center py-4">Ask me anything or summarize your notes!</p>}
@@ -606,7 +607,7 @@ export const OfficeHub: React.FC = () => {
                   </div>
                   <div className="flex gap-2">
                     <input type="text" placeholder="Ask Brio AI..." value={aiInput} onChange={(e) => setAiInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleAISend()} className="flex-1 px-4 py-2.5 bg-zinc-900 border border-red-500/20 rounded-xl text-xs font-medium text-white placeholder-zinc-500 focus:outline-none focus:border-red-500" />
-                    <button onClick={handleAISend} disabled={aiLoading || !aiInput.trim()} className="liquid-glass-btn px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl transition-all disabled:opacity-50"><Send className="w-4 h-4" /></button>
+                    <button onClick={handleAISend} disabled={aiLoading || !aiInput.trim()} className="skeuo-btn px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl transition-all disabled:opacity-50"><Send className="w-4 h-4" /></button>
                   </div>
                 </div>
               )}
@@ -627,19 +628,19 @@ export const OfficeHub: React.FC = () => {
                   <option value="high">High Priority</option>
                   <option value="critical">Critical Priority</option>
                 </select>
-                <button type="submit" className="liquid-glass-btn flex-1 py-2.5 bg-[#C8102E] hover:bg-[#ff7236] text-black font-bold text-xs rounded-xl shadow transition-all flex items-center justify-center gap-1"><Plus className="w-4 h-4" /> Add Task</button>
+                <button type="submit" className="skeuo-btn flex-1 py-2.5 bg-[#C8102E] hover:bg-[#ff7236] text-black font-bold text-xs rounded-xl shadow transition-all flex items-center justify-center gap-1"><Plus className="w-4 h-4" /> Add Task</button>
               </div>
             </form>
             <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
               {todos.map((todo) => (
-                <div key={todo.id} className={`liquid-glass-btn p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 ${todo.completed ? 'bg-zinc-950/50 border-white/5 opacity-60' : 'bg-zinc-900 border-white/10 hover:border-zinc-700'}`}>
+                <div key={todo.id} className={`skeuo-btn p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 ${todo.completed ? 'bg-zinc-950/50 border-white/5 opacity-60' : 'bg-zinc-900 border-white/10 hover:border-zinc-700'}`}>
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     <input type="checkbox" checked={todo.completed} onChange={() => toggleTodo(todo.id)} className="w-4 h-4 rounded accent-[#C8102E] cursor-pointer shrink-0" />
-                    <span className={`liquid-glass-btn text-sm font-medium truncate ${todo.completed ? 'line-through text-zinc-500' : 'text-white'}`}>{todo.task}</span>
+                    <span className={`skeuo-btn text-sm font-medium truncate ${todo.completed ? 'line-through text-zinc-500' : 'text-white'}`}>{todo.task}</span>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className={`liquid-glass-btn text-[9px] font-mono px-2.5 py-1 rounded-full font-bold uppercase ${todo.priority === 'critical' ? 'bg-rose-950 text-rose-300 border border-rose-500/30' : todo.priority === 'high' ? 'bg-red-950 text-red-300 border border-red-500/30' : 'bg-zinc-800 text-zinc-400'}`}>{todo.priority}</span>
-                    <button onClick={() => deleteTodo(todo.id)} className="liquid-glass-btn p-1 text-zinc-500 hover:text-rose-400"><Trash2 className="liquid-glass-btn w-3.5 h-3.5" /></button>
+                    <span className={`skeuo-btn text-[9px] font-mono px-2.5 py-1 rounded-full font-bold uppercase ${todo.priority === 'critical' ? 'bg-rose-950 text-rose-300 border border-rose-500/30' : todo.priority === 'high' ? 'bg-red-950 text-red-300 border border-red-500/30' : 'bg-zinc-800 text-zinc-400'}`}>{todo.priority}</span>
+                    <button onClick={() => deleteTodo(todo.id)} className="skeuo-btn p-1 text-zinc-500 hover:text-rose-400"><Trash2 className="skeuo-btn w-3.5 h-3.5" /></button>
                   </div>
                 </div>
               ))}
@@ -661,7 +662,7 @@ export const OfficeHub: React.FC = () => {
             </div>
             <div className="flex gap-3">
               <input type="text" value={newStickyText} onChange={(e) => setNewStickyText(e.target.value)} placeholder="Add quick sticky note..." className={`flex-1 px-4 py-2.5 ${neuInput}`} />
-              <button onClick={handleAddSticky} disabled={!newStickyText.trim()} className="liquid-glass-btn px-5 py-2.5 bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-xs rounded-xl transition-all disabled:opacity-50"><Plus className="w-4 h-4" /></button>
+              <button onClick={handleAddSticky} disabled={!newStickyText.trim()} className="skeuo-btn px-5 py-2.5 bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-xs rounded-xl transition-all disabled:opacity-50"><Plus className="w-4 h-4" /></button>
             </div>
           </div>
         )}
@@ -674,11 +675,11 @@ export const OfficeHub: React.FC = () => {
               <textarea placeholder="Type your draft here..." value={editorText} onChange={(e) => setEditorText(e.target.value)} className="w-full bg-transparent border-none outline-none resize-none text-sm text-white placeholder-zinc-500 h-full min-h-[200px]" />
             </div>
             <div className="flex items-center gap-2">
-              <button className="liquid-glass-btn p-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-xl border border-white/10 transition-all"><Bold className="w-3.5 h-3.5" /></button>
-              <button className="liquid-glass-btn p-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-xl border border-white/10 transition-all"><Italic className="w-3.5 h-3.5" /></button>
-              <button className="liquid-glass-btn p-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-xl border border-white/10 transition-all"><Underline className="w-3.5 h-3.5" /></button>
-              <button className="liquid-glass-btn p-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-xl border border-white/10 transition-all"><List className="w-3.5 h-3.5" /></button>
-              <button className="liquid-glass-btn p-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-xl border border-white/10 transition-all"><AlignLeft className="w-3.5 h-3.5" /></button>
+              <button className="skeuo-btn p-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-xl border border-white/10 transition-all"><Bold className="w-3.5 h-3.5" /></button>
+              <button className="skeuo-btn p-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-xl border border-white/10 transition-all"><Italic className="w-3.5 h-3.5" /></button>
+              <button className="skeuo-btn p-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-xl border border-white/10 transition-all"><Underline className="w-3.5 h-3.5" /></button>
+              <button className="skeuo-btn p-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-xl border border-white/10 transition-all"><List className="w-3.5 h-3.5" /></button>
+              <button className="skeuo-btn p-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-xl border border-white/10 transition-all"><AlignLeft className="w-3.5 h-3.5" /></button>
             </div>
           </div>
         )}
@@ -728,7 +729,7 @@ export const OfficeHub: React.FC = () => {
               <div className="flex items-center gap-3 pt-4 border-t border-white/10">
                 <span className="text-xs text-zinc-400 font-mono">Formula:</span>
                 <input type="text" placeholder="=SUM(A1:B2)" className={`flex-1 px-4 py-2 ${neuInput}`} onKeyDown={(e) => { if (e.key === 'Enter' && selectedCell) { const val = (e.target as HTMLInputElement).value; updateCell(selectedCell.row, selectedCell.col, { value: evaluateFormula(val), formula: val }); } }} />
-                <button onClick={() => { if (selectedCell) { const cell = getCell(selectedCell.row, selectedCell.col); if (cell?.formula) { updateCell(selectedCell.row, selectedCell.col, { value: evaluateFormula(cell.formula) }); } } }} className="liquid-glass-btn px-4 py-2 bg-red-600 text-white text-xs font-bold rounded-xl">Apply</button>
+                <button onClick={() => { if (selectedCell) { const cell = getCell(selectedCell.row, selectedCell.col); if (cell?.formula) { updateCell(selectedCell.row, selectedCell.col, { value: evaluateFormula(cell.formula) }); } } }} className="skeuo-btn px-4 py-2 bg-red-600 text-white text-xs font-bold rounded-xl">Apply</button>
               </div>
             )}
           </div>
@@ -739,16 +740,16 @@ export const OfficeHub: React.FC = () => {
           <div className={`${neuBase} ${neuShadow} rounded-3xl p-8 space-y-5`}>
             {SECTION_HEADER(<Presentation className="w-5 h-5" />, 'Presentation', 'Slides', '#a855f7')}
             <div className="flex items-center justify-center gap-6">
-              <button onClick={prevSlide} disabled={currentSlideIndex === 0} className="liquid-glass-btn p-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl border border-zinc-700 disabled:opacity-50"><ChevronLeft className="w-5 h-5" /></button>
+              <button onClick={prevSlide} disabled={currentSlideIndex === 0} className="skeuo-btn p-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl border border-zinc-700 disabled:opacity-50"><ChevronLeft className="w-5 h-5" /></button>
               <div className="flex-1 max-w-2xl aspect-video bg-zinc-900 rounded-3xl border border-zinc-800 p-8 flex flex-col items-center justify-center text-center shadow-inner">
                 <h2 className="text-3xl font-bold text-white mb-4">{slides[currentSlideIndex]?.title}</h2>
                 <p className="text-base text-zinc-300 whitespace-pre-wrap leading-relaxed">{slides[currentSlideIndex]?.content}</p>
               </div>
-              <button onClick={nextSlide} disabled={currentSlideIndex === slides.length - 1} className="liquid-glass-btn p-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl border border-zinc-700 disabled:opacity-50"><ChevronRight className="w-5 h-5" /></button>
+              <button onClick={nextSlide} disabled={currentSlideIndex === slides.length - 1} className="skeuo-btn p-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl border border-zinc-700 disabled:opacity-50"><ChevronRight className="w-5 h-5" /></button>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-zinc-400 font-mono">Slide {currentSlideIndex + 1} of {slides.length}</span>
-              <button onClick={addSlide} className="liquid-glass-btn px-4 py-2 bg-red-600 text-white text-xs font-bold rounded-xl hover:bg-red-500 transition-all flex items-center gap-1"><Plus className="w-3.5 h-3.5" /> Add Slide</button>
+              <button onClick={addSlide} className="skeuo-btn px-4 py-2 bg-red-600 text-white text-xs font-bold rounded-xl hover:bg-red-500 transition-all flex items-center gap-1"><Plus className="w-3.5 h-3.5" /> Add Slide</button>
             </div>
           </div>
         )}
@@ -759,18 +760,18 @@ export const OfficeHub: React.FC = () => {
             {SECTION_HEADER(<FileTextIcon className="w-5 h-5" />, 'Word Processor', 'Document', '#3b82f6')}
             <input type="text" placeholder="Document Title..." value={docTitle} onChange={(e) => setDocTitle(e.target.value)} className={`w-full px-4 py-3 ${neuInput}`} />
             <div className="flex items-center gap-2 flex-wrap">
-              <button onClick={() => document.execCommand('bold')} className="liquid-glass-btn p-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-xl border border-white/10 transition-all" title="Bold"><Bold className="w-3.5 h-3.5" /></button>
-              <button onClick={() => document.execCommand('italic')} className="liquid-glass-btn p-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-xl border border-white/10 transition-all" title="Italic"><Italic className="w-3.5 h-3.5" /></button>
-              <button onClick={() => document.execCommand('underline')} className="liquid-glass-btn p-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-xl border border-white/10 transition-all" title="Underline"><Underline className="w-3.5 h-3.5" /></button>
-              <button onClick={() => document.execCommand('formatBlock', false, 'h2')} className="liquid-glass-btn px-3 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-xl border border-white/10 transition-all text-xs font-bold" title="Heading">H</button>
-              <button onClick={() => document.execCommand('insertUnorderedList')} className="liquid-glass-btn p-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-xl border border-white/10 transition-all" title="Bullet List"><List className="w-3.5 h-3.5" /></button>
+              <button onClick={() => document.execCommand('bold')} className="skeuo-btn p-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-xl border border-white/10 transition-all" title="Bold"><Bold className="w-3.5 h-3.5" /></button>
+              <button onClick={() => document.execCommand('italic')} className="skeuo-btn p-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-xl border border-white/10 transition-all" title="Italic"><Italic className="w-3.5 h-3.5" /></button>
+              <button onClick={() => document.execCommand('underline')} className="skeuo-btn p-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-xl border border-white/10 transition-all" title="Underline"><Underline className="w-3.5 h-3.5" /></button>
+              <button onClick={() => document.execCommand('formatBlock', false, 'h2')} className="skeuo-btn px-3 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-xl border border-white/10 transition-all text-xs font-bold" title="Heading">H</button>
+              <button onClick={() => document.execCommand('insertUnorderedList')} className="skeuo-btn p-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-xl border border-white/10 transition-all" title="Bullet List"><List className="w-3.5 h-3.5" /></button>
             </div>
             <div
               contentEditable
               suppressContentEditableWarning
               onInput={(e) => setDocContent((e.target as HTMLDivElement).innerHTML)}
               className={`${neuInput} p-5 rounded-2xl min-h-[320px] prose prose-invert max-w-none text-sm leading-relaxed`}
-              dangerouslySetInnerHTML={{ __html: docContent }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(docContent) }}
             />
           </div>
         )}
@@ -780,9 +781,9 @@ export const OfficeHub: React.FC = () => {
           <div className={`${neuBase} ${neuShadow} rounded-3xl p-8 space-y-5`}>
             {SECTION_HEADER(<BookOpen className="w-5 h-5" />, 'Notebook', 'Pages', '#6366f1')}
             <div className="flex items-center gap-3 mb-5">
-              <button onClick={() => setCurrentPageIndex((p) => Math.max(0, p - 1))} disabled={currentPageIndex === 0} className="liquid-glass-btn p-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl border border-zinc-700 disabled:opacity-50"><ChevronLeft className="w-4 h-4" /></button>
+              <button onClick={() => setCurrentPageIndex((p) => Math.max(0, p - 1))} disabled={currentPageIndex === 0} className="skeuo-btn p-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl border border-zinc-700 disabled:opacity-50"><ChevronLeft className="w-4 h-4" /></button>
               <span className="text-sm text-zinc-400 font-mono">Page {currentPageIndex + 1} of {notebookPages.length}</span>
-              <button onClick={() => setCurrentPageIndex((p) => Math.min(notebookPages.length - 1, p + 1))} disabled={currentPageIndex === notebookPages.length - 1} className="liquid-glass-btn p-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl border border-zinc-700 disabled:opacity-50"><ChevronRight className="w-4 h-4" /></button>
+              <button onClick={() => setCurrentPageIndex((p) => Math.min(notebookPages.length - 1, p + 1))} disabled={currentPageIndex === notebookPages.length - 1} className="skeuo-btn p-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-2xl border border-zinc-700 disabled:opacity-50"><ChevronRight className="w-4 h-4" /></button>
             </div>
             {notebookPages[currentPageIndex] && (
               <div className="space-y-4">
@@ -792,7 +793,7 @@ export const OfficeHub: React.FC = () => {
                   suppressContentEditableWarning
                   onInput={(e) => setNotebookPages(prev => prev.map((p, i) => i === currentPageIndex ? { ...p, content: (e.target as HTMLDivElement).innerHTML } : p))}
                   className={`${neuInput} p-5 rounded-2xl min-h-[280px] prose prose-invert max-w-none text-sm leading-relaxed`}
-                  dangerouslySetInnerHTML={{ __html: notebookPages[currentPageIndex]?.content || '<p>Start writing...</p>' }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(notebookPages[currentPageIndex]?.content || '<p>Start writing...</p>') }}
                 />
               </div>
             )}
@@ -804,8 +805,8 @@ export const OfficeHub: React.FC = () => {
           <div className={`${neuBase} ${neuShadow} rounded-3xl p-8 space-y-5`}>
             {SECTION_HEADER(<LayoutTemplate className="w-5 h-5" />, 'Publisher', 'Layout', '#ec4899')}
             <div className="flex items-center gap-3">
-              <button onClick={() => addPublisherElement('text')} className="liquid-glass-btn px-4 py-2.5 bg-red-600 text-white text-xs font-bold rounded-xl hover:bg-red-500 transition-all flex items-center gap-1"><Plus className="w-3.5 h-3.5" /> Text</button>
-              <button onClick={() => addPublisherElement('image')} className="liquid-glass-btn px-4 py-2.5 bg-red-600 text-white text-xs font-bold rounded-xl hover:bg-red-500 transition-all flex items-center gap-1"><Image className="w-3.5 h-3.5" /> Image</button>
+              <button onClick={() => addPublisherElement('text')} className="skeuo-btn px-4 py-2.5 bg-red-600 text-white text-xs font-bold rounded-xl hover:bg-red-500 transition-all flex items-center gap-1"><Plus className="w-3.5 h-3.5" /> Text</button>
+              <button onClick={() => addPublisherElement('image')} className="skeuo-btn px-4 py-2.5 bg-red-600 text-white text-xs font-bold rounded-xl hover:bg-red-500 transition-all flex items-center gap-1"><Image className="w-3.5 h-3.5" /> Image</button>
             </div>
             <div className="relative w-full h-[420px] bg-zinc-900 rounded-3xl border border-zinc-800 overflow-hidden shadow-inner" onMouseMove={handlePublisherMouseMove} onMouseUp={handlePublisherMouseUp} onMouseLeave={handlePublisherMouseUp}>
               {publisherElements.map((el) => (
@@ -838,7 +839,7 @@ export const OfficeHub: React.FC = () => {
                 { id: 'text', icon: <Type className="w-4 h-4" />, label: 'Text' },
                 { id: 'stamp', icon: <Stamp className="w-4 h-4" />, label: 'Stamp' },
               ].map((tool) => (
-                <button key={tool.id} onClick={() => setPdfTool(tool.id as any)} className={`liquid-glass-btn px-4 py-2.5 rounded-2xl border text-xs font-bold transition-all ${pdfTool === tool.id ? 'bg-rose-500/20 border-rose-500/40 text-rose-300' : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white'}`}>
+                <button key={tool.id} onClick={() => setPdfTool(tool.id as any)} className={`skeuo-btn px-4 py-2.5 rounded-2xl border text-xs font-bold transition-all ${pdfTool === tool.id ? 'bg-rose-500/20 border-rose-500/40 text-rose-300' : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white'}`}>
                   {tool.icon} {tool.label}
                 </button>
               ))}
@@ -861,7 +862,7 @@ export const OfficeHub: React.FC = () => {
             {pdfAnnotations.length > 0 && (
               <div className="flex items-center gap-3">
                 <span className="text-xs text-zinc-400">{pdfAnnotations.length} annotations</span>
-                <button onClick={() => exportDocument('annotations.json', JSON.stringify(pdfAnnotations, null, 2), 'application/json')} className="liquid-glass-btn px-4 py-2 bg-zinc-800 text-zinc-300 text-xs font-bold rounded-xl hover:bg-zinc-700 transition-all">Save Annotations</button>
+                <button onClick={() => exportDocument('annotations.json', JSON.stringify(pdfAnnotations, null, 2), 'application/json')} className="skeuo-btn px-4 py-2 bg-zinc-800 text-zinc-300 text-xs font-bold rounded-xl hover:bg-zinc-700 transition-all">Save Annotations</button>
               </div>
             )}
           </div>

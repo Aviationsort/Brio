@@ -1,5 +1,18 @@
 # Compiled and build artifacts
 *.pyc
+
+# Local SQLite auth store (LiteFS-managed) + secrets
+data/
+brio.db
+brio.db-*
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+aes-master.key
+
+# LiteFS
+litefs-data/
 __pycache__/
 *.o
 *.obj

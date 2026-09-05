@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { Camera, Award, BarChart3, User, Mail, ShieldCheck, ArrowLeft } from 'lucide-react';
 import { computeAirlineRankings, computeAircraftModelRankings, computeLiveStats } from '../data/planePicsData';
@@ -10,16 +10,16 @@ interface ProfilePageProps {
 export const ProfilePage: React.FC<ProfilePageProps> = ({ onBack }) => {
   const { user, myPlanePics, showToast } = useApp();
 
-  const stats = computeLiveStats(myPlanePics);
-  const airlineRankings = computeAirlineRankings(myPlanePics);
-  const modelRankings = computeAircraftModelRankings(myPlanePics);
+  const stats = useMemo(() => computeLiveStats(myPlanePics), [myPlanePics]);
+  const airlineRankings = useMemo(() => computeAirlineRankings(myPlanePics), [myPlanePics]);
+  const modelRankings = useMemo(() => computeAircraftModelRankings(myPlanePics), [myPlanePics]);
 
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 pb-2 border-b border-zinc-800">
         <button
           onClick={onBack}
-          className="liquid-glass-btn p-1.5 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white"
+          className="skeuo-btn p-1.5 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white"
         >
           <ArrowLeft className="w-4 h-4" />
         </button>

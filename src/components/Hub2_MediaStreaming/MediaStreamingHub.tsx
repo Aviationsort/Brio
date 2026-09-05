@@ -17,10 +17,10 @@ export const MediaStreamingHub: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Sub-tab Navigation */}
-      <div className="flex items-center gap-2 p-1.5 aero-panel overflow-x-auto no-scrollbar">
+      <div className="flex items-center gap-2 p-1.5 skeuo-panel overflow-x-auto no-scrollbar">
         <button
           onClick={() => setSubTab('nightcore')}
-          className={`ife-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+          className={`skeuo-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
             subTab === 'nightcore'
               ? 'bg-gradient-to-r from-[#C8102E] to-[#8B0000] text-white shadow-lg shadow-red-900/30 border border-red-400/40'
               : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
@@ -32,7 +32,7 @@ export const MediaStreamingHub: React.FC = () => {
 
         <button
           onClick={() => setSubTab('iptv')}
-          className={`ife-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+          className={`skeuo-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
             subTab === 'iptv'
               ? 'bg-gradient-to-r from-[#C8102E] to-[#8B0000] text-white shadow-lg shadow-red-900/30 border border-red-400/40'
               : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
@@ -44,7 +44,7 @@ export const MediaStreamingHub: React.FC = () => {
 
         <button
           onClick={() => setSubTab('rss')}
-          className={`ife-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+          className={`skeuo-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
             subTab === 'rss'
               ? 'bg-gradient-to-r from-[#C8102E] to-[#8B0000] text-white shadow-lg shadow-red-900/30 border border-red-400/40'
               : 'text-zinc-400 hover:text-white hover:bg-zinc-900'

@@ -111,13 +111,13 @@ export const BlackjackGame: React.FC = () => {
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={handleHit}
-            className="liquid-glass-btn py-3 bg-red-500 hover:bg-red-400 text-slate-950 font-black text-xs rounded-xl shadow transition-all"
+            className="skeuo-btn-primary py-3 bg-red-500 hover:bg-red-400 text-slate-950 font-black text-xs rounded-xl shadow transition-all"
           >
             HIT CARD
           </button>
           <button
             onClick={handleStand}
-            className="liquid-glass-btn py-3 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl shadow transition-all"
+            className="skeuo-btn-primary py-3 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl shadow transition-all"
           >
             STAND
           </button>
@@ -125,7 +125,7 @@ export const BlackjackGame: React.FC = () => {
       ) : (
         <button
           onClick={startDeal}
-          className="liquid-glass-btn w-full py-3.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-white font-bold text-xs rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2"
+          className="skeuo-btn-primary w-full py-3.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-white font-bold text-xs rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2"
         >
           <Sparkles className="w-4 h-4" />
           <span>DEAL HAND ($50)</span>

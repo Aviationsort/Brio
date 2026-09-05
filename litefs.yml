@@ -1,0 +1,28 @@
+# LiteFS configuration for global SQLite replication.
+#
+# LiteFS mounts a directory and transparently replicates the SQLite file
+# (brio.db) from the primary node to all replicas. Writes are forwarded to the
+# primary lease-holder; reads are served locally with low latency.
+#
+# Deploy with Fly.io: `fly deploy` (see fly.toml). The Brio server reads
+# LITEFS_DIR from the environment and stores brio.db + aes-master.key inside it.
+
+# fuse:
+#   # Required on Linux hosts; not needed on Fly.io (uses the shared mount).
+#   dir: "/data"
+
+data:
+  # The replicated mount that holds brio.db. On Fly.io this is the LiteFS
+  # volume; locally you can point it at ./data for development.
+  dir: "/data"
+
+lease:
+  # Use the Fly.io lease API when running on Fly. For self-hosted clusters,
+  # replace with a consul block.
+  type: "fly"
+  promote: true
+  timeout: "30s"
+
+# Strict mode ensures consistency: read/write connections go to the primary
+# while a node holds the lease. Safe default for auth data.
+skip-sync-on-start: false

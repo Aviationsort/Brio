@@ -68,14 +68,14 @@ export const Navigation: React.FC = () => {
             <button
               key={hub.id}
               onClick={() => setActiveHub(hub.id)}
-              className={`ife-btn relative flex items-center gap-2.5 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shrink-0 select-none ${
-                isActive
-                  ? 'bg-gradient-to-r from-[#C8102E] to-[#8B0000] text-white shadow-lg shadow-red-900/20 border border-red-400/40'
-                  : 'bg-[#1a1a1a] border border-white/10 text-zinc-400 hover:text-white hover:bg-zinc-800'
-              }`}
+              className={`skeuo-tab relative flex items-center gap-2.5 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shrink-0 select-none ${
+                  isActive
+                    ? 'skeuo-tab--active bg-gradient-to-r from-[#C8102E] to-[#8B0000] text-white shadow-lg shadow-red-900/20 border border-red-400/40'
+                    : 'bg-[#1a1a1a] border border-white/10 text-zinc-400 hover:text-white hover:bg-zinc-800'
+                }`}
             >
               <div
-                className={`ife-btn p-1.5 rounded-xl transition-colors ${
+                className={`skeuo-btn p-1.5 rounded-xl transition-colors ${
                   isActive ? 'bg-black text-red-400' : 'bg-zinc-900 text-zinc-400'
                 }`}
               >

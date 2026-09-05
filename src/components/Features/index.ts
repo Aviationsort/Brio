@@ -1,0 +1,10 @@
+export { QuickNotesWidget } from './QuickNotesWidget';
+export { ClipboardManager } from './ClipboardManager';
+export { UnitConverter } from './UnitConverter';
+export { QRCodeGenerator } from './QRCodeGenerator';
+export { ColorPicker } from './ColorPicker';
+export { Notepad } from './Notepad';
+export { CurrencyConverter } from './CurrencyConverter';
+export { BMICalculator } from './BMICalculator';
+export { WorldClock } from './WorldClock';
+export { Metronome } from './Metronome';

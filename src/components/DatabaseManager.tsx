@@ -92,7 +92,7 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({ isOpen, onClos
           </div>
           <button
             onClick={onClose}
-            className="liquid-glass-btn p-2 rounded-xl text-slate-400 hover:text-white bg-slate-800"
+            className="skeuo-btn p-2 rounded-xl text-slate-400 hover:text-white bg-slate-800"
           >
             <span className="text-lg">×</span>
           </button>
@@ -121,7 +121,7 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({ isOpen, onClos
           <button
             onClick={handleExport}
             disabled={backingUp || restoring || importing}
-            className="liquid-glass-btn py-3 bg-gradient-to-r from-red-600 to-red-600 hover:from-red-500 hover:to-red-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="skeuo-btn py-3 bg-gradient-to-r from-red-600 to-red-600 hover:from-red-500 hover:to-red-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             <FileDown className="w-4 h-4" />
             <span>Export .db</span>
@@ -130,7 +130,7 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({ isOpen, onClos
           <button
             onClick={handleBackup}
             disabled={backingUp || restoring || importing}
-            className="liquid-glass-btn py-3 bg-gradient-to-r from-red-600 to-red-600 hover:from-red-500 hover:to-red-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="skeuo-btn py-3 bg-gradient-to-r from-red-600 to-red-600 hover:from-red-500 hover:to-red-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {backingUp ? (
               <span className="animate-pulse">Saving...</span>
@@ -145,7 +145,7 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({ isOpen, onClos
           <button
             onClick={() => importInputRef.current?.click()}
             disabled={backingUp || restoring || importing}
-            className="liquid-glass-btn py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="skeuo-btn py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {importing ? (
               <span className="animate-pulse">Importing...</span>
@@ -160,7 +160,7 @@ export const DatabaseManager: React.FC<DatabaseManagerProps> = ({ isOpen, onClos
           <button
             onClick={() => restoreInputRef.current?.click()}
             disabled={backingUp || restoring || importing}
-            className="liquid-glass-btn py-3 bg-gradient-to-r from-red-600 to-red-600 hover:from-red-500 hover:to-red-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="skeuo-btn py-3 bg-gradient-to-r from-red-600 to-red-600 hover:from-red-500 hover:to-red-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {restoring ? (
               <span className="animate-pulse">Restoring...</span>

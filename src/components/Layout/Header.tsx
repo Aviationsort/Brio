@@ -28,7 +28,7 @@ export const Header: React.FC = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-gradient-to-r from-[#0a0a0c] via-[#1a1a1a]/90 to-[#0a0a0c] backdrop-blur-2xl border-b border-red-500/30 px-4 py-3 text-white shadow-xl shadow-black/40 aero-glossy">
+      <header className="sticky top-0 z-40 bg-gradient-to-r from-[#0a0a0c] via-[#1a1a1a]/90 to-[#0a0a0c] backdrop-blur-2xl border-b border-red-500/30 px-4 py-3 text-white shadow-xl shadow-black/40 skeuo-panel">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           {/* Brand & Logo */}
           <div className="flex items-center gap-3">
@@ -81,7 +81,7 @@ export const Header: React.FC = () => {
                 onClick={() => {
                   setShowMobileGUI(false);
                 }}
-                className="ife-btn flex items-center gap-1.5 px-3 py-1.5 bg-red-900/30 border border-red-300 text-red-200 rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+                className="skeuo-btn flex items-center gap-1.5 px-3 py-1.5 bg-red-900/30 border border-red-300 text-red-200 rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
               >
                 <Smartphone className="w-4 h-4 text-red-300" />
                 <span className="hidden sm:inline">{t.mobileMode || 'WP7 Mobile'}</span>
@@ -91,7 +91,7 @@ export const Header: React.FC = () => {
             {/* Auth Button */}
             <button
               onClick={() => setShowAuthModal(true)}
-              className="ife-btn flex items-center gap-2 px-4 py-1.5 rounded-xl bg-gradient-to-b from-red-500 via-red-600 to-[#8B0000] hover:from-red-400 hover:to-red-700 border-t border-red-300 text-xs font-bold text-white transition-all shadow-lg shadow-red-900/20 active:scale-95 cursor-pointer"
+              className="skeuo-btn-primary flex items-center gap-2 px-4 py-1.5 rounded-xl bg-gradient-to-b from-red-500 via-red-600 to-[#8B0000] hover:from-red-400 hover:to-red-700 border-t border-red-300 text-xs font-bold text-white transition-all shadow-lg shadow-red-900/20 active:scale-95 cursor-pointer"
             >
               {user ? (
                 <>

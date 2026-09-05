@@ -1051,19 +1051,19 @@ export const NightcorePlayer: React.FC = () => {
         <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={() => setMediaType('audio')}
-            className={`liquid-glass-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${mediaType === 'audio' ? 'bg-red-500 text-black shadow-lg' : 'bg-slate-800 text-slate-400'}`}
+            className={`skeuo-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${mediaType === 'audio' ? 'bg-red-500 text-black shadow-lg' : 'bg-slate-800 text-slate-400'}`}
           >
             <Music className="w-3.5 h-3.5 inline mr-1" /> Audio
           </button>
           <button
             onClick={() => setMediaType('video')}
-            className={`liquid-glass-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${mediaType === 'video' ? 'bg-red-500 text-black shadow-lg' : 'bg-slate-800 text-slate-400'}`}
+            className={`skeuo-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${mediaType === 'video' ? 'bg-red-500 text-black shadow-lg' : 'bg-slate-800 text-slate-400'}`}
           >
             <Video className="w-3.5 h-3.5 inline mr-1" /> Video
           </button>
           <button
             onClick={() => setIsMiniPlayer(!isMiniPlayer)}
-            className="liquid-glass-btn px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer"
+            className="skeuo-btn px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer"
             title="Mini Player"
           >
             {isMiniPlayer ? <Maximize2 className="w-3.5 h-3.5" /> : <Minimize2 className="w-3.5 h-3.5" />}
@@ -1120,401 +1120,424 @@ export const NightcorePlayer: React.FC = () => {
                 <canvas ref={canvasRef} width={BARS * 3} height={36} className="w-44 h-9 rounded-lg bg-black/60 border border-red-500/20" />
               </div>
 
-              <div className="lg:col-span-2 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-bold text-white truncate">
-                      {currentTrack ? currentTrack.title : 'No Media Loaded'}
-                    </h4>
-                    <p className="text-xs text-slate-400 truncate">
-                      {currentTrack ? currentTrack.artist : 'Load a file or paste a URL to begin'}
-                    </p>
-                    {audioFormat && currentTrack && (
-                      <p className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1">
-                        <FileAudio className="w-3 h-3" />
-                        {audioFormat}
-                        {fileSize && ` • ${(fileSize / 1024 / 1024).toFixed(1)} MB`}
-                        {currentTrack.durationSeconds > 0 && ` • ${formatTime(currentTrack.durationSeconds)}`}
-                      </p>
-                    )}
-                  </div>
-                  {currentTrack && (
-                    <button
-                      onClick={toggleFullscreen}
-                      className="liquid-glass-btn p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition-all cursor-pointer ml-2"
-                      title="Toggle Fullscreen"
-                    >
-                      <Maximize2 className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
+               <div className="lg:col-span-2 space-y-4">
+                 <div className="flex items-center justify-between">
+                   <div className="flex-1 min-w-0">
+                     <h4 className="text-sm font-bold text-white truncate">
+                       {currentTrack ? currentTrack.title : 'No Media Loaded'}
+                     </h4>
+                     <p className="text-xs text-slate-400 truncate">
+                       {currentTrack ? currentTrack.artist : 'Load a file or paste a URL to begin'}
+                     </p>
+                     {audioFormat && currentTrack && (
+                       <p className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1">
+                         <FileAudio className="w-3 h-3" />
+                         {audioFormat}
+                         {fileSize && ` • ${(fileSize / 1024 / 1024).toFixed(1)} MB`}
+                         {currentTrack.durationSeconds > 0 && ` • ${formatTime(currentTrack.durationSeconds)}`}
+                       </p>
+                     )}
+                   </div>
+                   {currentTrack && (
+                     <button
+                       onClick={toggleFullscreen}
+                       className="skeuo-btn p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition-all cursor-pointer ml-2"
+                       title="Toggle Fullscreen"
+                     >
+                       <Maximize2 className="w-4 h-4" />
+                     </button>
+                   )}
+                 </div>
 
-                <div className="bg-black rounded-2xl overflow-hidden border border-slate-800 min-h-[200px] flex items-center justify-center relative"
-                  onDrop={handleDrop}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}>
-                  {currentTrack ? (
-                    isYoutube && youtubeId ? (
-                      <iframe
-                        src={buildYouTubeEmbedUrl(youtubeId, false)}
-                        title="YouTube Video"
-                        className="w-full aspect-video max-h-[400px]"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      />
-                    ) : mediaType === 'video' ? (
-                      <video
-                        ref={videoRef}
-                        controls
-                        autoPlay={isPlayingMusic}
-                        className="w-full max-h-[400px] object-contain"
-                        src={currentTrack.audioUrl}
-                        onPlay={handleMediaPlay}
-                        onPause={handleMediaPause}
-                        onEnded={handleMediaEnded}
-                        onLoadedMetadata={handleMediaLoadedMetadata}
-                        onTimeUpdate={handleMediaTimeUpdate}
-                      />
-                    ) : (
-                      <audio
-                        ref={audioRef}
-                        controls
-                        autoPlay={isPlayingMusic}
-                        className="w-full"
-                        src={currentTrack.audioUrl}
-                        onPlay={handleMediaPlay}
-                        onPause={handleMediaPause}
-                        onEnded={handleMediaEnded}
-                        onLoadedMetadata={handleMediaLoadedMetadata}
-                        onTimeUpdate={handleMediaTimeUpdate}
-                      />
-                    )
-                  ) : (
-                    <div className="text-center text-slate-500 p-8 space-y-3">
-                      <Upload className="w-12 h-12 mx-auto text-slate-600" />
-                      <p className="text-sm font-mono">Drop files here or use the upload options below</p>
-                      <p className="text-xs text-slate-600">Supports MP3, WAV, FLAC, MP4, and more</p>
-                    </div>
-                  )}
-                  {isDragOver && (
-                    <div className="absolute inset-0 bg-red-500/10 border-2 border-red-400 border-dashed rounded-2xl flex items-center justify-center">
-                      <div className="text-red-300 text-sm font-bold flex items-center gap-2">
-                        <Upload className="w-6 h-6" /> Drop files to add to playlist
-                      </div>
-                    </div>
-                  )}
-                </div>
+                 <div className="space-y-3">
+                   <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                     <Disc className="w-3.5 h-3.5 text-red-400" />
+                     NOW PLAYING
+                   </h3>
 
-                <div className="bg-slate-950/60 border border-red-500/10 rounded-2xl p-3 backdrop-blur-xl">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-mono text-slate-400">{formatTime(elapsed)}</span>
-                    <span className="text-xs font-mono text-slate-400">{formatTime(duration)}</span>
-                  </div>
-                  <div className="relative w-full h-8 bg-slate-900/80 rounded-xl overflow-hidden border border-slate-800 cursor-pointer"
-                    onClick={(e) => {
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      const percent = (e.clientX - rect.left) / rect.width;
-                      const newTime = percent * duration;
-                      const el = getMediaElement();
-                      if (el) {
-                        el.currentTime = newTime;
-                        setElapsed(newTime);
-                      }
-                    }}>
-                    <canvas ref={waveformCanvasRef} width={300} height={32} className="w-full h-full" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 to-red-500/20 pointer-events-none"
-                      style={{ width: `${progressPercent}%` }} />
-                    <div className="absolute top-0 bottom-0 w-0.5 bg-red-500 pointer-events-none shadow-lg shadow-red-500/50"
-                      style={{ left: `${progressPercent}%` }} />
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max={duration || 100}
-                    step="0.1"
-                    value={elapsed}
-                    onChange={handleSeek}
-                    onMouseUp={handleSeekCommit}
-                    onTouchEnd={handleSeekCommit}
-                    className="w-full accent-red-500 cursor-pointer h-1 bg-slate-800 rounded-lg mt-1 opacity-0 absolute"
-                    style={{ pointerEvents: 'none' }}
-                  />
-                </div>
+                   <div className="bg-black rounded-2xl overflow-hidden border border-slate-800 min-h-[200px] flex items-center justify-center relative"
+                     onDrop={handleDrop}
+                     onDragOver={handleDragOver}
+                     onDragLeave={handleDragLeave}>
+                     {currentTrack ? (
+                       isYoutube && youtubeId ? (
+                         <iframe
+                           src={buildYouTubeEmbedUrl(youtubeId, false)}
+                           title="YouTube Video"
+                           className="w-full aspect-video max-h-[400px]"
+                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                           allowFullScreen
+                         />
+                       ) : mediaType === 'video' ? (
+                         <video
+                           ref={videoRef}
+                           controls
+                           autoPlay={isPlayingMusic}
+                           className="w-full max-h-[400px] object-contain"
+                           src={currentTrack.audioUrl}
+                           onPlay={handleMediaPlay}
+                           onPause={handleMediaPause}
+                           onEnded={handleMediaEnded}
+                           onLoadedMetadata={handleMediaLoadedMetadata}
+                           onTimeUpdate={handleMediaTimeUpdate}
+                         />
+                       ) : (
+                         <audio
+                           ref={audioRef}
+                           controls
+                           autoPlay={isPlayingMusic}
+                           className="w-full"
+                           src={currentTrack.audioUrl}
+                           onPlay={handleMediaPlay}
+                           onPause={handleMediaPause}
+                           onEnded={handleMediaEnded}
+                           onLoadedMetadata={handleMediaLoadedMetadata}
+                           onTimeUpdate={handleMediaTimeUpdate}
+                         />
+                       )
+                     ) : (
+                       <div className="text-center text-slate-500 p-8 space-y-3">
+                         <Upload className="w-12 h-12 mx-auto text-slate-600" />
+                         <p className="text-sm font-mono">Drop files here or use the upload options below</p>
+                         <p className="text-xs text-slate-600">Supports MP3, WAV, FLAC, MP4, and more</p>
+                       </div>
+                     )}
+                     {isDragOver && (
+                       <div className="absolute inset-0 bg-red-500/10 border-2 border-red-400 border-dashed rounded-2xl flex items-center justify-center">
+                         <div className="text-red-300 text-sm font-bold flex items-center gap-2">
+                           <Upload className="w-6 h-6" /> Drop files to add to playlist
+                         </div>
+                       </div>
+                     )}
+                   </div>
 
-                <div className="flex items-center justify-center gap-3 flex-wrap">
-                  <button
-                    onClick={playPrev}
-                    disabled={!currentTrack}
-                    className="liquid-glass-btn p-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition-all cursor-pointer disabled:opacity-40"
-                    title="Previous (P)"
-                  >
-                    <SkipBack className="w-5 h-5" />
-                  </button>
+                   <div className="bg-slate-950/60 border border-red-500/10 rounded-2xl p-3 backdrop-blur-xl">
+                     <div className="flex items-center justify-between mb-2">
+                       <span className="text-xs font-mono text-slate-400">{formatTime(elapsed)}</span>
+                       <span className="text-xs font-mono text-slate-400">{formatTime(duration)}</span>
+                     </div>
+                     <div className="relative w-full h-8 bg-slate-900/80 rounded-xl overflow-hidden border border-slate-800 cursor-pointer"
+                       onClick={(e) => {
+                         const rect = e.currentTarget.getBoundingClientRect();
+                         const percent = (e.clientX - rect.left) / rect.width;
+                         const newTime = percent * duration;
+                         const el = getMediaElement();
+                         if (el) {
+                           el.currentTime = newTime;
+                           setElapsed(newTime);
+                         }
+                       }}>
+                       <canvas ref={waveformCanvasRef} width={300} height={32} className="w-full h-full" />
+                       <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 to-red-500/20 pointer-events-none"
+                         style={{ width: `${progressPercent}%` }} />
+                       <div className="absolute top-0 bottom-0 w-0.5 bg-red-500 pointer-events-none shadow-lg shadow-red-500/50"
+                         style={{ left: `${progressPercent}%` }} />
+                     </div>
+                     <input
+                       type="range"
+                       min="0"
+                       max={duration || 100}
+                       step="0.1"
+                       value={elapsed}
+                       onChange={handleSeek}
+                       onMouseUp={handleSeekCommit}
+                       onTouchEnd={handleSeekCommit}
+                       className="w-full accent-red-500 cursor-pointer h-1 bg-slate-800 rounded-lg mt-1 opacity-0 absolute"
+                       style={{ pointerEvents: 'none' }}
+                     />
+                   </div>
 
-                  <button
-                    onClick={togglePlay}
-                    disabled={!currentTrack}
-                    className="liquid-glass-btn px-8 py-3.5 bg-gradient-to-r from-red-500 via-red-500 to-red-600 hover:scale-105 text-white font-black text-sm rounded-2xl shadow-xl shadow-red-500/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
-                  >
-                    {isPlayingMusic ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-                    <span>{isPlayingMusic ? 'Pause' : 'Play'}</span>
-                  </button>
+                   <div className="flex items-center justify-center gap-3 flex-wrap">
+                     <button
+                       onClick={playPrev}
+                       disabled={!currentTrack}
+                       className="skeuo-btn p-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition-all cursor-pointer disabled:opacity-40"
+                       title="Previous (P)"
+                     >
+                       <SkipBack className="w-5 h-5" />
+                     </button>
 
-                  <button
-                    onClick={playNext}
-                    disabled={!currentTrack || playlist.length <= 1}
-                    className="liquid-glass-btn p-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition-all cursor-pointer disabled:opacity-40"
-                    title="Next (N)"
-                  >
-                    <SkipForward className="w-5 h-5" />
-                  </button>
+                     <button
+                       onClick={togglePlay}
+                       disabled={!currentTrack}
+                       className="skeuo-btn px-8 py-3.5 bg-gradient-to-r from-red-500 via-red-500 to-red-600 hover:scale-105 text-white font-black text-sm rounded-2xl shadow-xl shadow-red-500/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                     >
+                       {isPlayingMusic ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                       <span>{isPlayingMusic ? 'Pause' : 'Play'}</span>
+                     </button>
 
-                  <button
-                    onClick={togglePlaybackMode}
-                    disabled={!currentTrack}
-                    className={`liquid-glass-btn p-3 rounded-xl border transition-all cursor-pointer disabled:opacity-40 ${playbackMode !== 'sequential' ? 'bg-red-500/20 border-red-500/40 text-red-300' : 'bg-slate-800 hover:bg-slate-700 text-slate-400 border-slate-700'}`}
-                    title={`${getPlaybackModeLabel()} - Click to change`}
-                  >
-                    {getPlaybackModeIcon()}
-                  </button>
+                     <button
+                       onClick={playNext}
+                       disabled={!currentTrack || playlist.length <= 1}
+                       className="skeuo-btn p-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition-all cursor-pointer disabled:opacity-40"
+                       title="Next (N)"
+                     >
+                       <SkipForward className="w-5 h-5" />
+                     </button>
 
-                  <button
-                    onClick={toggleMute}
-                    className="liquid-glass-btn p-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition-all cursor-pointer"
-                    title="Mute (M)"
-                  >
-                    {isMuted || volume === 0 ? <VolumeX className="w-5 h-5" /> : volume < 0.5 ? <Volume1 className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-                  </button>
+                     <button
+                       onClick={togglePlaybackMode}
+                       disabled={!currentTrack}
+                       className={`skeuo-btn p-3 rounded-xl border transition-all cursor-pointer disabled:opacity-40 ${playbackMode !== 'sequential' ? 'bg-red-500/20 border-red-500/40 text-red-300' : 'bg-slate-800 hover:bg-slate-700 text-slate-400 border-slate-700'}`}
+                       title={`${getPlaybackModeLabel()} - Click to change`}
+                     >
+                       {getPlaybackModeIcon()}
+                     </button>
 
-                  <button
-                    onClick={() => setShowLyrics(!showLyrics)}
-                    disabled={!currentTrack}
-                    className={`liquid-glass-btn p-3 rounded-xl border transition-all cursor-pointer disabled:opacity-40 ${showLyrics ? 'bg-red-500/20 border-red-500/40 text-red-300' : 'bg-slate-800 hover:bg-slate-700 text-slate-400 border-slate-700'}`}
-                    title="Lyrics"
-                  >
-                    <Mic2 className="w-5 h-5" />
-                  </button>
-                </div>
+                     <button
+                       onClick={toggleMute}
+                       className="skeuo-btn p-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition-all cursor-pointer"
+                       title="Mute (M)"
+                     >
+                       {isMuted || volume === 0 ? <VolumeX className="w-5 h-5" /> : volume < 0.5 ? <Volume1 className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                     </button>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="bg-slate-950/60 border border-red-500/20 rounded-2xl p-3 space-y-2 backdrop-blur-xl">
-                    <div className="flex items-center justify-between text-xs font-mono">
-                      <span className="text-red-400 font-bold flex items-center gap-1">
-                        <Sparkles className="w-3.5 h-3.5" /> Nightcore Speed ({nightcorePitch.toFixed(2)}x)
-                      </span>
-                      <span className="text-[10px] text-slate-400">0.80 ➔ 1.50</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="0.8"
-                      max="1.5"
-                      step="0.05"
-                      value={nightcorePitch}
-                      onChange={(e) => setNightcorePitch(Number(e.target.value))}
-                      className="w-full accent-red-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
-                    />
-                  </div>
+                     <button
+                       onClick={() => setShowLyrics(!showLyrics)}
+                       disabled={!currentTrack}
+                       className={`skeuo-btn p-3 rounded-xl border transition-all cursor-pointer disabled:opacity-40 ${showLyrics ? 'bg-red-500/20 border-red-500/40 text-red-300' : 'bg-slate-800 hover:bg-slate-700 text-slate-400 border-slate-700'}`}
+                       title="Lyrics"
+                     >
+                       <Mic2 className="w-5 h-5" />
+                     </button>
+                   </div>
 
-                  <div className="bg-slate-950/60 border border-red-500/20 rounded-2xl p-3 space-y-2 backdrop-blur-xl md:col-span-2">
-                    <div className="flex items-center justify-between text-xs font-mono">
-                      <span className="text-red-400 font-bold flex items-center gap-1">
-                        <Sliders className="w-3.5 h-3.5" /> EQ & Bass Booster
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <select
-                          value={eqPreset}
-                          onChange={(e) => {
-                            const p = e.target.value as EqPreset;
-                            setEqPreset(p);
-                            setEqBands([...EQ_PRESETS[p]]);
-                          }}
-                          className="bg-slate-900 border border-slate-700 text-[10px] text-slate-300 rounded-md px-1.5 py-0.5 cursor-pointer"
-                        >
-                          <option value="flat">Flat</option>
-                          <option value="rock">Rock</option>
-                          <option value="pop">Pop</option>
-                          <option value="jazz">Jazz</option>
-                          <option value="classical">Classical</option>
-                          <option value="bass-boost">Bass Boost</option>
-                          <option value="treble-boost">Treble Boost</option>
-                        </select>
-                        <button
-                          onClick={() => setShowEqPanel(!showEqPanel)}
-                          className="text-[10px] text-red-300 hover:text-red-200 cursor-pointer"
-                        >
-                          {showEqPanel ? 'Hide Bands' : 'Show Bands'}
-                        </button>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-[10px] text-slate-400 shrink-0 w-8">Bass</span>
-                      <input
-                        type="range"
-                        min="0"
-                        max="200"
-                        step="1"
-                        value={bassBoost}
-                        onChange={(e) => setBassBoost(Number(e.target.value))}
-                        className="flex-1 accent-red-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
-                      />
-                      <span className="text-[10px] text-red-300 font-mono w-12 text-right">{bassBoost}%</span>
-                    </div>
-                    {showEqPanel && (
-                      <div className="space-y-1.5 pt-1.5 border-t border-slate-800/60">
-                        <div className="flex items-end gap-1">
-                          {EQ_BANDS.map((band, i) => (
-                            <div key={band.freq} className="flex-1 flex flex-col items-center gap-0.5">
-                              <input
-                                type="range"
-                                min="-12"
-                                max="12"
-                                step="0.5"
-                                value={eqBands[i] ?? 0}
-                                onChange={(e) => {
-                                  const newBands = [...eqBands];
-                                  newBands[i] = Number(e.target.value);
-                                  setEqBands(newBands);
-                                  setEqPreset('flat');
-                                }}
-                                className="w-full accent-red-400 cursor-pointer"
-                                style={{ writingMode: 'vertical-lr', direction: 'rtl', height: '64px' }}
-                              />
-                              <span className="text-[9px] text-red-300 font-mono">{(eqBands[i] ?? 0) > 0 ? '+' : ''}{eqBands[i] ?? 0}</span>
-                              <span className="text-[9px] text-slate-500 font-mono">{band.label}Hz</span>
-                            </div>
-                          ))}
-                        </div>
-                        <button
-                          onClick={() => { setEqBands([...EQ_PRESETS.flat]); setEqPreset('flat'); setBassBoost(0); }}
-                          className="text-[10px] text-slate-400 hover:text-white cursor-pointer px-2 py-0.5 bg-slate-800 rounded-md border border-slate-700"
-                        >
-                          Reset All
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                   {showLyrics && lyrics && (
+                     <div className="bg-slate-950/80 border border-red-500/20 rounded-2xl p-4 max-h-40 overflow-y-auto backdrop-blur-xl">
+                       <div className="flex items-center justify-between mb-2">
+                         <span className="text-xs font-bold text-red-300 flex items-center gap-1">
+                           <Type className="w-3.5 h-3.5" /> Lyrics
+                         </span>
+                         <button onClick={() => setShowLyrics(false)} className="text-slate-400 hover:text-white cursor-pointer">
+                           <X className="w-3.5 h-3.5" />
+                         </button>
+                       </div>
+                       <pre className="text-xs text-slate-300 whitespace-pre-wrap font-mono leading-relaxed">{lyrics}</pre>
+                     </div>
+                   )}
 
-                  <div className="bg-slate-950/60 border border-red-500/20 rounded-2xl p-3 space-y-2 backdrop-blur-xl">
-                    <div className="flex items-center justify-between text-xs font-mono">
-                      <span className="text-red-400 font-bold flex items-center gap-1">
-                        <Gauge className="w-3.5 h-3.5" /> Playback Speed ({playbackRate.toFixed(1)}x)
-                      </span>
-                      <span className="text-[10px] text-slate-400">0.5 ➔ 2.0</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="0.5"
-                      max="2"
-                      step="0.1"
-                      value={playbackRate}
-                      onChange={handleRateChange}
-                      className="w-full accent-red-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
-                    />
-                  </div>
+                   {showLyrics && !lyrics && currentTrack && (
+                     <div className="bg-slate-950/80 border border-red-500/20 rounded-2xl p-4 backdrop-blur-xl">
+                       <div className="flex items-center justify-between mb-2">
+                         <span className="text-xs font-bold text-red-300 flex items-center gap-1">
+                           <Type className="w-3.5 h-3.5" /> Lyrics
+                         </span>
+                         <button onClick={() => setShowLyrics(false)} className="text-slate-400 hover:text-white cursor-pointer">
+                           <X className="w-3.5 h-3.5" />
+                         </button>
+                       </div>
+                       <p className="text-xs text-slate-500 italic">No lyrics available. Add an .lrc file or embed lyrics in the track metadata.</p>
+                     </div>
+                   )}
+                 </div>
 
-                  <div className="bg-slate-950/60 border border-red-500/20 rounded-2xl p-3 space-y-2 backdrop-blur-xl">
-                    <div className="flex items-center justify-between text-xs font-mono">
-                      <span className="text-red-400 font-bold flex items-center gap-1">
-                        <Volume2 className="w-3.5 h-3.5" /> Volume ({Math.round(volumePercent)}%)
-                      </span>
-                      <span className="text-[10px] text-slate-400">{isMuted ? 'MUTED' : 'ACTIVE'}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.01"
-                      value={isMuted ? 0 : volume}
-                      onChange={handleVolumeChange}
-                      className="w-full accent-red-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
-                    />
-                  </div>
+                 <div className="space-y-3">
+                   <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                     <Sliders className="w-3.5 h-3.5 text-red-400" />
+                     AUDIO SETTINGS
+                   </h3>
 
-                  <div className="bg-slate-950/60 border border-red-600/20 rounded-2xl p-3 space-y-2 backdrop-blur-xl">
-                    <div className="flex items-center justify-between text-xs font-mono">
-                      <span className="text-red-500 font-bold flex items-center gap-1">
-                        <Timer className="w-3.5 h-3.5" /> Sleep Timer
-                      </span>
-                      <span className="text-[10px] text-slate-400">{sleepTimer ? `${sleepTimer}m left` : 'Off'}</span>
-                    </div>
-                    <div className="flex gap-2">
-                      {[15, 30, 60, 90].map(mins => (
-                        <button
-                          key={mins}
-                          onClick={() => handleSleepTimerSet(mins)}
-                          disabled={!!sleepTimer}
-                          className="flex-1 py-1 bg-slate-800 hover:bg-slate-700 disabled:bg-slate-900 disabled:opacity-50 text-slate-300 rounded-lg text-[10px] font-mono cursor-pointer transition-all border border-slate-700"
-                        >
-                          {mins}m
-                        </button>
-                      ))}
-                      {sleepTimer && (
-                        <button
-                          onClick={cancelSleepTimer_}
-                          className="px-2 py-1 bg-red-600 hover:bg-red-500 text-white rounded-lg text-[10px] font-mono cursor-pointer transition-all"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                     <div className="bg-slate-950/60 border border-red-500/20 rounded-2xl p-3 space-y-2 backdrop-blur-xl">
+                       <div className="flex items-center justify-between text-xs font-mono">
+                         <span className="text-red-400 font-bold flex items-center gap-1">
+                           <Sparkles className="w-3.5 h-3.5" /> Nightcore Speed ({nightcorePitch.toFixed(2)}x)
+                         </span>
+                         <span className="text-[10px] text-slate-400">0.80 ➔ 1.50</span>
+                       </div>
+                       <input
+                         type="range"
+                         min="0.8"
+                         max="1.5"
+                         step="0.05"
+                         value={nightcorePitch}
+                         onChange={(e) => setNightcorePitch(Number(e.target.value))}
+                         className="w-full accent-red-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
+                       />
+                     </div>
 
-                <div className="bg-slate-950/60 border border-slate-700/20 rounded-2xl p-3 space-y-2 backdrop-blur-xl">
-                  <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-slate-300 font-bold flex items-center gap-1">
-                      <Sliders className="w-3.5 h-3.5" /> Skip Silence {isSkippingSilence ? '(Skipping...)' : ''}
-                    </span>
-                    <span className="text-[10px] text-slate-400">Threshold: {(skipSilenceThreshold * 100).toFixed(0)}%</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => setSkipSilence(!skipSilence)}
-                      className={`liquid-glass-btn px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${skipSilence ? 'bg-red-500/20 border-red-500/40 text-green-300' : 'bg-slate-800 text-slate-400 border border-slate-700'}`}
-                    >
-                      {skipSilence ? 'ON' : 'OFF'}
-                    </button>
-                    <input
-                      type="range"
-                      min="0.005"
-                      max="0.1"
-                      step="0.005"
-                      value={skipSilenceThreshold}
-                      onChange={(e) => setSkipSilenceThreshold(Number(e.target.value))}
-                      disabled={!skipSilence}
-                      className="flex-1 accent-red-600 cursor-pointer h-1 bg-slate-800 rounded-lg disabled:opacity-40"
-                    />
-                  </div>
-                </div>
+                     <div className="bg-slate-950/60 border border-red-500/20 rounded-2xl p-3 space-y-2 backdrop-blur-xl">
+                       <div className="flex items-center justify-between text-xs font-mono">
+                         <span className="text-red-400 font-bold flex items-center gap-1">
+                           <Gauge className="w-3.5 h-3.5" /> Playback Speed ({playbackRate.toFixed(1)}x)
+                         </span>
+                         <span className="text-[10px] text-slate-400">0.5 ➔ 2.0</span>
+                       </div>
+                       <input
+                         type="range"
+                         min="0.5"
+                         max="2"
+                         step="0.1"
+                         value={playbackRate}
+                         onChange={handleRateChange}
+                         className="w-full accent-red-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
+                       />
+                     </div>
 
-                {showLyrics && lyrics && (
-                  <div className="bg-slate-950/80 border border-red-500/20 rounded-2xl p-4 max-h-40 overflow-y-auto backdrop-blur-xl">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold text-red-300 flex items-center gap-1">
-                        <Type className="w-3.5 h-3.5" /> Lyrics
-                      </span>
-                      <button onClick={() => setShowLyrics(false)} className="text-slate-400 hover:text-white cursor-pointer">
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                    <pre className="text-xs text-slate-300 whitespace-pre-wrap font-mono leading-relaxed">{lyrics}</pre>
-                  </div>
-                )}
+                     <div className="bg-slate-950/60 border border-red-500/20 rounded-2xl p-3 space-y-2 backdrop-blur-xl">
+                       <div className="flex items-center justify-between text-xs font-mono">
+                         <span className="text-red-400 font-bold flex items-center gap-1">
+                           <Volume2 className="w-3.5 h-3.5" /> Volume ({Math.round(volumePercent)}%)
+                         </span>
+                         <span className="text-[10px] text-slate-400">{isMuted ? 'MUTED' : 'ACTIVE'}</span>
+                       </div>
+                       <input
+                         type="range"
+                         min="0"
+                         max="1"
+                         step="0.01"
+                         value={isMuted ? 0 : volume}
+                         onChange={handleVolumeChange}
+                         className="w-full accent-red-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
+                       />
+                     </div>
 
-                {showLyrics && !lyrics && currentTrack && (
-                  <div className="bg-slate-950/80 border border-red-500/20 rounded-2xl p-4 backdrop-blur-xl">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold text-red-300 flex items-center gap-1">
-                        <Type className="w-3.5 h-3.5" /> Lyrics
-                      </span>
-                      <button onClick={() => setShowLyrics(false)} className="text-slate-400 hover:text-white cursor-pointer">
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                    <p className="text-xs text-slate-500 italic">No lyrics available. Add an .lrc file or embed lyrics in the track metadata.</p>
-                  </div>
-                )}
-              </div>
+                     <div className="bg-slate-950/60 border border-red-500/20 rounded-2xl p-3 space-y-2 backdrop-blur-xl md:col-span-2">
+                       <div className="flex items-center justify-between text-xs font-mono">
+                         <span className="text-red-400 font-bold flex items-center gap-1">
+                           <Sliders className="w-3.5 h-3.5" /> EQ & Bass Booster
+                         </span>
+                         <div className="flex items-center gap-2">
+                           <select
+                             value={eqPreset}
+                             onChange={(e) => {
+                               const p = e.target.value as EqPreset;
+                               setEqPreset(p);
+                               setEqBands([...EQ_PRESETS[p]]);
+                             }}
+                             className="bg-slate-900 border border-slate-700 text-[10px] text-slate-300 rounded-md px-1.5 py-0.5 cursor-pointer"
+                           >
+                             <option value="flat">Flat</option>
+                             <option value="rock">Rock</option>
+                             <option value="pop">Pop</option>
+                             <option value="jazz">Jazz</option>
+                             <option value="classical">Classical</option>
+                             <option value="bass-boost">Bass Boost</option>
+                             <option value="treble-boost">Treble Boost</option>
+                           </select>
+                           <button
+                             onClick={() => setShowEqPanel(!showEqPanel)}
+                             className="text-[10px] text-red-300 hover:text-red-200 cursor-pointer"
+                           >
+                             {showEqPanel ? 'Hide Bands' : 'Show Bands'}
+                           </button>
+                         </div>
+                       </div>
+                       <div className="flex items-center gap-3">
+                         <span className="text-[10px] text-slate-400 shrink-0 w-8">Bass</span>
+                         <input
+                           type="range"
+                           min="0"
+                           max="200"
+                           step="1"
+                           value={bassBoost}
+                           onChange={(e) => setBassBoost(Number(e.target.value))}
+                           className="flex-1 accent-red-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
+                         />
+                         <span className="text-[10px] text-red-300 font-mono w-12 text-right">{bassBoost}%</span>
+                       </div>
+                       {showEqPanel && (
+                         <div className="space-y-1.5 pt-1.5 border-t border-slate-800/60">
+                           <div className="flex items-end gap-1">
+                             {EQ_BANDS.map((band, i) => (
+                               <div key={band.freq} className="flex-1 flex flex-col items-center gap-0.5">
+                                 <input
+                                   type="range"
+                                   min="-12"
+                                   max="12"
+                                   step="0.5"
+                                   value={eqBands[i] ?? 0}
+                                   onChange={(e) => {
+                                     const newBands = [...eqBands];
+                                     newBands[i] = Number(e.target.value);
+                                     setEqBands(newBands);
+                                     setEqPreset('flat');
+                                   }}
+                                   className="w-full accent-red-400 cursor-pointer"
+                                   style={{ writingMode: 'vertical-lr', direction: 'rtl', height: '64px' }}
+                                 />
+                                 <span className="text-[9px] text-red-300 font-mono">{(eqBands[i] ?? 0) > 0 ? '+' : ''}{eqBands[i] ?? 0}</span>
+                                 <span className="text-[9px] text-slate-500 font-mono">{band.label}Hz</span>
+                               </div>
+                             ))}
+                           </div>
+                           <button
+                             onClick={() => { setEqBands([...EQ_PRESETS.flat]); setEqPreset('flat'); setBassBoost(0); }}
+                             className="text-[10px] text-slate-400 hover:text-white cursor-pointer px-2 py-0.5 bg-slate-800 rounded-md border border-slate-700"
+                           >
+                             Reset All
+                           </button>
+                         </div>
+                       )}
+                     </div>
+                   </div>
+                 </div>
+
+                 <div className="space-y-3">
+                   <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                     <Timer className="w-3.5 h-3.5 text-red-400" />
+                     UTILITIES
+                   </h3>
+
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                     <div className="bg-slate-950/60 border border-red-600/20 rounded-2xl p-3 space-y-2 backdrop-blur-xl">
+                       <div className="flex items-center justify-between text-xs font-mono">
+                         <span className="text-red-500 font-bold flex items-center gap-1">
+                           <Timer className="w-3.5 h-3.5" /> Sleep Timer
+                         </span>
+                         <span className="text-[10px] text-slate-400">{sleepTimer ? `${sleepTimer}m left` : 'Off'}</span>
+                       </div>
+                       <div className="flex gap-2">
+                         {[15, 30, 60, 90].map(mins => (
+                           <button
+                             key={mins}
+                             onClick={() => handleSleepTimerSet(mins)}
+                             disabled={!!sleepTimer}
+                             className="flex-1 py-1 bg-slate-800 hover:bg-slate-700 disabled:bg-slate-900 disabled:opacity-50 text-slate-300 rounded-lg text-[10px] font-mono cursor-pointer transition-all border border-slate-700"
+                           >
+                             {mins}m
+                           </button>
+                         ))}
+                         {sleepTimer && (
+                           <button
+                             onClick={cancelSleepTimer_}
+                             className="px-2 py-1 bg-red-600 hover:bg-red-500 text-white rounded-lg text-[10px] font-mono cursor-pointer transition-all"
+                           >
+                             <X className="w-3 h-3" />
+                           </button>
+                         )}
+                       </div>
+                     </div>
+
+                     <div className="bg-slate-950/60 border border-slate-700/20 rounded-2xl p-3 space-y-2 backdrop-blur-xl">
+                       <div className="flex items-center justify-between text-xs font-mono">
+                         <span className="text-slate-300 font-bold flex items-center gap-1">
+                           <Sliders className="w-3.5 h-3.5" /> Skip Silence {isSkippingSilence ? '(Skipping...)' : ''}
+                         </span>
+                         <span className="text-[10px] text-slate-400">Threshold: {(skipSilenceThreshold * 100).toFixed(0)}%</span>
+                       </div>
+                       <div className="flex items-center gap-3">
+                         <button
+                           onClick={() => setSkipSilence(!skipSilence)}
+                           className={`skeuo-btn px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${skipSilence ? 'bg-red-500/20 border-red-500/40 text-green-300' : 'bg-slate-800 text-slate-400 border border-slate-700'}`}
+                         >
+                           {skipSilence ? 'ON' : 'OFF'}
+                         </button>
+                         <input
+                           type="range"
+                           min="0.005"
+                           max="0.1"
+                           step="0.005"
+                           value={skipSilenceThreshold}
+                           onChange={(e) => setSkipSilenceThreshold(Number(e.target.value))}
+                           disabled={!skipSilence}
+                           className="flex-1 accent-red-600 cursor-pointer h-1 bg-slate-800 rounded-lg disabled:opacity-40"
+                         />
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+               </div>
             </div>
           </div>
 
@@ -1566,14 +1589,14 @@ export const NightcorePlayer: React.FC = () => {
                   <button
                     type="submit"
                     disabled={!youtubeUrl.trim()}
-                    className="liquid-glass-btn flex-1 py-2 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer disabled:opacity-50"
+                    className="skeuo-btn flex-1 py-2 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer disabled:opacity-50"
                   >
                     Load Video
                   </button>
                   <button
                     type="button"
                     onClick={() => { setShowYouTubeInput(false); setYoutubeUrl(''); }}
-                    className="liquid-glass-btn px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs cursor-pointer"
+                    className="skeuo-btn px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -1607,14 +1630,14 @@ export const NightcorePlayer: React.FC = () => {
                   <button
                     type="submit"
                     disabled={!customStreamUrl.trim()}
-                    className="liquid-glass-btn flex-1 py-2 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer disabled:opacity-50"
+                    className="skeuo-btn flex-1 py-2 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer disabled:opacity-50"
                   >
                     Load Stream
                   </button>
                   <button
                     type="button"
                     onClick={() => { setShowStreamInput(false); setCustomStreamUrl(''); }}
-                    className="liquid-glass-btn px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs cursor-pointer"
+                    className="skeuo-btn px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs cursor-pointer"
                   >
                     Cancel
                   </button>

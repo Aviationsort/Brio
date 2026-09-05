@@ -7,7 +7,7 @@ import { EncryptedPayload } from '../types';
 
 class EncryptionService {
   private masterCryptoKey: CryptoKey | null = null;
-  private defaultPassphrase = 'brio-secure-vault-master-key-2026';
+  private legacyFallbackKey = 'brio-secure-vault-master-key-2026';
   private useFallback = false;
 
   private ensureWebCrypto(): SubtleCrypto | null {
@@ -19,7 +19,18 @@ class EncryptionService {
   }
 
   private getFallbackKey(): string {
-    return this.defaultPassphrase;
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      let key = window.sessionStorage.getItem('brio_fallback_key');
+      if (!key) {
+        const randomBytes = typeof window !== 'undefined' && window.crypto && window.crypto.getRandomValues
+          ? window.crypto.getRandomValues(new Uint8Array(32))
+          : Array.from({ length: 32 }, () => Math.floor(Math.random() * 256));
+        key = Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+        window.sessionStorage.setItem('brio_fallback_key', key);
+      }
+      return key;
+    }
+    return this.legacyFallbackKey;
   }
 
   private fallbackEncrypt(jsonString: string): EncryptedPayload<string> {
@@ -145,7 +156,7 @@ class EncryptionService {
   private async getMasterKey(): Promise<CryptoKey> {
     if (!this.masterCryptoKey) {
       try {
-        this.masterCryptoKey = await this.deriveKey(this.defaultPassphrase);
+        this.masterCryptoKey = await this.deriveKey(this.legacyFallbackKey);
       } catch {
         // fallback mode
       }
@@ -261,7 +272,7 @@ class EncryptionService {
       return await this.decrypt(payload);
     } catch {
       try {
-        return await this.decrypt(payload, this.defaultPassphrase);
+        return await this.decrypt(payload, this.legacyFallbackKey);
       } catch {
         return null;
       }

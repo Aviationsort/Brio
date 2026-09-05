@@ -1,9 +1,8 @@
 /**
- * Live Accurate Weather Service using OpenWeatherMap API
- * Rewritten with vanilla JS approach: state object, selectors, clean helpers.
+ * Live Accurate Weather Service.
+ * Fetches through the Brio server's /api/weather proxy (which calls
+ * OpenWeatherMap server-side) so the API key stays on the server.
  */
-
-const API_KEY = import.meta.env.VITE_WEATHER_API_KEY as string | undefined;
 
 export interface WeatherData {
   city: string;
@@ -130,13 +129,13 @@ async function getWeather(city?: string, units?: 'metric' | 'imperial'): Promise
     timezone: 0,
   };
 
-  if (!API_KEY) {
-    setState({ loading: false, error: 'Weather API key not configured.' });
-    return { ...defaults, error: 'Weather API key not configured.' } as any;
+  if (!query) {
+    setState({ loading: false, error: 'Please enter a city.' });
+    return { ...defaults, error: 'Please enter a city.' } as any;
   }
 
   try {
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(query)}&appid=${API_KEY}&units=${targetUnits}`;
+    const url = `/api/weather?q=${encodeURIComponent(query)}&units=${targetUnits}`;
     const res = await fetch(url);
 
     if (res.ok) {
