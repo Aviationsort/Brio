@@ -2,31 +2,40 @@
 # Dependencies
 node_modules/
 
-# Build artifacts
-dist/
-build/
-*.js.map
-
 # Environment
 .env
 .env.local
 .env.*
 
-# Editors
-.vscode/
-.idea/
-
 # Logs
 *.log
 
-# OS generated files
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+
+# OS
 .DS_Store
 Thumbs.db
 
-# Temporary files
-*.tmp
-*.swp
-*.swo
+# Build artifacts
+dist/
+build/
+target/
+*.out
+*.exe
+*.dll
+*.so
+*.a
+*.class
 
 # Python
 __pycache__/
@@ -34,16 +43,21 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
-env/
-venv/
+*.so
+.Python
+*.egg-info/
+.eggs/
 .venv/
+venv/
+.mypy_cache/
+.pytest_cache/
 
-# Coverage
-coverage/
-htmlcov/
-.coverage
+# Node
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Compression
+# Compressed files
 *.zip
 *.gz
 *.tar
@@ -62,5 +76,4 @@ htmlcov/
 *.Z
 *.lz
 *.lzo
-
 ```
