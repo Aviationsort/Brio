@@ -1,73 +1,164 @@
-# Compiled and build artifacts
-*.pyc
-
-# Local SQLite auth store (LiteFS-managed) + secrets
-data/
-brio.db
-brio.db-*
-*.db
-*.db-shm
-*.db-wal
-*.sqlite
-aes-master.key
-
-# LiteFS
-litefs-data/
-__pycache__/
-*.o
-*.obj
-*.class
-*.exe
-*.dll
-*.so
-*.a
-*.out
-
 # Dependencies
 node_modules/
-venv/
-.venv/
+
+# Build outputs
+dist/
+build/
+coverage/
+htmlcov/
+
+# Environment variables
 .env
 .env.local
 .env.*
 
-# Build directories
-dist/
-build/
-target/
-*.log
-*.tmp
-*.swp
-
-# Editors
+# IDE specific
 .vscode/
 .idea/
-
-# System files
-.DS_Store
-Thumbs.db
-
-# Coverage
-coverage/
-htmlcov/
-.coverage
+*.swp
+*.swo
+*.tmp
 
 # Python specific
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg-info/
+.eggs/
+
+# Logs
+*.log
+
+# Coverage
+.coverage
+.coverage.*
+
+# Distribution / packaging
+*.tar.gz
+*.whl
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+
+# Translations
+*.mo
+*.pot
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask
+instance/
+.webassets-cache
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
 .mypy_cache/
-.pytest_cache/
+.dmypy.json
+dmypy.json
 
-# Gradle
-.gradle/
+# Pyre type checker
+.pyre/
 
-# Compressed files
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# PyCharm
+# JetBrains specific template is maintained in a separate file.
+#.idea/
+
+# Coverage
+.coverage*
+
+# VS Code
+.vscode/
+
+# Temporary folders
+tmp/
+temp/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Compiled Binary files
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Compressed archives
 *.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
+*.tar.gz
+*.tar.bz2
+*.tar.xz
 *.7z
 *.rar
+*.gz
+*.bz2
+*.xz
 *.zst
 *.lz4
 *.lzh
@@ -78,7 +169,578 @@ htmlcov/
 *.Z
 *.lz
 *.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
+*.tar
+*.tgz
+
+# Vite specific
+!.vite/
+.vite/deps/
+
+# TypeScript/JavaScript build outputs
+*.tsbuildinfo
+*.js.map
+*.jsx.map
+*.ts.map
+*.tsx.map
+
+# Lock files
+package-lock.json
+yarn.lock
+
+# Next.js
+.next/
+out/
+
+# Nuxt.js
+.nuxt/
+.output/
+dist/
+
+# Gatsby
+.cache/
+public/
+
+# React Native
+node_modules/
+.platforms/
+.plugins/
+.derived/
+!.gitignore
+ios/Pods/
+ios/.symlinks/
+android/.gradle/
+android/build/
+android/app/build/
+
+# Vue
+.vuepress/dist
+.vuepress/.cache
+.vuepress/.temp
+.shuttle/
+
+# Svelte
+.svelte-kit/
+
+# Astro
+.dist/
+astro/
+!README.md
+
+# Bun
+node_modules/
+bun.lockb
+
+# Deno
+deno.lock
+_deps/
+gen/
+
+# Node.js
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.node_repl_history
+node_modules/
+npm-shrinkwrap.json
+*.tgz
+
+# Webpack
+webpack-stats.json
+
+# Jest
+coverage/
+*.log
+
+# Cypress
+cypress/videos/
+cypress/screenshots/
+
+# ESLint cache
+.eslintcache
+
+# TSLint cache
+.tslintcache
+
+# Karma
+karma-debug.html
+
+# PhantomJS
+phantomjs-prebuilt-*.tar.gz
+prebuilt-*.tar.gz
+*.phantomjs_prebuilt
+
+# Protractor
+selenium-debug.log
+
+# Nightwatch
+node_modules/.tmp
+
+# Grunt
+Gruntfile.js.babel.js
+
+# Bower
+bower_components/
+
+# Brunch
+public/
+.brunch/
+
+# component(1)
+component.json
+components/
+templates/
+
+# Coveralls
+.coveralls.yml
+
+# Sass
+.sass-cache/
+*.css.map
+
+# Stylus
+.stylus-cache/
+
+# Closure Compiler
+*.js.combn
+
+# RequireJS
+*.js.min
+
+# Browserify
+node_modules/
+*.jshintrc
+testem.json
+testem.js
+
+# JSHint
+.jshintrc
+.jshintignore
+
+# YSlow
+.yo-rc.json
+
+# Compass
+sass-cache/
+.csscomb.json
+.yardoc/
+.rvmrc
+.rake
+.bundle
+.plcrashreporter
+
+# CodeClimate
+.codeclimate.yml
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Cake - Uncomment if you are using Cake
+#*.cake
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history
+
+# Visual Studio
+*.VC.db
+*.VC.VC.opendb
+*.aps
+*.ncb
+*.opendb
+*.opensdf
+*.sdf
+*.sln.docstates
+*.suo
+*.user
+*.userosscache
+*.sln.GhostDoc.xml
+[vV]isual[Ss]tudio*.settings
+*.metaproj.user
+*.metaproj
+*.userprefs
+*.cs.cache
+*.vb.cache
+*.tlb
+*.resx
+*.dbmdl
+*.dbproj.schemaview
+*.publishproj
+*.pubxml
+*.publish-settings
+*.deviceuser
+*.DeviceUser
+*.userosscacheid
+*.vcxproj.filters
+[Oo]bj/
+[Bb]in/
+[Tt]est[Rr]esults/
+*.VisualState.xml
+[Dd]eploy/
+[Ll]ogs/
+[Ll]og[Ff]iles/
+*.VC.VC.opendb
+*.VC.db
+ipch/
+*.aps
+*.pidb
+*.sbr
+*.tlb
+*.tlh
+*.bak
+*.cache
+*.ilk
+*.iobj
+*.ipdb
+*.iobj
+*.exp
+*.lib
+*.lst
+*.manifest
+*.map
+*.mdp
+*.ncb
+*.obj
+*.opendb
+*.opensdf
+*.opt
+*.pch
+*.pdb
+*.pgc
+*.pgd
+*.ppdb
+*.metaproj
+*.metaproj.user
+*.metaproj.userosscache
+*.metaproj.userosscacheid
+*.sln.docstates
+*.suo
+*.user
+*.userosscache
+*.userosscacheid
+*.userprefs
+*.svclog
+*.sdf
+*.dbmdl
+*.dbproj.schemaview
+*.publishproj
+*.pubxml
+*.publish-settings
+*.deviceuser
+*.DeviceUser
+*.userosscacheid
+*.vcxproj.filters
+[Oo]bj/
+[Bb]in/
+[Tt]est[Rr]esults/
+*.VisualState.xml
+[Dd]eploy/
+[Ll]ogs/
+[Ll]og[Ff]iles/
+*.VC.VC.opendb
+*.VC.db
+ipch/
+*.aps
+*.pidb
+*.sbr
+*.tlb
+*.tlh
+*.bak
+*.cache
+*.ilk
+*.iobj
+*.ipdb
+*.iobj
+*.exp
+*.lib
+*.lst
+*.manifest
+*.map
+*.mdp
+*.ncb
+*.obj
+*.opendb
+*.opensdf
+*.opt
+*.pch
+*.pdb
+*.pgc
+*.pgd
+*.ppdb
+*.metaproj
+*.metaproj.user
+*.metaproj.userosscache
+*.metaproj.userosscacheid
+*.sln.docstates
+*.suo
+*.user
+*.userosscache
+*.userosscacheid
+*.userprefs
+*.svclog
+*.sdf
+*.dbmdl
+*.dbproj.schemaview
+*.publishproj
+*.pubxml
+*.publish-settings
+*.deviceuser
+*.DeviceUser
+*.userosscacheid
+*.vcxproj.filters
+[Oo]bj/
+[Bb]in/
+[Tt]est[Rr]esults/
+*.VisualState.xml
+[Dd]eploy/
+[Ll]ogs/
+[Ll]og[Ff]iles/
+*.VC.VC.opendb
+*.VC.db
+ipch/
+*.aps
+*.pidb
+*.sbr
+*.tlb
+*.tlh
+*.bak
+*.cache
+*.ilk
+*.iobj
+*.ipdb
+*.iobj
+*.exp
+*.lib
+*.lst
+*.manifest
+*.map
+*.mdp
+*.ncb
+*.obj
+*.opendb
+*.opensdf
+*.opt
+*.pch
+*.pdb
+*.pgc
+*.pgd
+*.ppdb
+*.metaproj
+*.metaproj.user
+*.metaproj.userosscache
+*.metaproj.userosscacheid
+*.sln.docstates
+*.suo
+*.user
+*.userosscache
+*.userosscacheid
+*.userprefs
+*.svclog
+*.sdf
+*.dbmdl
+*.dbproj.schemaview
+*.publishproj
+*.pubxml
+*.publish-settings
+*.deviceuser
+*.DeviceUser
+*.userosscacheid
+*.vcxproj.filters
+[Oo]bj/
+[Bb]in/
+[Tt]est[Rr]esults/
+*.VisualState.xml
+[Dd]eploy/
+[Ll]ogs/
+[Ll]og[Ff]iles/
+*.VC.VC.opendb
+*.VC.db
+ipch/
+*.aps
+*.pidb
+*.sbr
+*.tlb
+*.tlh
+*.bak
+*.cache
+*.ilk
+*.iobj
+*.ipdb
+*.iobj
+*.exp
+*.lib
+*.lst
+*.manifest
+*.map
+*.mdp
+*.ncb
+*.obj
+*.opendb
+*.opensdf
+*.opt
+*.pch
+*.pdb
+*.pgc
+*.pgd
+*.ppdb
+*.metaproj
+*.metaproj.user
+*.metaproj.userosscache
+*.metaproj.userosscacheid
+*.sln.docstates
+*.suo
+*.user
+*.userosscache
+*.userosscacheid
+*.userprefs
+*.svclog
+*.sdf
+*.dbmdl
+*.dbproj.schemaview
+*.publishproj
+*.pubxml
+*.publish-settings
+*.deviceuser
+*.DeviceUser
+*.userosscacheid
+*.vcxproj.filters
+[Oo]bj/
+[Bb]in/
+[Tt]est[Rr]esults/
+*.VisualState.xml
+[Dd]eploy/
+[Ll]ogs/
+[Ll]og[Ff]iles/
+*.VC.VC.opendb
+*.VC.db
+ipch/
+*.aps
+*.pidb
+*.sbr
+*.tlb
+*.tlh
+*.bak
+*.cache
+*.ilk
+*.iobj
+*.ipdb
+*.iobj
+*.exp
+*.lib
+*.lst
+*.manifest
+*.map
+*.mdp
+*.ncb
+*.obj
+*.opendb
+*.opensdf
+*.opt
+*.pch
+*.pdb
+*.pgc
+*.pgd
+*.ppdb
+*.metaproj
+*.metaproj.user
+*.metaproj.userosscache
+*.metaproj.userosscacheid
+*.sln.docstates
+*.suo
+*.user
+*.userosscache
+*.userosscacheid
+*.userprefs
+*.svclog
+*.sdf
+*.dbmdl
+*.dbproj.schemaview
+*.publishproj
+*.pubxml
+*.publish-settings
+*.deviceuser
+*.DeviceUser
+*.userosscacheid
+*.vcxproj.filters
+[Oo]bj/
+[Bb]in/
+[Tt]est[Rr]esults/
+*.VisualState.xml
+[Dd]eploy/
+[Ll]ogs/
+[Ll]og[Ff]iles/
+*.VC.VC.opendb
+*.VC.db
+ipch/
+*.aps
+*.pidb
+*.sbr
+*.tlb
+*.tlh
+*.bak
+*.cache
+*.ilk
+*.iobj
+*.ipdb
+*.iobj
+*.exp
+*.lib
+*.lst
+*.manifest
+*.map
+*.mdp
+*.ncb
+*.obj
+*.opendb
+*.opensdf
+*.opt
+*.pch
+*.pdb
+*.pgc
+*.pgd
+*.ppdb
+*.metaproj
+*.metaproj.user
+*.metaproj.userosscache
+*.metaproj.userosscacheid
+*.sln.docstates
+*.suo
+*.user
+*.userosscache
+*.userosscacheid
+*.userprefs
+*.svclog
+*.sdf
+*.dbmdl
+*.dbproj.schemaview
+*.publishproj
+*.pubxml
+*.publish-settings
+*.deviceuser
+*.DeviceUser
+*.userosscacheid
+*.vcxproj.filters
+[Oo]bj/
+[Bb]in/
+[Tt]est[Rr]esults/
+*.VisualState.xml
+[Dd]eploy/
+[Ll]ogs/
+[Ll]og[Ff]iles/
+*.VC.VC.opendb
+*.VC.db
+ipch/
+*.aps
+*.pidb
+*.sbr
+*.tlb
+*.tlh
+*.bak
+*.cache
+......
