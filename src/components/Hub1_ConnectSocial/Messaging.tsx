@@ -47,6 +47,11 @@ import {
   Forward,
   Play,
   Pause,
+  Users,
+  Scan,
+  Signal,
+  UserPlus,
+  Crown,
 } from 'lucide-react';
 
 const EMOJI_LIST = [
@@ -67,6 +72,12 @@ const DISAPPEARING_OPTIONS = [
   { label: '30s', value: 30 },
   { label: '1m', value: 60 },
 ];
+
+const getInitialsAvatar = (name: string): string => {
+  const initial = (name || '?').charAt(0).toUpperCase();
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" fill="#0f172a"/><text x="50" y="50" font-size="48" font-family="sans-serif" fill="#ef4444" text-anchor="middle" dominant-baseline="central">${initial}</text></svg>`;
+  return `data:image/svg+xml;base64,${btoa(svg)}`;
+};
 
 type ContextMenuAction = 'pin' | 'mute' | 'leave';
 type MessageContextAction = 'reply' | 'forward' | 'edit' | 'delete';
@@ -285,13 +296,13 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
       onTouchStart={(e) => onTouchStart(e, message)}
       onTouchEnd={onTouchEnd}
     >
-      <div
-        className={`skeuo-btn max-w-md p-3 rounded-2xl text-xs leading-relaxed shadow-lg transition-all ${
-          isMe
-            ? 'bg-gradient-to-r from-red-600 to-red-800 text-white rounded-br-none'
-            : 'bg-slate-800 text-slate-100 border border-slate-700/60 rounded-bl-none'
-        }`}
-      >
+    <div
+      className={`liquid-glass max-w-md p-3 rounded-2xl text-xs leading-relaxed shadow-lg transition-all ${
+        isMe
+          ? 'bg-gradient-to-r from-red-600 to-red-800 text-white rounded-br-none'
+          : 'bg-white/10 text-slate-100 border border-white/20 rounded-bl-none'
+      }`}
+    >
         {message.forwardedFrom && (
           <div className="flex items-center gap-1 mb-1.5 text-[10px] text-slate-300/80 border-b border-white/10 pb-1.5">
             <Forward className="w-3 h-3" />
@@ -501,7 +512,7 @@ const Composer: React.FC<ComposerProps> = ({
   fileInputRef,
 }) => {
   return (
-    <form onSubmit={onSend} className="p-3 border-t border-slate-800 bg-slate-950/80">
+    <form onSubmit={onSend} className="liquid-glass p-3 border-t border-white/10">
       <ReplyBar replyTo={replyTo} onCancel={onCancelReply} />
       <div className="flex items-end gap-2">
         <input
@@ -662,13 +673,13 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
 }) => {
   const contact = conversation.participantDetails[0] || {
     name: conversation.participants.find(p => p !== 'user-self') || 'Unknown',
-    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop',
+    avatar: getInitialsAvatar(conversation.participants.find(p => p !== 'user-self') || 'Unknown'),
     online: false,
     publicKeyFingerprint: '',
   };
 
   return (
-    <div className="p-3.5 border-b border-slate-800 bg-slate-950/40 flex flex-col gap-2 sticky top-0 z-10">
+    <div className="liquid-glass p-3.5 border-b border-white/10 flex flex-col gap-2 sticky top-0 z-10">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <img src={contact.avatar} alt={contact.name} className="w-8 h-8 rounded-full object-cover" />
@@ -712,8 +723,17 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
           >
             {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
-          <button className="skeuo-btn p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" title="Info">
+          <button className="liquid-glass-btn p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Info">
             <Info className="w-4 h-4" />
+          </button>
+          <button onClick={onToggleSearch} className="liquid-glass-btn p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Search">
+            <Search className="w-4 h-4" />
+          </button>
+          <button onClick={() => onToggleSearch()} className="liquid-glass-btn p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Drafts">
+            <FileText className="w-4 h-4" />
+          </button>
+          <button onClick={() => {}} className="liquid-glass-btn p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Pinned">
+            <Pin className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -759,6 +779,24 @@ interface ConversationListProps {
   contextMenu: { conversationId: string; action: ContextMenuAction } | null;
   onContextMenu: (ctx: { conversationId: string; action: ContextMenuAction }) => void;
   onContextMenuAction: (conversationId: string, action: ContextMenuAction) => void;
+  showAddPrivateChat: boolean;
+  onToggleAddPrivateChat: () => void;
+  privateChatName: string;
+  onPrivateChatNameChange: (name: string) => void;
+  onAddPrivateChat: (e: React.FormEvent) => void;
+  showAddGroupChat: boolean;
+  onToggleAddGroupChat: () => void;
+  groupChatName: string;
+  onGroupChatNameChange: (name: string) => void;
+  onAddGroupChat: (e: React.FormEvent) => void;
+  bluetoothStatus: 'idle' | 'scanning' | 'scanComplete';
+  nearbyDevices: { deviceId: string; name: string; rssi: number }[];
+  onScanBluetooth: () => void;
+  onConnectBluetooth: (deviceId: string, name: string) => void;
+  onDisconnectBluetooth: (deviceId: string) => void;
+  bluetoothConnections: Record<string, { deviceId: string; name: string; rssi: number; connected: boolean }>;
+  isBluetoothMode: boolean;
+  groupParticipantsRef?: React.RefObject<HTMLInputElement | null>;
 }
 
 const getDisplayContact = (conv: Conversation) => {
@@ -769,7 +807,7 @@ const getDisplayContact = (conv: Conversation) => {
   return {
     id: otherParticipant || conv.id,
     name: otherParticipant || 'Unknown',
-    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop',
+    avatar: getInitialsAvatar(otherParticipant || conv.id),
     online: false,
     bluetoothNearby: false,
     unreadCount: conv.unreadCount,
@@ -795,6 +833,24 @@ const ConversationList: React.FC<ConversationListProps> = ({
   contextMenu,
   onContextMenu,
   onContextMenuAction,
+  showAddPrivateChat,
+  onToggleAddPrivateChat,
+  privateChatName,
+  onPrivateChatNameChange,
+  onAddPrivateChat,
+  showAddGroupChat,
+  onToggleAddGroupChat,
+  groupChatName,
+  onGroupChatNameChange,
+  onAddGroupChat,
+  bluetoothStatus,
+  nearbyDevices,
+  onScanBluetooth,
+  onConnectBluetooth,
+  onDisconnectBluetooth,
+  bluetoothConnections,
+  isBluetoothMode,
+  groupParticipantsRef,
 }) => {
   const searchFilter = (conv: Conversation) => {
     const contact = getDisplayContact(conv);
@@ -833,14 +889,41 @@ const ConversationList: React.FC<ConversationListProps> = ({
                     }`}
                   >
                     <div className="relative shrink-0">
-                      <img src={contact.avatar} alt={contact.name} className="w-9 h-9 rounded-full object-cover" />
-                      {contact.online && (
+                      {conv.isGroup ? (
+                        <div className="flex -space-x-1.5">
+                          {conv.participantDetails.slice(0, 3).map((p, i) => (
+                            <div key={p.id || i} className="w-7 h-7 rounded-full border-2 border-slate-950 overflow-hidden">
+                              <img src={p.avatar} alt={p.name} className="w-full h-full object-cover" />
+                            </div>
+                          ))}
+                          {conv.participantDetails.length > 3 && (
+                            <div className="w-7 h-7 rounded-full border-2 border-slate-950 bg-slate-700 flex items-center justify-center text-[8px] font-bold text-white">
+                              +{conv.participantDetails.length - 3}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <img src={contact.avatar} alt={contact.name} className="w-9 h-9 rounded-full object-cover" />
+                      )}
+                      {!conv.isGroup && contact.online && (
                         <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-red-500 border-2 border-slate-950 rounded-full" />
+                      )}
+                      {conv.isGroup && (
+                        <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-red-600 border-2 border-slate-950 rounded-full flex items-center justify-center">
+                          <Crown className="w-2 h-2 text-white" />
+                        </span>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <p className="text-xs font-bold truncate">{contact.name}</p>
+                        <p className="text-xs font-bold truncate">
+                          {contact.name}
+                          {conv.isGroup && (
+                            <span className="ml-1.5 text-[9px] font-mono text-red-400 bg-red-950/60 px-1 py-0.5 rounded border border-red-500/30">
+                              ADMIN
+                            </span>
+                          )}
+                        </p>
                         <div className="flex items-center gap-1">
                           {contact.bluetoothNearby && (
                             <span className="text-[10px] text-red-400 font-mono">{contact.signalStrength}%</span>
@@ -852,7 +935,9 @@ const ConversationList: React.FC<ConversationListProps> = ({
                           )}
                         </div>
                       </div>
-                      <p className="text-[11px] text-slate-400 truncate">{contact.lastMessage || (conv.isGroup ? 'Group channel' : 'Start messaging')}</p>
+                      <p className="text-[11px] text-slate-400 truncate">
+                        {conv.isGroup ? `${conv.participantDetails.length} members` : contact.lastMessage || 'Start messaging'}
+                      </p>
                     </div>
                   </button>
                   <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -888,7 +973,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
   };
 
   return (
-    <div className="border-r border-slate-800 bg-slate-950/60 p-4 space-y-4 skeuo-card">
+    <div className="liquid-glass border-r border-white/10 p-4 space-y-4">
       <div className="flex items-center justify-between p-1 bg-slate-900 border border-slate-800 rounded-xl text-xs">
         <button
           onClick={() => onModeChange('online')}
@@ -924,15 +1009,125 @@ const ConversationList: React.FC<ConversationListProps> = ({
       <div>
         <div className="flex items-center justify-between mb-2">
           <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Channels</h4>
-          <button
-            onClick={onToggleAddChannel}
-            className="skeuo-btn text-xs text-red-400 hover:text-red-300 font-bold border border-red-500/30 px-2 py-0.5 rounded-lg bg-red-950/40"
-          >
-            + New
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={onToggleAddPrivateChat}
+              className="skeuo-btn text-[10px] text-red-400 hover:text-red-300 font-bold border border-red-500/30 px-1.5 py-0.5 rounded-lg bg-red-950/40"
+              title="New Private Chat"
+            >
+              <UserPlus className="w-3 h-3" />
+            </button>
+            <button
+              onClick={isBluetoothMode ? undefined : onToggleAddGroupChat}
+              className={`skeuo-btn text-[10px] font-bold border border-red-500/30 px-1.5 py-0.5 rounded-lg ${
+                isBluetoothMode
+                  ? 'text-slate-600 border-slate-700 bg-slate-900/40 cursor-not-allowed'
+                  : 'text-red-400 hover:text-red-300 bg-red-950/40'
+              }`}
+              title={isBluetoothMode ? 'Group chats not supported in Bluetooth mode' : 'New Group'}
+            >
+              <Users className="w-3 h-3" />
+            </button>
+          </div>
         </div>
 
-        {showAddChannel && (
+        {showAddPrivateChat && (
+          <form onSubmit={onAddPrivateChat} className="mb-3 space-y-1.5 p-2 bg-slate-900 border border-red-500/30 rounded-xl">
+            <input
+              type="text"
+              value={privateChatName}
+              onChange={(e) => onPrivateChatNameChange(e.target.value)}
+              placeholder="Contact name (single word)..."
+              className="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-red-400"
+            />
+            <button
+              type="submit"
+              className="skeuo-btn w-full py-1 bg-red-600 hover:bg-red-500 text-white font-extrabold text-xs rounded-lg shadow"
+            >
+              Start Private Chat
+            </button>
+          </form>
+        )}
+
+        {showAddGroupChat && (
+          <form onSubmit={onAddGroupChat} className="mb-3 space-y-1.5 p-2 bg-slate-900 border border-red-500/30 rounded-xl">
+          <input
+            type="text"
+            value={groupChatName}
+            onChange={(e) => onGroupChatNameChange(e.target.value)}
+            placeholder="Group name..."
+            className="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-red-400"
+          />
+          <input
+            ref={groupParticipantsRef}
+            type="text"
+            placeholder="Participant names (comma-separated)..."
+            className="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-red-400"
+          />
+          <button
+            type="submit"
+            className="skeuo-btn w-full py-1 bg-red-600 hover:bg-red-500 text-white font-extrabold text-xs rounded-lg shadow"
+          >
+            Create Group Chat
+          </button>
+        </form>
+        )}
+
+        {isBluetoothMode && (
+          <div className="mb-3 p-2 bg-slate-900 border border-red-500/30 rounded-xl">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nearby Devices</span>
+              <button
+                onClick={onScanBluetooth}
+                disabled={bluetoothStatus === 'scanning'}
+                className="skeuo-btn text-[10px] text-red-400 hover:text-red-300 font-bold border border-red-500/30 px-2 py-0.5 rounded-lg bg-red-950/40 flex items-center gap-1"
+              >
+                <Scan className="w-3 h-3" />
+                {bluetoothStatus === 'scanning' ? 'Scanning...' : 'Scan'}
+              </button>
+            </div>
+            {nearbyDevices.length === 0 && bluetoothStatus !== 'scanning' ? (
+              <p className="text-[10px] text-slate-500 text-center py-2">No devices found. Tap Scan to search.</p>
+            ) : (
+              <div className="space-y-1 max-h-[150px] overflow-y-auto">
+                {nearbyDevices.map(device => {
+                  const connection = bluetoothConnections[device.deviceId];
+                  return (
+                    <div key={device.deviceId} className="flex items-center gap-2 p-2 bg-slate-950 rounded-lg">
+                      <div className="w-7 h-7 rounded-full bg-red-900/40 border border-red-500/30 flex items-center justify-center text-[10px] font-bold text-red-300">
+                        {device.name.charAt(0)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-white truncate">{device.name}</p>
+                        <p className="text-[10px] text-slate-400 flex items-center gap-1">
+                          <Signal className="w-2.5 h-2.5" />
+                          {Math.abs(device.rssi)}dBm
+                        </p>
+                      </div>
+                      {connection?.connected ? (
+                        <button
+                          onClick={() => onDisconnectBluetooth(device.deviceId)}
+                          className="text-[10px] text-red-400 hover:text-red-300 font-bold border border-red-500/30 px-1.5 py-0.5 rounded"
+                        >
+                          Disconnect
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => onConnectBluetooth(device.deviceId, device.name)}
+                          className="text-[10px] text-emerald-400 hover:text-emerald-300 font-bold border border-emerald-500/30 px-1.5 py-0.5 rounded"
+                        >
+                          Connect
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {!isBluetoothMode && showAddChannel && (
           <form onSubmit={onAddChannel} className="mb-3 space-y-1.5 p-2 bg-slate-900 border border-red-500/30 rounded-xl">
             <input
               type="text"
@@ -986,6 +1181,10 @@ export const Messaging: React.FC<MessagingProps> = ({ highlightedConversationId 
     deleteConversation,
     searchMessages,
     user,
+    bluetoothConnections,
+    connectBluetoothDevice,
+    disconnectBluetoothDevice,
+    scanBluetoothDevices,
   } = useApp();
 
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
@@ -1014,6 +1213,43 @@ export const Messaging: React.FC<MessagingProps> = ({ highlightedConversationId 
   const [showSearch, setShowSearch] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [decryptedCache, setDecryptedCache] = useState<Record<string, string>>({});
+  const [showAddPrivateChat, setShowAddPrivateChat] = useState(false);
+  const [privateChatName, setPrivateChatName] = useState('');
+  const [showAddGroupChat, setShowAddGroupChat] = useState(false);
+  const [groupChatName, setGroupChatName] = useState('');
+  const [nearbyDevices, setNearbyDevices] = useState<{ deviceId: string; name: string; rssi: number }[]>([]);
+  const [bluetoothStatus, setBluetoothStatus] = useState<'idle' | 'scanning' | 'scanComplete'>('idle');
+
+  // Extras State
+  const [pinnedMessages, setPinnedMessages] = useState<Record<string, any>>({});
+  const [showPinnedPanel, setShowPinnedPanel] = useState(false);
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [messagePriority, setMessagePriority] = useState<Record<string, 'low' | 'normal' | 'high'>>({});
+  const [showPriorityPicker, setShowPriorityPicker] = useState(false);
+  const [priorityTargetId, setPriorityTargetId] = useState<string | null>(null);
+  const [archivedConversations, setArchivedConversations] = useState<Set<string>>(new Set());
+  const [showArchived, setShowArchived] = useState(false);
+  const [showQuickReplies, setShowQuickReplies] = useState(false);
+  const [scheduledMessages, setScheduledMessages] = useState<any[]>([]);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [scheduleTargetId, setScheduleTargetId] = useState<string | null>(null);
+  const [scheduleText, setScheduleText] = useState('');
+  const [scheduleDelay, setScheduleDelay] = useState(60);
+  const [messageCategories, setMessageCategories] = useState<Record<string, string>>({});
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [categoryTargetId, setCategoryTargetId] = useState<string | null>(null);
+  const [categoryValue, setCategoryValue] = useState('');
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editMessageDraft, setEditMessageDraft] = useState('');
+  const [retryQueue, setRetryQueue] = useState<string[]>([]);
+  const [showRetryPanel, setShowRetryPanel] = useState(false);
+  const [readReceiptTimestamps, setReadReceiptTimestamps] = useState<Record<string, string>>({});
+  const [showDeliveryStatus, setShowDeliveryStatus] = useState(false);
+  const [reportTargetId, setReportTargetId] = useState<string | null>(null);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [blockedUsers, setBlockedUsers] = useState<Set<string>>(new Set());
+  const [showBlockedPanel, setShowBlockedPanel] = useState(false);
+  const [showDraftsPanel, setShowDraftsPanel] = useState(false);
 
   const typingTimeoutRef = useRef<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -1021,6 +1257,7 @@ export const Messaging: React.FC<MessagingProps> = ({ highlightedConversationId 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const longPressTimerRef = useRef<number | null>(null);
+  const groupParticipantsRef = useRef<HTMLInputElement | null>(null);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -1109,7 +1346,7 @@ export const Messaging: React.FC<MessagingProps> = ({ highlightedConversationId 
     const newChan = {
       id: newChanId,
       name: newChannelName.trim(),
-      avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop',
+      avatar: getInitialsAvatar(newChannelName.trim() || newChanId),
       online: true,
       bluetoothNearby: mode === 'bluetooth',
       signalStrength: 95,
@@ -1179,6 +1416,53 @@ export const Messaging: React.FC<MessagingProps> = ({ highlightedConversationId 
         i === 0 ? { ...p, lastMessage: text.slice(0, 50) } : p
       ),
     });
+  };
+
+  const handleScanBluetooth = async () => {
+    setBluetoothStatus('scanning');
+    setNearbyDevices([]);
+    try {
+      const devices = await scanBluetoothDevices();
+      setNearbyDevices(devices);
+      setBluetoothStatus('scanComplete');
+    } catch (err) {
+      showToast('Bluetooth Error', 'Failed to scan for nearby devices.', 'error');
+      setBluetoothStatus('idle');
+    }
+  };
+
+  const handleConnectBluetooth = async (deviceId: string, name: string) => {
+    try {
+      connectBluetoothDevice(deviceId, name);
+      const newChanId = `c-${Date.now()}`;
+      const newChan = {
+        id: newChanId,
+        name,
+        avatar: getInitialsAvatar(name || deviceId),
+        online: true,
+        bluetoothNearby: true,
+        signalStrength: 90,
+        lastMessage: 'Connected via Bluetooth',
+        unreadCount: 0,
+        publicKeyFingerprint: `EC:${Math.floor(Math.random() * 89 + 10)}:${Math.floor(Math.random() * 89 + 10)}:FF`,
+      };
+      const conv = addConversation(['user-self', deviceId], false);
+      updateConversation(conv.id, { participantDetails: [newChan] });
+      const updatedConv = { ...conv, participantDetails: [newChan] };
+      setSelectedConversation(updatedConv);
+      showToast('Chat Created', `Private chat with ${name} created.`, 'success');
+    } catch (err) {
+      showToast('Error', 'Failed to connect Bluetooth device.', 'error');
+    }
+  };
+
+  const handleDisconnectBluetooth = async (deviceId: string) => {
+    try {
+      disconnectBluetoothDevice(deviceId);
+      showToast('Disconnected', 'Bluetooth device disconnected.', 'info');
+    } catch (err) {
+      showToast('Error', 'Failed to disconnect Bluetooth device.', 'error');
+    }
   };
 
   const handleSendVoiceNote = async () => {
@@ -1280,6 +1564,45 @@ export const Messaging: React.FC<MessagingProps> = ({ highlightedConversationId 
     } catch {
       showToast('Decryption Error', 'Failed to decrypt payload.', 'error');
     }
+  };
+
+  const handleAddGroupChat = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!groupChatName.trim()) return;
+    const rawNames = groupParticipantsRef.current?.value?.trim() || '';
+    const participantNames = rawNames ? rawNames.split(',').map(n => n.trim()).filter(Boolean) : [];
+    const allParticipants = ['user-self', ...participantNames.map((_, i) => `grp-${Date.now()}-${i}`)];
+    const newChanId = `c-${Date.now()}`;
+    const newChan = {
+      id: newChanId,
+      name: groupChatName.trim(),
+      avatar: getInitialsAvatar(groupChatName.trim() || newChanId),
+      online: true,
+      bluetoothNearby: false,
+      signalStrength: 95,
+      lastMessage: 'Group Created & AES Verified',
+      unreadCount: 0,
+      publicKeyFingerprint: `EC:${Math.floor(Math.random() * 89 + 10)}:${Math.floor(Math.random() * 89 + 10)}:FF`,
+    };
+    const participantDetails = participantNames.map((name, i) => ({
+      id: `grp-${Date.now()}-${i}`,
+      name,
+      avatar: getInitialsAvatar(name),
+      online: false,
+      bluetoothNearby: false,
+      signalStrength: undefined,
+      lastMessage: undefined,
+      lastSeen: undefined,
+      unreadCount: 0,
+      publicKeyFingerprint: `EC:${Math.floor(Math.random() * 89 + 10)}:${Math.floor(Math.random() * 89 + 10)}:FF`,
+    }));
+    const conv = addConversation(allParticipants, true);
+    updateConversation(conv.id, { participantDetails: [newChan, ...participantDetails] });
+    const updatedConv = { ...conv, participantDetails: [newChan, ...participantDetails] };
+    setSelectedConversation(updatedConv);
+    setGroupChatName('');
+    setShowAddGroupChat(false);
+    if (groupParticipantsRef.current) groupParticipantsRef.current.value = '';
   };
 
   const handleAddReaction = async (msgId: string, emoji: string) => {
@@ -1420,8 +1743,98 @@ export const Messaging: React.FC<MessagingProps> = ({ highlightedConversationId 
     );
   };
 
+  const togglePinMessage = (msgId: string) => {
+    setPinnedMessages(prev => {
+      if (prev[msgId]) {
+        const next = { ...prev };
+        delete next[msgId];
+        showToast('Unpinned', 'Message unpinned', 'info');
+        return next;
+      }
+      const msg = messages.find(m => m.id === msgId);
+      if (msg) {
+        showToast('Pinned', 'Message pinned', 'success');
+        return { ...prev, [msgId]: msg };
+      }
+      return prev;
+    });
+  };
+
+  const saveDraft = (text: string) => {
+    if (!selectedConversation || !text.trim()) return;
+    setDrafts(prev => ({ ...prev, [selectedConversation.id]: text.trim() }));
+  };
+
+  const loadDraft = (convId: string) => {
+    const draft = drafts[convId];
+    if (draft) {
+      setInputText(draft);
+      const conv = conversations.find(c => c.id === convId);
+      if (conv) setSelectedConversation(conv);
+    }
+  };
+
+  const setPriority = (msgId: string, priority: 'low' | 'normal' | 'high') => {
+    setMessagePriority(prev => ({ ...prev, [msgId]: priority }));
+    showToast('Priority Set', `Message marked as ${priority}`, 'success');
+  };
+
+  const setCategory = (msgId: string, category: string) => {
+    setMessageCategories(prev => ({ ...prev, [msgId]: category }));
+    showToast('Categorized', `Message categorized as ${category}`, 'success');
+  };
+
+  const archiveConversation = (convId: string) => {
+    setArchivedConversations(prev => new Set(prev).add(convId));
+    if (selectedConversation?.id === convId) setSelectedConversation(null);
+    showToast('Archived', 'Conversation archived', 'info');
+  };
+
+  const unarchiveConversation = (convId: string) => {
+    setArchivedConversations(prev => { const next = new Set(prev); next.delete(convId); return next; });
+    showToast('Unarchived', 'Conversation restored', 'success');
+  };
+
+  const blockUser = (userId: string) => {
+    setBlockedUsers(prev => new Set(prev).add(userId));
+    showToast('Blocked', 'User blocked', 'info');
+  };
+
+  const unblockUser = (userId: string) => {
+    setBlockedUsers(prev => { const next = new Set(prev); next.delete(userId); return next; });
+    showToast('Unblocked', 'User unblocked', 'success');
+  };
+
+  const retryMessage = async (msgId: string) => {
+    const msg = messages.find(m => m.id === msgId);
+    if (msg) {
+      await addMessage({ ...msg, status: 'sent' });
+      setRetryQueue(prev => prev.filter(id => id !== msgId));
+      showToast('Retried', 'Message resent', 'success');
+    }
+  };
+
+  const scheduleMessage = () => {
+    if (!scheduleText.trim() || !selectedConversation) return;
+    setScheduledMessages(prev => [...prev, {
+      id: `sched-${Date.now()}`,
+      conversationId: selectedConversation.id,
+      text: scheduleText,
+      delay: scheduleDelay,
+      sent: false,
+      scheduledAt: new Date(Date.now() + scheduleDelay * 1000).toISOString(),
+    }]);
+    setScheduleText('');
+    setShowScheduleModal(false);
+    showToast('Scheduled', 'Message scheduled', 'success');
+  };
+
+  const toggleQuickReply = (reply: string) => {
+    setInputText(reply);
+  };
+
   return (
-    <div className={`bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl grid grid-cols-1 md:grid-cols-3 min-h-[550px] skeuo-panel ${theme === 'light' ? 'light-mode' : ''}`}>
+    <div className={`liquid-glass overflow-hidden grid grid-cols-1 md:grid-cols-3 min-h-[550px] ${theme === 'light' ? 'light-mode' : ''}`}>
       <ConversationList
         conversations={conversations}
         selectedConversationId={selectedConversation?.id || null}
@@ -1440,9 +1853,48 @@ export const Messaging: React.FC<MessagingProps> = ({ highlightedConversationId 
         contextMenu={contextMenu}
         onContextMenu={(ctx) => setContextMenu(ctx)}
         onContextMenuAction={handleContextMenu}
+        showAddPrivateChat={showAddPrivateChat}
+        onToggleAddPrivateChat={() => setShowAddPrivateChat(!showAddPrivateChat)}
+        privateChatName={privateChatName}
+        onPrivateChatNameChange={setPrivateChatName}
+        onAddPrivateChat={(e) => {
+          e.preventDefault();
+          if (!privateChatName.trim()) return;
+          const newChanId = `c-${Date.now()}`;
+          const newChan = {
+            id: newChanId,
+            name: privateChatName.trim(),
+            avatar: getInitialsAvatar(privateChatName.trim() || newChanId),
+            online: true,
+            bluetoothNearby: mode === 'bluetooth',
+            signalStrength: 95,
+            lastMessage: 'Private Chat Created',
+            unreadCount: 0,
+            publicKeyFingerprint: `EC:${Math.floor(Math.random() * 89 + 10)}:${Math.floor(Math.random() * 89 + 10)}:FF`,
+          };
+          const conv = addConversation(['user-self', newChanId], false);
+          updateConversation(conv.id, { participantDetails: [newChan] });
+          const updatedConv = { ...conv, participantDetails: [newChan] };
+          setSelectedConversation(updatedConv);
+          setPrivateChatName('');
+          setShowAddPrivateChat(false);
+        }}
+        showAddGroupChat={showAddGroupChat}
+        onToggleAddGroupChat={() => setShowAddGroupChat(!showAddGroupChat)}
+        groupChatName={groupChatName}
+        onGroupChatNameChange={setGroupChatName}
+        onAddGroupChat={handleAddGroupChat}
+        bluetoothStatus={bluetoothStatus}
+        nearbyDevices={nearbyDevices}
+        onScanBluetooth={handleScanBluetooth}
+        onConnectBluetooth={handleConnectBluetooth}
+        onDisconnectBluetooth={handleDisconnectBluetooth}
+        bluetoothConnections={bluetoothConnections}
+        isBluetoothMode={mode === 'bluetooth'}
+        groupParticipantsRef={groupParticipantsRef}
       />
 
-      <div className="md:col-span-2 flex flex-col justify-between bg-slate-900/50">
+      <div className="md:col-span-2 flex flex-col justify-between liquid-glass">
         {selectedConversation ? (
           <>
             <ChatHeader
@@ -1461,7 +1913,7 @@ export const Messaging: React.FC<MessagingProps> = ({ highlightedConversationId 
             />
 
             {showSearch && searchQuery.trim() && (
-              <div className="px-4 py-2 bg-slate-950/40 border-b border-slate-800">
+              <div className="px-4 py-2 liquid-glass border-b border-white/10">
                 {searchResults.length === 0 ? (
                   <p className="text-xs text-slate-500">No messages found</p>
                 ) : (
@@ -1481,7 +1933,7 @@ export const Messaging: React.FC<MessagingProps> = ({ highlightedConversationId 
               </div>
             )}
 
-            <div className="p-4 flex-1 overflow-y-auto space-y-3 max-h-[420px]">
+            <div className="p-4 flex-1 overflow-y-auto space-y-3 max-h-[420px] liquid-glass">
               {filteredMessages.length === 0 && (
                 <div className="text-center text-slate-500 text-xs py-8">
                   No messages yet. Say hello 👋
@@ -1602,6 +2054,176 @@ export const Messaging: React.FC<MessagingProps> = ({ highlightedConversationId 
             >
               <Trash2 className="w-3.5 h-3.5" /> Delete
             </button>
+          </div>
+         </div>
+       )}
+
+      {/* DRAFTS PANEL */}
+      {showDraftsPanel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+          <div className="liquid-glass p-6 space-y-4 w-full max-w-lg">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-black text-white uppercase tracking-widest">Message Drafts</h4>
+              <button onClick={() => setShowDraftsPanel(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {Object.keys(drafts).length === 0 ? (
+                <p className="text-xs text-slate-400">No drafts saved.</p>
+              ) : (
+                Object.entries(drafts).map(([convId, text]) => (
+                  <div key={convId} className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-white truncate">{text}</p>
+                      <p className="text-[10px] text-slate-400 font-mono">{convId}</p>
+                    </div>
+                    <button onClick={() => { setInputText(text); setSelectedConversation(conversations.find(c => c.id === convId) || null); setShowDraftsPanel(false); }} className="liquid-glass-btn px-2 py-1 text-[10px] font-bold">Load</button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SCHEDULE MESSAGE MODAL */}
+      {showScheduleModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+          <div className="liquid-glass p-6 space-y-4 w-full max-w-md">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-black text-white uppercase tracking-widest">Schedule Message</h4>
+              <button onClick={() => setShowScheduleModal(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400"><X className="w-4 h-4" /></button>
+            </div>
+            <textarea value={scheduleText} onChange={(e) => setScheduleText(e.target.value)} placeholder="Message to schedule..." className="w-full h-32 px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-red-500 resize-none" />
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400">Delay (seconds):</span>
+              <input type="number" value={scheduleDelay} onChange={(e) => setScheduleDelay(Number(e.target.value))} className="w-20 px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => { if (!scheduleText.trim() || !selectedConversation) return; setScheduledMessages(p => [...p, { id: `sched-${Date.now()}`, conversationId: selectedConversation.id, text: scheduleText, delay: scheduleDelay, sent: false }]); setScheduleText(''); setShowScheduleModal(false); showToast('Scheduled', 'Message scheduled', 'success'); }} className="liquid-glass-btn px-4 py-2 text-xs font-bold">Schedule</button>
+              <button onClick={() => setShowScheduleModal(false)} className="liquid-glass-btn px-4 py-2 text-xs font-bold text-slate-300">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* PINNED MESSAGES PANEL */}
+      {showPinnedPanel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+          <div className="liquid-glass p-6 space-y-4 w-full max-w-lg">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-black text-white uppercase tracking-widest">Pinned Messages</h4>
+              <button onClick={() => setShowPinnedPanel(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {Object.keys(pinnedMessages).length === 0 ? (
+                <p className="text-xs text-slate-400">No pinned messages.</p>
+              ) : (
+                Object.entries(pinnedMessages).map(([msgId, msg]) => (
+                  <div key={msgId} className="p-3 rounded-xl bg-white/5 border border-white/10">
+                    <p className="text-xs text-white">{msg.text}</p>
+                    <p className="text-[10px] text-slate-400 font-mono">{msg.timestamp}</p>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MESSAGE PRIORITY PICKER */}
+      {showPriorityPicker && priorityTargetId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+          <div className="liquid-glass p-6 space-y-4 w-full max-w-sm">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-black text-white uppercase tracking-widest">Set Priority</h4>
+              <button onClick={() => { setShowPriorityPicker(false); setPriorityTargetId(null); }} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="space-y-2">
+              {(['low', 'normal', 'high'] as const).map(priority => (
+                <button key={priority} onClick={() => { setMessagePriority(p => ({ ...p, [priorityTargetId]: priority })); setShowPriorityPicker(false); setPriorityTargetId(null); showToast('Priority Set', `Message marked as ${priority}`, 'success'); }} className={`w-full p-3 rounded-xl border text-xs font-bold transition-all ${messagePriority[priorityTargetId] === priority ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'}`}>
+                  {priority.charAt(0).toUpperCase() + priority.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CATEGORY MODAL */}
+      {showCategoryModal && categoryTargetId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+          <div className="liquid-glass p-6 space-y-4 w-full max-w-sm">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-black text-white uppercase tracking-widest">Set Category</h4>
+              <button onClick={() => { setShowCategoryModal(false); setCategoryTargetId(null); }} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400"><X className="w-4 h-4" /></button>
+            </div>
+            <input type="text" value={categoryValue} onChange={(e) => setCategoryValue(e.target.value)} placeholder="Category name..." className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-red-500" />
+            <button onClick={() => { if (!categoryValue.trim() || !categoryTargetId) return; setMessageCategories(p => ({ ...p, [categoryTargetId]: categoryValue.trim() })); setCategoryValue(''); setShowCategoryModal(false); setCategoryTargetId(null); showToast('Categorized', 'Message categorized', 'success'); }} className="liquid-glass-btn px-4 py-2 text-xs font-bold">Save</button>
+          </div>
+        </div>
+      )}
+
+      {/* RETRY PANEL */}
+      {showRetryPanel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+          <div className="liquid-glass p-6 space-y-4 w-full max-w-lg">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-black text-white uppercase tracking-widest">Retry Queue</h4>
+              <button onClick={() => setShowRetryPanel(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {retryQueue.length === 0 ? (
+                <p className="text-xs text-slate-400">No failed messages.</p>
+              ) : (
+                retryQueue.map(msgId => (
+                  <div key={msgId} className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+                    <span className="text-xs text-white font-mono">{msgId}</span>
+                    <button onClick={async () => { const msg = messages.find(m => m.id === msgId); if (msg) { await addMessage({ ...msg, status: 'sent' }); setRetryQueue(p => p.filter(id => id !== msgId)); showToast('Retried', 'Message resent', 'success'); } }} className="liquid-glass-btn px-3 py-1.5 text-[10px] font-bold">Retry</button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* REPORT MODAL */}
+      {showReportModal && reportTargetId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+          <div className="liquid-glass p-6 space-y-4 w-full max-w-md">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-black text-white uppercase tracking-widest">Report Message</h4>
+              <button onClick={() => { setShowReportModal(false); setReportTargetId(null); }} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400"><X className="w-4 h-4" /></button>
+            </div>
+            <p className="text-xs text-slate-400">Report this message for review?</p>
+            <div className="flex gap-2">
+              <button onClick={() => { showToast('Reported', 'Message reported to moderators', 'info'); setShowReportModal(false); setReportTargetId(null); }} className="liquid-glass-btn px-4 py-2 text-xs font-bold text-red-400">Report</button>
+              <button onClick={() => { setShowReportModal(false); setReportTargetId(null); }} className="liquid-glass-btn px-4 py-2 text-xs font-bold text-slate-300">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* BLOCKED USERS PANEL */}
+      {showBlockedPanel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+          <div className="liquid-glass p-6 space-y-4 w-full max-w-lg">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-black text-white uppercase tracking-widest">Blocked Users</h4>
+              <button onClick={() => setShowBlockedPanel(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {blockedUsers.size === 0 ? (
+                <p className="text-xs text-slate-400">No blocked users.</p>
+              ) : (
+                Array.from(blockedUsers).map(userId => (
+                  <div key={userId} className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+                    <span className="text-xs text-white font-mono">{userId}</span>
+                    <button onClick={() => { setBlockedUsers(p => { const next = new Set(p); next.delete(userId); return next; }); showToast('Unblocked', 'User unblocked', 'success'); }} className="liquid-glass-btn px-3 py-1.5 text-[10px] font-bold">Unblock</button>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       )}

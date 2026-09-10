@@ -5,11 +5,11 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { HubId } from '../../types';
-import { MessageSquare, Music, Gamepad2, Briefcase, Plane } from 'lucide-react';
+import { MessageSquare, Music, Gamepad2, Briefcase, Plane, Rss } from 'lucide-react';
 
 interface HubTab {
   id: HubId;
-  labelKey: 'connectHub' | 'mediaHub' | 'arcadeHub' | 'officeHub' | 'telemetryHub';
+  labelKey: 'connectHub' | 'mediaHub' | 'arcadeHub' | 'officeHub' | 'telemetryHub' | 'rssHub';
   icon: React.ElementType;
   badge?: string;
   gradient: string;
@@ -27,7 +27,14 @@ const HUBS: HubTab[] = [
     id: 'media',
     labelKey: 'mediaHub',
     icon: Music,
-    badge: 'Nightcore & IPTV',
+    badge: 'Nightcore & RSS',
+    gradient: 'from-red-600 to-[#8B0000]',
+  },
+  {
+    id: 'rss',
+    labelKey: 'rssHub',
+    icon: Rss,
+    badge: 'News & Feeds',
     gradient: 'from-red-600 to-[#8B0000]',
   },
   {

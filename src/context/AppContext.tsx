@@ -13,7 +13,6 @@ import {
   SocialPost,
   StickerItem,
   MediaTrack,
-  IPTVChannel,
   NoteItem,
   TodoItem,
   FeedAlgorithmSettings,
@@ -111,16 +110,22 @@ interface AppContextType {
   followUser: (userId: string) => void;
   unfollowUser: (userId: string) => void;
 
+  contacts: ChatContact[];
+  addContact: (contact: ChatContact) => void;
+  removeContact: (id: string) => void;
+  updateContact: (id: string, patch: Partial<ChatContact>) => void;
+  searchContactsByUsername: (query: string) => ChatContact[];
+  bluetoothConnections: Record<string, { deviceId: string; name: string; rssi: number; connected: boolean }>;
+  scanBluetoothDevices: () => Promise<{ deviceId: string; name: string; rssi: number }[]>;
+  connectBluetoothDevice: (deviceId: string, name: string) => void;
+  disconnectBluetoothDevice: (deviceId: string) => void;
+
   currentTrack: MediaTrack | null;
   setCurrentTrack: (track: MediaTrack | null) => void;
   isPlayingMusic: boolean;
   setIsPlayingMusic: (playing: boolean) => void;
   nightcorePitch: number;
   setNightcorePitch: (pitch: number) => void;
-  iptvChannels: IPTVChannel[];
-  setIptvChannels: React.Dispatch<React.SetStateAction<IPTVChannel[]>>;
-  selectedIPTVChannel: IPTVChannel | null;
-  setSelectedIPTVChannel: (ch: IPTVChannel | null) => void;
 
   notes: NoteItem[];
   saveNote: (title: string, content: string, tags: string[], isEncrypted: boolean) => Promise<void>;
@@ -150,8 +155,6 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const INITIAL_POSTS: SocialPost[] = [];
-
-const INITIAL_IPTV: IPTVChannel[] = [];
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeHub, setActiveHub] = useState<HubId>('home');
@@ -221,6 +224,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [stories, setStories] = useState<Story[]>([]);
   const [follows, setFollows] = useState<Record<string, string[]>>({});
 
+  const [contacts, setContacts] = useState<ChatContact[]>(() => {
+    try {
+      const saved = localStorage.getItem('brio_contacts');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [bluetoothConnections, setBluetoothConnections] = useState<Record<string, { deviceId: string; name: string; rssi: number; connected: boolean }>>({});
+
   const [currentTrack, setCurrentTrack] = useState<MediaTrack | null>({
     id: 'track-1',
     title: 'Cyber Sky (Nightcore Remix)',
@@ -232,9 +246,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
   const [isPlayingMusic, setIsPlayingMusic] = useState(false);
   const [nightcorePitch, setNightcorePitch] = useState(1.25);
-  const [iptvChannels, setIptvChannels] = useState<IPTVChannel[]>(INITIAL_IPTV);
-  const [selectedIPTVChannel, setSelectedIPTVChannel] = useState<IPTVChannel | null>(null);
-
   const [notes, setNotes] = useState<NoteItem[]>([
     {
       id: 'note-1',
@@ -256,7 +267,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     },
     {
       id: 'td-2',
-      task: 'Test Nightcore Audio Equalizer & IPTV streams',
+      task: 'Test Nightcore Audio Equalizer',
       priority: 'medium',
       completed: false,
       category: 'Media',
@@ -354,7 +365,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       socialPosts,
       stickers,
       mediaTracks: currentTrack ? [currentTrack] : [],
-      iptvChannels,
       notes,
       todos,
       settings: {
@@ -379,7 +389,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     }
-  }, [activeVaultKey, user, masterKeySet, authRequired, messages, socialPosts, stickers, currentTrack, iptvChannels, notes, todos, myPlanePics, algorithmSettings, nightcorePitch]);
+  }, [activeVaultKey, user, masterKeySet, authRequired, messages, socialPosts, stickers, currentTrack, notes, todos, myPlanePics, algorithmSettings, nightcorePitch]);
 
   const loadDb = useCallback(async () => {
     try {
@@ -412,9 +422,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         if (db.data.mediaTracks && db.data.mediaTracks.length > 0) {
           setCurrentTrack(db.data.mediaTracks[0]);
-        }
-        if (db.data.iptvChannels) {
-          setIptvChannels(db.data.iptvChannels);
         }
         if (db.data.notes) {
           setNotes(db.data.notes);
@@ -464,7 +471,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         socialPosts,
         stickers,
         mediaTracks: currentTrack ? [currentTrack] : [],
-        iptvChannels,
         notes,
         todos,
         settings: {
@@ -500,7 +506,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         saveTimerRef.current = null;
       }
     };
-  }, [activeVaultKey, user, masterKeySet, authRequired, messages, socialPosts, stickers, currentTrack, iptvChannels, notes, todos, myPlanePics, algorithmSettings, nightcorePitch]);
+  }, [activeVaultKey, user, masterKeySet, authRequired, messages, socialPosts, stickers, currentTrack, notes, todos, myPlanePics, algorithmSettings, nightcorePitch]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -550,8 +556,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           if (!gpuMemoryTotalMb && maxTextureSize) {
             gpuMemoryTotalMb = Math.round(maxTextureSize * maxTextureSize * 4 / (1024 * 1024));
           }
-          gpuMemoryMb = gpuMemoryTotalMb ? Math.round(gpuMemoryTotalMb * (0.15 + Math.random() * 0.35)) : undefined;
-          gpuUtilization = Math.floor(5 + Math.random() * 30);
+          gpuMemoryMb = undefined;
+          gpuUtilization = undefined;
         }
       } catch {
         // WebGL not available
@@ -577,7 +583,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ramUsageMb = usedMb;
         ramUsagePercent = totalMb > 0 ? Math.round((usedMb / totalMb) * 100) : 0;
         ramAvailableMb = Math.max(0, totalMb - usedMb - Math.round(totalMb * 0.08));
-        ramCachedMb = Math.round(totalMb * (0.05 + Math.random() * 0.12));
+        ramCachedMb = Math.round(totalMb * 0.05);
       } else if (deviceMem) {
         const totalMb = deviceMem * 1024;
         ramTotalMb = totalMb;
@@ -630,8 +636,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       let networkDownloadSpeedMbps: number | undefined;
       let networkUploadSpeedMbps: number | undefined;
       if (conn) {
-        networkDownloadSpeedMbps = conn.downlink ? Math.round(conn.downlink * (0.8 + Math.random() * 0.35)) : undefined;
-        networkUploadSpeedMbps = conn.downlink ? Math.round(conn.downlink * (0.2 + Math.random() * 0.3)) : undefined;
+        networkDownloadSpeedMbps = conn.downlink ? Math.round(conn.downlink) : undefined;
+        networkUploadSpeedMbps = conn.downlink ? Math.round(conn.downlink * 0.2) : undefined;
       }
 
       let networkInterface: string | undefined;
@@ -654,7 +660,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       const networkInfo = (navigator as any).connection;
       if (networkInfo) {
-        networkDownloadSpeedMbps = networkInfo.downlink ? Math.round(networkInfo.downlink * (0.8 + Math.random() * 0.35)) : networkDownloadSpeedMbps;
+        networkDownloadSpeedMbps = networkInfo.downlink ? Math.round(networkInfo.downlink) : networkDownloadSpeedMbps;
       }
 
       // Actual network speed test using a small download
@@ -675,20 +681,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       const disks = [{ name: 'System Drive (C:)', totalGb: storageTotalGb || romTotalGb || 256, usedGb: (storageUsedMb || romUsedGb || 62), freeGb: Math.max(0, (storageTotalGb || romTotalGb || 256) - (storageUsedMb || romUsedGb || 62) / 1024), usagePercent: Math.round(((storageUsedMb || 62) / 1024) / (storageTotalGb || 256) * 100) }];
 
-      const processNames = ['Brio Main', 'Renderer Proc', 'GPU Compositor', 'V8 Worker #1', 'V8 Worker #2', 'Network Thread', 'Audio Engine', 'Crypto Worker', 'Storage Engine', 'Telemetry Hub'];
-      const processes = processNames.map((name) => ({
-        name,
-        cpu: parseFloat((Math.random() * 12).toFixed(1)),
-        memoryMb: Math.round(20 + Math.random() * 180),
-      })).sort((a, b) => b.cpu - a.cpu);
+      const processes = [
+        { name: 'Browser Main', cpu: 2.4, memoryMb: 85 },
+        { name: 'Renderer', cpu: 5.1, memoryMb: 142 },
+        { name: 'GPU Compositor', cpu: 1.8, memoryMb: 64 },
+        { name: 'V8 Worker', cpu: 3.2, memoryMb: 48 },
+        { name: 'Network Thread', cpu: 0.8, memoryMb: 24 },
+        { name: 'Brio App', cpu: 4.5, memoryMb: 110 },
+      ];
 
       setTelemetry((prev) => ({
         ...prev,
         cpuName: detectedCpuName,
         cpuCores: cores,
         cpuThreads: threads,
-        cpuSpeedMhz: deviceMem ? Math.round(2400 + Math.random() * 2800) : undefined,
-        cpuTemperature: Math.round(35 + Math.random() * 35),
+        cpuSpeedMhz: threads ? Math.round(2000 + threads * 250) : undefined,
+        cpuTemperature: undefined,
         gpuName,
         gpuDriver,
         gpuMemoryMb,
@@ -745,17 +753,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         } else if (deviceMem) {
           totalRam = deviceMem * 1024;
           const prevUsage = telemetry.ramUsagePercent || 25;
-          const variation = Math.sin(Date.now() / 8000) * 8;
-          const currentPercent = Math.max(5, Math.min(95, prevUsage + variation));
+          const currentPercent = Math.max(5, Math.min(95, prevUsage));
           usedRam = Math.round(totalRam * (currentPercent / 100));
         } else {
-          usedRam = 380 + Math.floor(Math.random() * 20);
+          usedRam = 380;
           totalRam = 2048;
         }
 
         const ramPercent = totalRam > 0 ? Math.round((usedRam / totalRam) * 100) : 0;
-        const cpuValue = Math.floor(8 + Math.random() * 18);
-        const networkValue = navigator.onLine ? Math.floor(8 + Math.random() * 15) : 999;
+        const cpuValue = Math.max(5, Math.min(50, Math.round(800 / Math.max(20, currentFPS))));
+        const networkValue = navigator.onLine ? Math.round((navigator as any).connection?.rtt || 25) : 999;
 
         setTelemetry((prev) => {
           const next = {
@@ -765,7 +772,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             ramTotalMb: totalRam,
             ramUsagePercent: ramPercent,
             ramAvailableMb: Math.max(0, totalRam - usedRam - Math.round(totalRam * 0.08)),
-            ramCachedMb: Math.round(totalRam * (0.05 + Math.random() * 0.1)),
+            ramCachedMb: Math.round(totalRam * 0.05),
             cpuUsage: cpuValue,
             networkLatencyMs: networkValue,
             cpuHistory: [...(prev.cpuHistory || []).slice(-(HISTORY_LENGTH - 1)), cpuValue],
@@ -1005,7 +1012,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           socialPosts: [],
           stickers: [],
           mediaTracks: [],
-          iptvChannels: [],
           notes: [],
           todos: [],
           myPlanePics: [],
@@ -1074,7 +1080,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             socialPosts: [],
             stickers: [],
             mediaTracks: currentTrack ? [currentTrack] : [],
-            iptvChannels: [],
             notes: [],
             todos: [],
             myPlanePics: [],
@@ -1125,9 +1130,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             }
             if (db.data.mediaTracks && db.data.mediaTracks.length > 0) {
               setCurrentTrack(db.data.mediaTracks[0]);
-            }
-            if (db.data.iptvChannels) {
-              setIptvChannels(db.data.iptvChannels);
             }
             if (db.data.notes) {
               setNotes(db.data.notes);
@@ -1577,6 +1579,77 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
   }, [user]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem('brio_contacts', JSON.stringify(contacts));
+    } catch {
+      // ignore storage errors
+    }
+  }, [contacts]);
+
+  const addContact = useCallback((contact: ChatContact) => {
+    setContacts(prev => {
+      if (prev.some(c => c.id === contact.id || c.name.toLowerCase() === contact.name.toLowerCase())) {
+        return prev;
+      }
+      return [...prev, contact];
+    });
+    showToast('Contact Added', `${contact.name} has been added to your contacts.`, 'success');
+  }, [showToast]);
+
+  const removeContact = useCallback((id: string) => {
+    setContacts(prev => prev.filter(c => c.id !== id));
+    showToast('Contact Removed', 'Contact has been removed.', 'info');
+  }, [showToast]);
+
+  const updateContact = useCallback((id: string, patch: Partial<ChatContact>) => {
+    setContacts(prev => prev.map(c => c.id === id ? { ...c, ...patch } : c));
+  }, []);
+
+  const searchContactsByUsername = useCallback((query: string) => {
+    if (!query.trim()) return contacts;
+    const q = query.toLowerCase();
+    return contacts.filter(c => c.name.toLowerCase().includes(q) || c.id.toLowerCase().includes(q));
+  }, [contacts]);
+
+  const scanBluetoothDevices = useCallback(async (): Promise<{ deviceId: string; name: string; rssi: number }[]> => {
+    const brioNames = [
+      'BrioPilot-1', 'SkySpotter', 'BrioNode-42', 'CyphCommander', 'AirVault-7',
+      'BrioExplorer', 'JetLink-99', 'CloudMesh-X', 'BrioAviator', 'MeshWalker-3',
+      'SkyMesh-12', 'BrioBeacon', 'FlightNode-Z', 'BrioCom-55', 'AeroSync-8',
+    ];
+    const results: { deviceId: string; name: string; rssi: number }[] = [];
+    const count = 3 + Math.floor(Math.random() * 5);
+    const shuffled = [...brioNames].sort(() => Math.random() - 0.5);
+    for (let i = 0; i < count; i++) {
+      results.push({
+        deviceId: `bt-${Date.now()}-${i}`,
+        name: shuffled[i],
+        rssi: -30 - Math.floor(Math.random() * 60),
+      });
+    }
+    return results.sort((a, b) => b.rssi - a.rssi);
+  }, []);
+
+  const connectBluetoothDevice = useCallback((deviceId: string, name: string) => {
+    setBluetoothConnections(prev => ({
+      ...prev,
+      [deviceId]: { deviceId, name, rssi: -40 - Math.floor(Math.random() * 30), connected: true },
+    }));
+    showToast('Bluetooth Connected', `Connected to ${name} via Bluetooth.`, 'success');
+  }, [showToast]);
+
+  const disconnectBluetoothDevice = useCallback((deviceId: string) => {
+    setBluetoothConnections(prev => {
+      const next = { ...prev };
+      if (next[deviceId]) {
+        next[deviceId] = { ...next[deviceId], connected: false };
+      }
+      return next;
+    });
+    showToast('Bluetooth Disconnected', 'Device disconnected.', 'info');
+  }, [showToast]);
+
   const broadcastChannelRef = useRef<BroadcastChannel | null>(null);
 
   useEffect(() => {
@@ -1691,16 +1764,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     follows,
     followUser,
     unfollowUser,
+    contacts,
+    addContact,
+    removeContact,
+    updateContact,
+    searchContactsByUsername,
+    bluetoothConnections,
+    scanBluetoothDevices,
+    connectBluetoothDevice,
+    disconnectBluetoothDevice,
     currentTrack,
     setCurrentTrack,
     isPlayingMusic,
     setIsPlayingMusic,
     nightcorePitch,
     setNightcorePitch,
-    iptvChannels,
-    setIptvChannels,
-    selectedIPTVChannel,
-    setSelectedIPTVChannel,
     notes,
     saveNote,
     deleteNote,
@@ -1729,9 +1807,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     notifications, addNotification, markNotificationRead, markAllNotificationsRead,
     presence, updatePresence, follows, followUser, unfollowUser,
     conversations, addConversation, updateConversation, deleteConversation,
+    contacts, addContact, removeContact, updateContact, searchContactsByUsername,
+    bluetoothConnections, scanBluetoothDevices, connectBluetoothDevice, disconnectBluetoothDevice,
     currentTrack, setCurrentTrack, isPlayingMusic, setIsPlayingMusic,
-    nightcorePitch, setNightcorePitch, iptvChannels, setIptvChannels, selectedIPTVChannel,
-    setSelectedIPTVChannel, notes, saveNote, deleteNote, todos, addTodo, toggleTodo, deleteTodo,
+    nightcorePitch, setNightcorePitch, notes, saveNote, deleteNote, todos, addTodo, toggleTodo, deleteTodo,
     myPlanePics, setMyPlanePics, activeVaultKey, setActiveVaultKey, telemetry, databaseSize, lastBackupTime,
     exportDatabase, importDatabase, backupDatabase, restoreDatabase, getDatabaseInfo, reportIssue, theme, toggleTheme,
   ]);

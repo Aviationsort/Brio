@@ -502,161 +502,138 @@ export const ClockSuiteModal: React.FC<ClockSuiteModalProps> = ({ onClose }) => 
         {/* MODAL BODY */}
         <div className="p-6 overflow-y-auto flex-1">
           
-          {/* TAB 1: ANALOG CLOCK */}
-          {activeTab === 'ANALOG' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-               
-                {/* ANALOG CLOCK FACE */}
-                <div className="flex flex-col items-center justify-center p-6 rounded-[2rem] border border-white/10 shadow-inner relative skeuo-panel">
-                    <div className="relative w-80 h-80 sm:w-96 sm:h-96 rounded-full bg-gradient-to-br from-[#0f0f12] via-[#0a0a0e] to-[#111115] backdrop-blur-xl border-4 border-white/[0.08] shadow-[inset_0_6px_40px_rgba(0,0,0,0.95),0_0_80px_rgba(200,16,46,0.2),0_0_0_1px_rgba(255,255,255,0.04)] flex items-center justify-center skeuo-card">
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-red-900/30 via-transparent to-red-600/10 pointer-events-none" />
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-white/[0.06] via-transparent to-transparent pointer-events-none" />
-                      <div className="absolute inset-[3px] rounded-full border border-white/[0.03] pointer-events-none" />
+           {/* TAB 1: ANALOG CLOCK */}
+           {activeTab === 'ANALOG' && (
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                
+                 {/* ANALOG CLOCK FACE */}
+                 <div className="flex flex-col items-center justify-center p-6 rounded-[2rem] border border-white/10 shadow-inner relative skeuo-panel">
+                     <div className="relative w-80 h-80 sm:w-96 sm:h-96 rounded-full flex items-center justify-center" style={{
+                       background: 'linear-gradient(145deg, rgba(160,165,175,0.22) 0%, rgba(120,125,135,0.12) 50%, rgba(90,95,105,0.18) 100%)',
+                       backdropFilter: 'blur(24px) saturate(140%)',
+                       WebkitBackdropFilter: 'blur(24px) saturate(140%)',
+                       border: '3px solid rgba(255,255,255,0.16)',
+                       boxShadow: '0 8px 32px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.22), inset 0 -2px 4px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.04)'
+                     }}>
+                       <div className="absolute inset-0 rounded-full pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.14) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.06) 100%)' }} />
+                       <div className="absolute inset-0 rounded-full pointer-events-none" style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -1px 0 rgba(0,0,0,0.22)' }} />
+                       <div className="absolute inset-0 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle at 35% 30%, rgba(255,255,255,0.16) 0%, transparent 45%, transparent 60%, rgba(0,0,0,0.08) 100%)' }} />
 
-                     {/* Metallic bezel */}
-                     <div className="absolute inset-[-8px] rounded-full border-2 border-white/[0.06] pointer-events-none" style={{ boxShadow: '0 0 0 2px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)' }} />
-
-                     {[...Array(60)].map((_, i) => {
-                      const angle = i * 6;
-                      const isHourTick = i % 5 === 0;
-                      const tickLength = isHourTick ? 16 : 7;
-                      const tickWidth = isHourTick ? 3 : 0.8;
-                      const tickOpacity = isHourTick ? 1 : 0.3;
-                      const isQuarter = i % 15 === 0;
-                      const rad = (angle * Math.PI) / 180;
-                      const innerR = 43;
-                      const outerR = innerR + tickLength;
-                      const x1 = 50 + innerR * Math.sin(rad);
-                      const y1 = 50 - innerR * Math.cos(rad);
-                      const x2 = 50 + outerR * Math.sin(rad);
-                      const y2 = 50 - outerR * Math.cos(rad);
-                      return (
-                        <div
-                          key={i}
-                          className="absolute rounded-full"
-                          style={{
-                            left: `${x1}%`,
-                            top: `${y1}%`,
-                            width: `${tickWidth}px`,
-                            height: `${tickLength}px`,
-                            transformOrigin: 'center center',
-                            transform: `rotate(${angle}deg) translate(-50%, -50%)`,
-                            background: isHourTick
-                              ? isQuarter
-                                ? 'linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(200,16,46,0.8))'
-                                : 'linear-gradient(to bottom, rgba(255,255,255,0.85), rgba(255,255,255,0.2))'
-                              : 'rgba(200,200,200,0.4)',
-                            opacity: tickOpacity,
-                            boxShadow: isHourTick ? '0 0 4px rgba(200,16,46,0.3)' : 'none',
-                          }}
-                        />
-                      );
-                    })}
-
-                     {[...Array(12)].map((_, i) => {
-                       const angle = (i + 1) * 30;
-                       const rad = (angle * Math.PI) / 180;
-                       const x = 50 + 33 * Math.sin(rad);
-                       const y = 50 - 33 * Math.cos(rad);
-                       return (
-                         <span
-                           key={i}
-                           className="absolute text-sm sm:text-base font-black font-mono bg-gradient-to-b from-white via-white to-zinc-300 bg-clip-text text-transparent drop-shadow-[0_0_6px_rgba(255,255,255,0.4)]"
-                           style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' }}
-                         >
-                           {i + 1}
-                         </span>
-                       );
-                     })}
-
-                     {/* Date window at 3 o'clock */}
-                     <div className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 w-12 sm:w-14 h-8 sm:h-9 rounded-md bg-gradient-to-b from-[#0a0a0e] to-[#050507] border border-white/10 flex items-center justify-center shadow-[inset_0_1px_3px_rgba(0,0,0,0.6),0_1px_0_rgba(255,255,255,0.05)]">
-                       <span className="text-[10px] sm:text-xs font-black font-mono text-white tracking-wider">
-                         {now.toLocaleDateString(undefined, { day: '2-digit', month: 'short' })}
-                       </span>
-                     </div>
-
-                     <div
-                      className="absolute left-1/2 bottom-1/2 -translate-x-1/2 origin-bottom rounded-full"
-                      style={{
-                        transform: `translateX(-50%) rotate(${smoothHourDegRef.current}deg)`,
-                      }}
-                    >
-                      <div className="w-3 h-[72px] bg-gradient-to-t from-white via-zinc-100 to-zinc-300 rounded-t-full origin-bottom shadow-[0_0_14px_rgba(255,255,255,0.35),0_0_3px_rgba(255,255,255,0.2)]" />
-                      <div className="w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[8px] border-b-zinc-200 mx-auto mt-[-2px] opacity-80" />
-                    </div>
-
-                    <div
-                      className="absolute left-1/2 bottom-1/2 -translate-x-1/2 origin-bottom rounded-full"
-                      style={{
-                        transform: `translateX(-50%) rotate(${smoothMinDegRef.current}deg)`,
-                      }}
-                    >
-                      <div className="w-2 h-28 bg-gradient-to-t from-[#C8102E] via-[#ff3b3b] to-[#ff6b6b] rounded-t-full origin-bottom shadow-[0_0_14px_rgba(200,16,46,0.5),0_0_4px_rgba(255,45,45,0.3)]" />
-                      <div className="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-b-[6px] border-b-[#ff6b6b] mx-auto mt-[-2px] opacity-70" />
-                    </div>
-
-                    <div
-                      className="absolute left-1/2 bottom-1/2 -translate-x-1/2 origin-bottom rounded-full"
-                      style={{
-                        transform: `translateX(-50%) rotate(${smoothSecDegRef.current}deg)`,
-                      }}
-                    >
-                      <div className="w-[2px] h-32 bg-gradient-to-t from-[#FF2D2D] via-[#ff4545] to-[#ff7070] rounded-t-full origin-bottom shadow-[0_0_16px_rgba(255,45,45,0.7),0_0_5px_rgba(255,45,45,0.4)]" />
-                      <div className="w-0 h-0 border-l-[3px] border-l-transparent border-r-[3px] border-r-transparent border-b-[8px] border-b-[#ff7070] mx-auto mt-[-3px] opacity-80" />
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-[2px] h-5 bg-gradient-to-t from-[#C8102E] to-[#FF2D2D] rounded-b-full shadow-[0_0_4px_rgba(200,16,46,0.4)]" />
-                    </div>
-
-                    <div className="absolute w-7 h-7 rounded-full border-[2.5px] border-white/90 shadow-[0_0_0_3px_rgba(200,16,46,0.4),0_0_12px_rgba(200,16,46,0.2),inset_0_0_4px_rgba(0,0,0,0.5)] bg-gradient-to-br from-zinc-200 via-zinc-100 to-zinc-300" />
-                    <div className="absolute w-3 h-3 rounded-full bg-gradient-to-br from-white to-zinc-200 shadow-[0_0_4px_rgba(0,0,0,0.3),0_0_8px_rgba(200,16,46,0.25)] z-10" />
-
-                    {/* Seconds sub-dial */}
-                    <div className="absolute bottom-5 left-1/2 -translate-x-1/2 w-20 h-20 rounded-full bg-gradient-to-br from-[#0a0a0e] to-[#050507] border border-white/[0.07] flex items-center justify-center shadow-[inset_0_2px_10px_rgba(0,0,0,0.7),0_0_8px_rgba(200,16,46,0.12)]">
-                      <div className="relative w-full h-full">
-                        {[...Array(12)].map((_, i) => {
-                          const angle = i * 30;
+                        {[...Array(60)].map((_, i) => {
+                          const angle = i * 6;
+                          const isHour = i % 5 === 0;
+                          const isQuarter = i % 15 === 0;
                           const rad = (angle * Math.PI) / 180;
-                          const x = 50 + 35 * Math.sin(rad);
-                          const y = 50 - 35 * Math.cos(rad);
+                          const innerR = 42;
+                          const outerR = innerR + (isHour ? 14 : 7);
+                          const x1 = 50 + innerR * Math.sin(rad);
+                          const y1 = 50 - innerR * Math.cos(rad);
+                          const x2 = 50 + outerR * Math.sin(rad);
+                          const y2 = 50 - outerR * Math.cos(rad);
+                          if (isHour) {
+                            return (
+                              <div key={i} className="absolute rounded-full" style={{ left: `${x1}%`, top: `${y1}%`, width: '2.5px', height: '14px', background: 'linear-gradient(to bottom, rgba(255,255,255,0.85), rgba(180,185,195,0.45))', transform: 'translate(-50%, -50%) rotate(' + angle + 'deg)', transformOrigin: 'center center', boxShadow: '0 1px 2px rgba(0,0,0,0.3)' }} />
+                            );
+                          }
                           return (
                             <div
                               key={i}
-                              className="absolute w-px h-1.5 bg-gradient-to-t from-zinc-600 to-zinc-400 rounded-full"
+                              className="absolute rounded-full"
                               style={{
-                                left: `${x}%`,
-                                top: `${y}%`,
-                                transform: 'translate(-50%, -50%)',
+                                left: `${x1}%`,
+                                top: `${y1}%`,
+                                width: '1px',
+                                height: '7px',
+                                background: isQuarter ? 'rgba(255,255,255,0.45)' : 'rgba(200,205,215,0.3)',
+                                transform: 'translate(-50%, -50%) rotate(' + angle + 'deg)',
+                                transformOrigin: 'center center',
                               }}
                             />
                           );
                         })}
-                        <div
-                          className="absolute w-px h-6 bg-gradient-to-t from-[#C8102E] to-[#FF2D2D] rounded-full origin-bottom left-1/2 bottom-1/2 shadow-[0_0_4px_rgba(255,45,45,0.4)]"
-                          style={{ transform: `translateX(-50%) rotate(${smoothSecDegRef.current}deg)` }}
-                        />
-                        <div className="absolute w-2 h-2 bg-gradient-to-br from-[#C8102E] to-[#ff4545] rounded-full left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 shadow-[0_0_4px_rgba(200,16,46,0.5)]" />
-                      </div>
-                    </div>
-                  </div>
 
-                  <div className="mt-6 text-center">
-                    <div className="text-4xl font-black font-mono text-white tracking-[0.2em] drop-shadow-[0_0_8px_rgba(255,255,255,0.1)]">
-                      {now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                    </div>
-                    <div className="mt-2 flex flex-col items-center gap-0.5">
-                      <div className="text-[11px] font-mono font-bold text-red-400 uppercase tracking-widest">
-                        {now.toLocaleDateString(undefined, { weekday: 'long' })}
+                       {/* Date window at 3 o'clock */}
+                       <div className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 w-12 sm:w-14 h-8 sm:h-9 rounded-lg flex items-center justify-center" style={{
+                         background: 'linear-gradient(180deg, rgba(195,200,210,0.95) 0%, rgba(155,160,170,0.9) 100%)',
+                         border: '1.5px solid rgba(255,255,255,0.3)',
+                         boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.35), inset 0 -1px 2px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.06)'
+                       }}>
+                        <span className="text-[10px] sm:text-xs font-black font-mono tracking-wider" style={{ color: 'rgba(25,30,40,0.95)', textShadow: '0 1px 0 rgba(255,255,255,0.25)' }}>
+                          {now.toLocaleDateString(undefined, { day: '2-digit', month: 'short' })}
+                        </span>
                       </div>
-                      <div className="text-[11px] font-mono text-zinc-400 tracking-wide">
-                        {now.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
-                      </div>
-                    </div>
-                  </div>
-               </div>
 
-               {/* WORLD CLOCKS GRID */}
-               <div className="space-y-5">
-                 <div className="flex items-center justify-between">
+                      <div
+                       className="absolute left-1/2 bottom-1/2 -translate-x-1/2 origin-bottom rounded-full"
+                       style={{
+                         transform: `translateX(-50%) rotate(${smoothHourDegRef.current}deg)`,
+                         width: '4px',
+                         height: '60px',
+                         background: 'linear-gradient(to top, rgba(75,80,90,0.95), rgba(135,140,150,0.9))',
+                         borderRadius: '4px',
+                         boxShadow: '0 2px 8px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.06)'
+                       }}
+                     >
+                       <div className="w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-b-[8px] border-b-gray-400 mx-auto mt-[-2px]" style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.3))' }} />
+                     </div>
+
+                     <div
+                       className="absolute left-1/2 bottom-1/2 -translate-x-1/2 origin-bottom rounded-full"
+                       style={{
+                         transform: `translateX(-50%) rotate(${smoothMinDegRef.current}deg)`,
+                         width: '3px',
+                         height: '80px',
+                         background: 'linear-gradient(to top, rgba(85,90,100,0.95), rgba(145,150,160,0.9))',
+                         borderRadius: '3px',
+                         boxShadow: '0 2px 8px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.05)'
+                       }}
+                     >
+                       <div className="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-b-[6px] border-b-gray-400 mx-auto mt-[-2px]" style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.3))' }} />
+                     </div>
+
+                     <div
+                       className="absolute left-1/2 bottom-1/2 -translate-x-1/2 origin-bottom rounded-full"
+                       style={{
+                         transform: `translateX(-50%) rotate(${smoothSecDegRef.current}deg)`,
+                         width: '2px',
+                         height: '88px',
+                         background: 'linear-gradient(to top, rgba(200,16,46,0.88), rgba(255,80,80,0.82))',
+                         borderRadius: '2px',
+                         boxShadow: '0 0 8px rgba(200,16,46,0.4), 0 0 0 1px rgba(255,255,255,0.08)'
+                       }}
+                     >
+                       <div className="w-0 h-0 border-l-[3px] border-l-transparent border-r-[3px] border-r-transparent border-b-[7px] border-b-red-400 mx-auto mt-[-3px]" style={{ filter: 'drop-shadow(0 0 2px rgba(200,16,46,0.45))' }} />
+                       <div className="absolute top-full left-1/2 -translate-x-1/2" style={{ width: '2px', height: '5px', background: 'linear-gradient(to bottom, rgba(200,16,46,0.55), transparent)', borderRadius: '1px' }} />
+                     </div>
+
+                     <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" style={{
+                       width: '10px',
+                       height: '10px',
+                       borderRadius: '50%',
+                       background: 'linear-gradient(145deg, rgba(200,16,46,0.88), rgba(139,0,0,0.88))',
+                       border: '2px solid rgba(255,255,255,0.22)',
+                       boxShadow: '0 0 0 3px rgba(0,0,0,0.22), 0 2px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.18)'
+                     }} />
+                   </div>
+
+                   <div className="mt-6 text-center">
+                     <div className="text-4xl font-black font-mono tracking-[0.2em]" style={{ color: 'rgba(225,228,232,0.95)', textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
+                       {now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                     </div>
+                     <div className="mt-2 flex flex-col items-center gap-0.5">
+                       <div className="text-[11px] font-mono font-bold uppercase tracking-widest" style={{ color: 'rgba(200,16,46,0.92)', textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>
+                         {now.toLocaleDateString(undefined, { weekday: 'long' })}
+                       </div>
+                       <div className="text-[11px] font-mono tracking-wide" style={{ color: 'rgba(155,160,170,0.8)' }}>
+                         {now.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                       </div>
+                     </div>
+                   </div>
+                </div>
+
+                 {/* WORLD CLOCKS GRID */}
+                 <div className="space-y-5">
+                  <div className="flex items-center justify-between">
                    <h4 className="text-xs font-bold font-mono text-zinc-400 uppercase tracking-wider flex items-center gap-2">
                      <Globe className="w-4 h-4 text-red-400" />
                      <span>World Clock Matrix</span>

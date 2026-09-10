@@ -10,6 +10,12 @@ import { useApp } from '../../context/AppContext';
 import { parsePlaneFilename } from '../../utils/planePicsParser';
 import {
   computeLiveStats,
+  computeSpotterRanking,
+  computeSpotterScore,
+  computeLocationRankings,
+  getSpotterTier,
+  SPOTTER_TIERS,
+  SpotterRankingItem,
 } from '../../data/planePicsData';
 import { PlanePhoto } from '../../types';
 import { encryptionService } from '../../utils/crypto';
@@ -27,6 +33,8 @@ import {
   AlertTriangle,
   Sparkles,
   ShieldCheck,
+  TrendingUp,
+  TrendingDown,
   Calendar,
   Layers,
   Flame,
@@ -47,6 +55,7 @@ import {
   Download,
   Grid3x3,
   List,
+  Play,
   Palette,
   Plane,
   FolderOpen,
@@ -58,6 +67,9 @@ import {
   Bookmark,
   Star,
   FileText,
+  ExternalLink,
+  QrCode,
+  MapPin,
 } from 'lucide-react';
 
 const generateThumbnail = (file: File, maxWidth = 120, maxHeight = 90): Promise<string> => {
@@ -153,8 +165,8 @@ export const MyPlanePicsSuite: React.FC = () => {
     return results;
   }, [user]);
 
-  // Active Tab: album, parser, ranking, collections, liveries
-  const [activeTab, setActiveTab] = useState<'album' | 'parser' | 'ranking' | 'collections' | 'liveries'>('album');
+  // Active Tab: album, parser, ranking, collections, liveries, stats, albums, slideshow, compare
+  const [activeTab, setActiveTab] = useState<'album' | 'parser' | 'ranking' | 'collections' | 'liveries' | 'stats' | 'albums' | 'slideshow' | 'compare'>('album');
   const [expandedAirline, setExpandedAirline] = useState<string | null>(null);
   const [expandedAircraft, setExpandedAircraft] = useState<string | null>(null);
 
@@ -210,6 +222,7 @@ export const MyPlanePicsSuite: React.FC = () => {
 
   // Batch Edit State
   const [showBatchEdit, setShowBatchEdit] = useState(false);
+  const [showBatchActions, setShowBatchActions] = useState(false);
   const [batchAirline, setBatchAirline] = useState('');
   const [batchLocation, setBatchLocation] = useState('');
   const [batchRating, setBatchRating] = useState<number | null>(null);
@@ -221,6 +234,31 @@ export const MyPlanePicsSuite: React.FC = () => {
   // Photo Notes Edit State
   const [editingNotesForId, setEditingNotesForId] = useState<string | null>(null);
   const [notesDraft, setNotesDraft] = useState('');
+
+  // Extras State
+  const [ratings, setRatings] = useState<Record<string, number>>({});
+  const [photoTags, setPhotoTags] = useState<Record<string, string[]>>({});
+  const [albums, setAlbums] = useState<Record<string, string[]>>({});
+  const [activeAlbum, setActiveAlbum] = useState<string | null>(null);
+  const [showAlbumModal, setShowAlbumModal] = useState(false);
+  const [newAlbumName, setNewAlbumName] = useState('');
+  const [slideshowIds, setSlideshowIds] = useState<string[]>([]);
+  const [showSlideshow, setShowSlideshow] = useState(false);
+  const [slideshowIndex, setSlideshowIndex] = useState(0);
+  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [showCompare, setShowCompare] = useState(false);
+  const [editingMetadataId, setEditingMetadataId] = useState<string | null>(null);
+  const [metadataDraft, setMetadataDraft] = useState({ registration: '', airline: '', aircraftModel: '', specialLivery: '', location: '', notes: '' });
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareTarget, setShareTarget] = useState<PlanePhoto | null>(null);
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [qrTarget, setQrTarget] = useState<PlanePhoto | null>(null);
+  const [advancedFilters, setAdvancedFilters] = useState({ minRating: 0, hasNotes: false, hasTags: false, dateFrom: '', dateTo: '' });
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [showStats, setShowStats] = useState(false);
+  const [showDuplicates, setShowDuplicates] = useState(false);
+  const [showMapView, setShowMapView] = useState(false);
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
 
   // Paging state
   const [page, setPage] = useState(0);
@@ -1183,18 +1221,66 @@ export const MyPlanePicsSuite: React.FC = () => {
               <span>Collections</span>
             </button>
 
-            <button
-              onClick={() => setActiveTab('liveries')}
-              className={`skeuo-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${
-                activeTab === 'liveries'
-                  ? 'bg-gradient-to-r from-[#C8102E] to-red-600 text-black shadow-[0_4px_15px_rgba(255,95,31,0.4)] border border-white/20'
-                  : 'text-slate-300 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              <Palette className="w-3.5 h-3.5" />
-              <span>Liveries</span>
-            </button>
-          </div>
+             <button
+               onClick={() => setActiveTab('liveries')}
+               className={`skeuo-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${
+                 activeTab === 'liveries'
+                   ? 'bg-gradient-to-r from-[#C8102E] to-red-600 text-black shadow-[0_4px_15px_rgba(255,95,31,0.4)] border border-white/20'
+                   : 'text-slate-300 hover:text-white hover:bg-white/10'
+               }`}
+             >
+               <Palette className="w-3.5 h-3.5" />
+               <span>Liveries</span>
+             </button>
+
+             <button
+               onClick={() => setActiveTab('stats')}
+               className={`skeuo-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${
+                 activeTab === 'stats'
+                   ? 'bg-gradient-to-r from-[#C8102E] to-red-600 text-black shadow-[0_4px_15px_rgba(255,95,31,0.4)] border border-white/20'
+                   : 'text-slate-300 hover:text-white hover:bg-white/10'
+               }`}
+             >
+               <BarChart3 className="w-3.5 h-3.5" />
+               <span>Stats</span>
+             </button>
+
+             <button
+               onClick={() => setActiveTab('albums')}
+               className={`skeuo-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${
+                 activeTab === 'albums'
+                   ? 'bg-gradient-to-r from-[#C8102E] to-red-600 text-black shadow-[0_4px_15px_rgba(255,95,31,0.4)] border border-white/20'
+                   : 'text-slate-300 hover:text-white hover:bg-white/10'
+               }`}
+             >
+               <FolderOpen className="w-3.5 h-3.5" />
+               <span>Albums</span>
+             </button>
+
+             <button
+               onClick={() => setActiveTab('slideshow')}
+               className={`skeuo-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${
+                 activeTab === 'slideshow'
+                   ? 'bg-gradient-to-r from-[#C8102E] to-red-600 text-black shadow-[0_4px_15px_rgba(255,95,31,0.4)] border border-white/20'
+                   : 'text-slate-300 hover:text-white hover:bg-white/10'
+               }`}
+             >
+               <Play className="w-3.5 h-3.5" />
+               <span>Slideshow</span>
+             </button>
+
+             <button
+               onClick={() => setActiveTab('compare')}
+               className={`skeuo-btn flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all shrink-0 cursor-pointer ${
+                 activeTab === 'compare'
+                   ? 'bg-gradient-to-r from-[#C8102E] to-red-600 text-black shadow-[0_4px_15px_rgba(255,95,31,0.4)] border border-white/20'
+                   : 'text-slate-300 hover:text-white hover:bg-white/10'
+               }`}
+             >
+               <Copy className="w-3.5 h-3.5" />
+               <span>Compare</span>
+             </button>
+           </div>
         </div>
       </div>
 
@@ -1260,11 +1346,11 @@ export const MyPlanePicsSuite: React.FC = () => {
          </div>
        )}
 
-      {/* TAB 1: ALBUM VAULT */}
-      {activeTab === 'album' && (
-        <div className="space-y-6">
-           {/* Spotter Profile Summary Card */}
-           <div className="skeuo-panel p-5">
+       {/* TAB 1: ALBUM VAULT */}
+       {activeTab === 'album' && (
+         <div className="space-y-6">
+            {/* Spotter Profile Summary Card */}
+            <div className="liquid-glass p-5">
 
             <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4">
@@ -1298,8 +1384,8 @@ export const MyPlanePicsSuite: React.FC = () => {
             </div>
           </div>
 
-           {/* Action Bar & Search Bar */}
-           <div className="skeuo-panel p-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            {/* Action Bar & Search Bar */}
+            <div className="liquid-glass p-4 flex flex-col md:flex-row items-center justify-between gap-4">
             {/* Search Input */}
             <div className="relative w-full md:w-80">
               <Search className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
@@ -1376,19 +1462,19 @@ export const MyPlanePicsSuite: React.FC = () => {
               </div>
 
                <div className="flex items-center gap-1 bg-slate-950/80 backdrop-blur-xl border border-white/10 rounded-xl p-0.5 ">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-1.5 rounded-lg transition-all cursor-pointer ${viewMode === 'grid' ? 'bg-[#C8102E] text-black' : 'text-slate-400 hover:text-white'}`}
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-1.5 rounded-lg transition-all cursor-pointer ${viewMode === 'list' ? 'bg-[#C8102E] text-black' : 'text-slate-400 hover:text-white'}`}
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-                </button>
-              </div>
+                 <button
+                   onClick={() => setViewMode('grid')}
+                   className={`liquid-glass-btn p-1.5 rounded-lg transition-all cursor-pointer ${viewMode === 'grid' ? 'bg-[#C8102E] text-black' : 'text-slate-400 hover:text-white'}`}
+                 >
+                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                 </button>
+                 <button
+                   onClick={() => setViewMode('list')}
+                   className={`liquid-glass-btn p-1.5 rounded-lg transition-all cursor-pointer ${viewMode === 'list' ? 'bg-[#C8102E] text-black' : 'text-slate-400 hover:text-white'}`}
+                 >
+                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+                 </button>
+               </div>
 
               {selectedIds.size > 0 && (
                 <button
@@ -1458,28 +1544,28 @@ export const MyPlanePicsSuite: React.FC = () => {
               <p className="text-sm font-bold text-slate-400">{t.noPhotosMatchFilters}</p>
               <p className="text-xs text-slate-500 mt-1">{t.tryAdjustingSearchOrUpload}</p>
             </div>
-           ) : viewMode === 'grid' ? (
-             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-               {paginatedPhotos.map((photo) => {
-                 const isSelected = selectedIds.has(photo.id);
-                 return (
-                   <div
-                     key={photo.id}
-                     onClick={(e) => {
-                       if (e.shiftKey || e.ctrlKey || e.metaKey) {
-                         e.preventDefault();
-                         toggleSelect(photo.id);
-                       } else {
-                         setLightboxMedia(photo);
-                         setIsLightboxOpen(true);
-                       }
-                     }}
-                     onContextMenu={(e) => {
-                       e.preventDefault();
-                       toggleSelect(photo.id);
-                     }}
-                     className={`skeuo-panel relative group rounded-[28px] overflow-hidden bg-slate-900/60 backdrop-blur-xl border transition-all duration-300 cursor-pointer flex flex-col justify-between hover:-translate-y-1.5 shadow-xl hover:shadow-[0_18px_36px_rgba(0,0,0,0.55)] ${isSelected ? 'border-[#C8102E] shadow-[0_0_24px_rgba(255,95,31,0.35)]' : 'border-white/15 hover:border-white/30'}`}
-                   >
+            ) : viewMode === 'grid' ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                {paginatedPhotos.map((photo) => {
+                  const isSelected = selectedIds.has(photo.id);
+                  return (
+                    <div
+                      key={photo.id}
+                      onClick={(e) => {
+                        if (e.shiftKey || e.ctrlKey || e.metaKey) {
+                          e.preventDefault();
+                          toggleSelect(photo.id);
+                        } else {
+                          setLightboxMedia(photo);
+                          setIsLightboxOpen(true);
+                        }
+                      }}
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        toggleSelect(photo.id);
+                      }}
+                      className={`liquid-glass relative group rounded-[28px] overflow-hidden bg-white/5 border transition-all duration-300 cursor-pointer flex flex-col justify-between hover:-translate-y-1.5 shadow-xl hover:shadow-[0_18px_36px_rgba(0,0,0,0.55)] ${isSelected ? 'border-[#C8102E] shadow-[0_0_24px_rgba(255,95,31,0.35)]' : 'border-white/15 hover:border-white/30'}`}
+                    >
                     {/* Animated Gradient Border on Hover */}
                     <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[#C8102E]/0 via-red-600/0 to-red-500/0 group-hover:from-[#C8102E]/30 group-hover:via-red-600/20 group-hover:to-red-500/30 transition-all duration-500 pointer-events-none z-0" />
 
@@ -1593,7 +1679,7 @@ export const MyPlanePicsSuite: React.FC = () => {
               {paginatedPhotos.map((photo) => {
                 const isSelected = selectedIds.has(photo.id);
                 return (
-                  <div
+                   <div
                     key={photo.id}
                     onClick={(e) => {
                       if (e.shiftKey || e.ctrlKey || e.metaKey) {
@@ -1608,7 +1694,7 @@ export const MyPlanePicsSuite: React.FC = () => {
                       e.preventDefault();
                       toggleSelect(photo.id);
                     }}
-                     className={`skeuo-panel flex items-center gap-4 p-3 rounded-2xl bg-slate-900/60 backdrop-blur-xl border transition-all cursor-pointer hover:bg-slate-800/60 ${isSelected ? 'border-[#C8102E] shadow-[0_0_18px_rgba(255,95,31,0.25)]' : 'border-white/10'}`}
+                     className={`liquid-glass flex items-center gap-4 p-3 rounded-2xl bg-white/5 border transition-all cursor-pointer hover:bg-white/10 ${isSelected ? 'border-[#C8102E] shadow-[0_0_18px_rgba(255,95,31,0.25)]' : 'border-white/10'}`}
                   >
                     <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-black shrink-0">
                       <img
@@ -1829,9 +1915,9 @@ export const MyPlanePicsSuite: React.FC = () => {
               </div>
               <div>
                 <p className="text-[10px] text-slate-400 uppercase tracking-widest font-mono font-bold">
-                  Vault Analytics
+                  Spotter Rankings
                 </p>
-                <h3 className="text-base font-black text-white">Spotter Statistics & Trends</h3>
+                <h3 className="text-base font-black text-white">Aviation Spotter Leaderboard</h3>
               </div>
             </div>
             <span className="text-[10px] font-mono text-red-300 px-3 py-1 bg-slate-950 rounded-full border border-red-500/30 font-bold flex items-center gap-1">
@@ -1839,41 +1925,112 @@ export const MyPlanePicsSuite: React.FC = () => {
             </span>
           </div>
 
-           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-             <div className="skeuo-panel bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-5 shadow-2xl ">
-               <p className="text-[10px] text-slate-400 uppercase tracking-widest font-mono font-bold">{t.totalVaultedPhotos}</p>
-               <p className="text-3xl font-black text-[#C8102E] mt-1 font-mono">{liveStats.totalPhotos}</p>
-             </div>
+          {/* Spotter Tier Card */}
+          {(() => {
+            const currentTier = getSpotterTier(myPlanePics);
+            const score = computeSpotterScore(myPlanePics);
+            const nextTierIndex = SPOTTER_TIERS.findIndex(t => t.tier === currentTier.tier) + 1;
+            const nextTier = nextTierIndex < SPOTTER_TIERS.length ? SPOTTER_TIERS[nextTierIndex] : null;
+            const progress = nextTier
+              ? Math.round(((score - currentTier.minScore) / (nextTier.minScore - currentTier.minScore)) * 100)
+              : 100;
 
-             <div className="skeuo-panel bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-5 shadow-2xl ">
-               <p className="text-[10px] text-slate-400 uppercase tracking-widest font-mono font-bold">{t.uniqueRegistrations}</p>
-               <p className="text-3xl font-black text-red-400 mt-1 font-mono">{liveStats.uniqueRegistrations}</p>
-             </div>
+            const stats = {
+              media: myPlanePics.length,
+              airlines: new Set(myPlanePics.map(p => p.airline).filter(Boolean)).size,
+              registrations: new Set(myPlanePics.map(p => p.registration).filter(Boolean)).size,
+              liveries: new Set(myPlanePics.map(p => p.specialLivery).filter(Boolean)).size,
+              aircraft: new Set(myPlanePics.map(p => p.aircraftModel).filter(Boolean)).size,
+            };
 
-             <div className="skeuo-panel bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-5 shadow-2xl ">
-               <p className="text-[10px] text-slate-400 uppercase tracking-widest font-mono font-bold">{t.militaryRangeFormats}</p>
-               <p className="text-3xl font-black text-red-400 mt-1 font-mono">{liveStats.rangeFormatCount}</p>
-             </div>
+            return (
+              <div className="liquid-glass p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="text-4xl">{currentTier.icon}</div>
+                    <div>
+                      <p className="text-xs text-slate-400 uppercase tracking-widest font-mono font-bold">Your Tier</p>
+                      <p className={`text-xl font-black ${currentTier.color}`}>{currentTier.label}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-slate-400 font-mono">Score: {score}</p>
+                    {nextTier && (
+                      <div className="w-48 mt-2">
+                        <div className="flex justify-between text-[10px] text-slate-400 font-mono mb-1">
+                          <span>{currentTier.label}</span>
+                          <span>{nextTier.label}</span>
+                        </div>
+                        <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-white/10">
+                          <div
+                            className="h-full bg-gradient-to-r from-[#C8102E] to-red-500 rounded-full transition-all"
+                            style={{ width: `${Math.min(progress, 100)}%` }}
+                          ></div>
+                        </div>
+                        <p className="text-[10px] text-slate-500 font-mono mt-1">{nextTier.minScore - score} pts to {nextTier.label}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
 
-             <div className="skeuo-panel bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-5 shadow-2xl ">
-               <p className="text-[10px] text-slate-400 uppercase tracking-widest font-mono font-bold">{t.autoCorrectedMatches}</p>
-               <p className="text-3xl font-black text-red-400 mt-1 font-mono">{liveStats.autoCorrectedCount}</p>
-             </div>
-           </div>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                  <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+                    <div className="text-lg font-black text-white">{stats.media}</div>
+                    <div className="text-[10px] text-slate-400 font-mono">Media</div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+                    <div className="text-lg font-black text-[#C8102E]">{stats.airlines}</div>
+                    <div className="text-[10px] text-slate-400 font-mono">Airlines</div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+                    <div className="text-lg font-black text-red-400">{stats.registrations}</div>
+                    <div className="text-[10px] text-slate-400 font-mono">Regs</div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+                    <div className="text-lg font-black text-amber-400">{stats.liveries}</div>
+                    <div className="text-[10px] text-slate-400 font-mono">Liveries</div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+                    <div className="text-lg font-black text-emerald-400">{stats.aircraft}</div>
+                    <div className="text-[10px] text-slate-400 font-mono">Aircraft</div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-             <div className="skeuo-panel bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-6 shadow-2xl space-y-4 ">
+          {/* Tier Progression Table */}
+          <div className="liquid-glass p-4 space-y-3">
+            <h4 className="text-xs font-black text-white uppercase tracking-widest">Tier Progression</h4>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+              {SPOTTER_TIERS.map((tier) => {
+                const isCurrentTier = getSpotterTier(myPlanePics).tier === tier.tier;
+                return (
+                  <div key={tier.tier} className={`p-3 rounded-xl border text-center ${isCurrentTier ? 'bg-red-500/20 border-red-500/40' : 'bg-white/5 border-white/10'}`}>
+                    <div className="text-2xl mb-1">{tier.icon}</div>
+                    <div className={`text-xs font-black ${isCurrentTier ? tier.color : 'text-slate-300'}`}>{tier.label}</div>
+                    <div className="text-[10px] text-slate-500 font-mono">{tier.minScore}-{tier.maxScore === Infinity ? '∞' : tier.maxScore} pts</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Rankings by Category */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Airlines */}
+            <div className="skeuo-panel bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-6 shadow-2xl space-y-4">
               <h4 className="text-xs font-black text-slate-300 uppercase tracking-widest font-mono">
-                Top Airlines in Vault
+                Top Airlines
               </h4>
               <div className="space-y-3 font-mono text-xs">
-                {liveStats.topAirlines.map((item) => (
+                {liveStats.topAirlines.slice(0, 5).map((item) => (
                   <div key={item.airline} className="space-y-1">
                     <div className="flex justify-between text-slate-200">
-                      <span>{item.airline}</span>
-                      <span className="font-extrabold text-[#C8102E]">{item.count} photos</span>
+                      <span className="truncate">{item.airline}</span>
+                      <span className="font-extrabold text-[#C8102E]">{item.count}</span>
                     </div>
-                    <div className="w-full h-2.5 bg-slate-950 rounded-full overflow-hidden border border-white/10">
+                    <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-white/10">
                       <div
                         className="h-full bg-gradient-to-r from-[#C8102E] to-red-500 rounded-full"
                         style={{ width: `${(item.count / (liveStats.totalPhotos || 1)) * 100}%` }}
@@ -1884,21 +2041,45 @@ export const MyPlanePicsSuite: React.FC = () => {
               </div>
             </div>
 
-            <div className="skeuo-panel bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-6 shadow-2xl space-y-4 ">
-               <h4 className="text-xs font-black text-slate-300 uppercase tracking-widest font-mono">
-                 Monthly Spotting Trends
-               </h4>
+            {/* Aircraft Models */}
+            <div className="skeuo-panel bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-6 shadow-2xl space-y-4">
+              <h4 className="text-xs font-black text-slate-300 uppercase tracking-widest font-mono">
+                Top Aircraft Models
+              </h4>
               <div className="space-y-3 font-mono text-xs">
-                {liveStats.monthlyTrends.map((item) => (
-                  <div key={item.month} className="space-y-1">
+                {liveStats.topModels.slice(0, 5).map((item) => (
+                  <div key={item.model} className="space-y-1">
                     <div className="flex justify-between text-slate-200">
-                      <span>{item.month}</span>
-                      <span className="font-extrabold text-red-400">{item.photos} photos</span>
+                      <span className="truncate">{item.model}</span>
+                      <span className="font-extrabold text-red-400">{item.count}</span>
                     </div>
-                    <div className="w-full h-2.5 bg-slate-950 rounded-full overflow-hidden border border-white/10">
+                    <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-white/10">
                       <div
-                        className="h-full bg-gradient-to-r from-red-500 to-red-500 rounded-full"
-                        style={{ width: `${(item.photos / (liveStats.totalPhotos || 1)) * 100}%` }}
+                        className="h-full bg-gradient-to-r from-red-600 to-red-400 rounded-full"
+                        style={{ width: `${(item.count / (liveStats.totalPhotos || 1)) * 100}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Locations */}
+            <div className="skeuo-panel bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-6 shadow-2xl space-y-4">
+              <h4 className="text-xs font-black text-slate-300 uppercase tracking-widest font-mono">
+                Top Locations
+              </h4>
+              <div className="space-y-3 font-mono text-xs">
+                {computeLocationRankings(myPlanePics).slice(0, 5).map((item) => (
+                  <div key={item.location} className="space-y-1">
+                    <div className="flex justify-between text-slate-200">
+                      <span className="truncate">{item.location}</span>
+                      <span className="font-extrabold text-[#C8102E]">{item.photoCount}</span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-white/10">
+                      <div
+                        className="h-full bg-gradient-to-r from-red-500 to-orange-400 rounded-full"
+                        style={{ width: `${item.percentage}%` }}
                       ></div>
                     </div>
                   </div>
@@ -1909,96 +2090,111 @@ export const MyPlanePicsSuite: React.FC = () => {
         </div>
       )}
 
-       {/* FULLSCREEN LIGHTBOX MODAL */}
-        {isLightboxOpen && lightboxMedia && (
-          <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-2 sm:p-4" onClick={() => setIsLightboxOpen(false)}>
-            <div className="relative w-full max-w-6xl skeuo-panel rounded-[28px] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+      {/* LIGHTBOX POPUP MODAL */}
+      {isLightboxOpen && lightboxMedia && (
+        <div className="fixed inset-0 z-50 bg-black/98 backdrop-blur-2xl flex items-center justify-center p-0 sm:p-4 animate-fadeIn" onClick={() => setIsLightboxOpen(false)}>
+          <div className="relative w-full h-full sm:h-[85vh] sm:max-w-6xl liquid-glass rounded-none sm:rounded-[28px] overflow-hidden shadow-2xl border-0 sm:border border-white/20 animate-scaleIn" onClick={(e) => e.stopPropagation()}>
 
-              <div className="flex items-center justify-between p-4 border-b border-white/10">
-                <div className="flex items-center gap-3 font-mono">
-                  <button
-                    onClick={() => {
-                      const currentIndex = sortedPhotos.findIndex(p => p.id === lightboxMedia.id);
-                      const prevIndex = (currentIndex - 1 + sortedPhotos.length) % sortedPhotos.length;
-                      if (sortedPhotos[prevIndex]) {
-                        setLightboxMedia(sortedPhotos[prevIndex]);
-                      }
-                    }}
-                    className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer"
-                  >
-                    <ArrowLeft className="w-5 h-5" />
-                  </button>
-                  <div>
-                    <span className="text-lg font-black text-[#C8102E]">{lightboxMedia.registration}</span>
-                    <span className="text-xs text-slate-400 font-bold block">• {lightboxMedia.filename}</span>
-                  </div>
-                  <button
-                    onClick={() => {
-                      const currentIndex = sortedPhotos.findIndex(p => p.id === lightboxMedia.id);
-                      const nextIndex = (currentIndex + 1) % sortedPhotos.length;
-                      if (sortedPhotos[nextIndex]) {
-                        setLightboxMedia(sortedPhotos[nextIndex]);
-                      }
-                    }}
-                    className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer"
-                  >
-                    <ArrowRight className="w-5 h-5" />
-                  </button>
-                </div>
+            <button
+              onClick={() => setIsLightboxOpen(false)}
+              className="absolute top-3 right-3 z-20 p-2 bg-black/50 hover:bg-black/80 text-white rounded-full transition-colors cursor-pointer backdrop-blur"
+            >
+              <X className="w-5 h-5" />
+            </button>
 
+            <div className="relative h-full w-full flex flex-col sm:flex-row bg-black">
+              <div className="flex-1 relative bg-black flex items-center justify-center min-h-0">
+                {lightboxMedia.mediaType === 'video' && lightboxMedia.videoUrl ? (
+                  <video
+                    src={lightboxMedia.videoUrl}
+                    controls
+                    autoPlay
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <img
+                    src={lightboxMedia.imageUrl}
+                    alt={lightboxMedia.registration}
+                    className="w-full h-full object-contain"
+                  />
+                )}
                 <button
-                  onClick={() => setIsLightboxOpen(false)}
-                  className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer"
+                  onClick={() => {
+                    const currentIndex = sortedPhotos.findIndex(p => p.id === lightboxMedia.id);
+                    const prevIndex = (currentIndex - 1 + sortedPhotos.length) % sortedPhotos.length;
+                    if (sortedPhotos[prevIndex]) {
+                      setLightboxMedia(sortedPhotos[prevIndex]);
+                    }
+                  }}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 p-2 bg-black/50 hover:bg-black/80 text-white rounded-full transition-colors cursor-pointer backdrop-blur"
                 >
-                  <X className="w-5 h-5" />
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => {
+                    const currentIndex = sortedPhotos.findIndex(p => p.id === lightboxMedia.id);
+                    const nextIndex = (currentIndex + 1) % sortedPhotos.length;
+                    if (sortedPhotos[nextIndex]) {
+                      setLightboxMedia(sortedPhotos[nextIndex]);
+                    }
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-black/50 hover:bg-black/80 text-white rounded-full transition-colors cursor-pointer backdrop-blur"
+                >
+                  <ArrowRight className="w-5 h-5" />
                 </button>
               </div>
 
-               <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 flex-1 overflow-hidden">
-                 <div className="lg:col-span-2 relative bg-black flex items-center justify-center">
-                   {lightboxMedia.mediaType === 'video' && lightboxMedia.videoUrl ? (
-                     <video
-                       src={lightboxMedia.videoUrl}
-                       controls
-                       autoPlay
-                       className="w-full h-full object-contain"
+              <div className="sm:w-80 bg-slate-900/95 backdrop-blur-2xl border-t sm:border-t-0 sm:border-l border-white/10 p-4 space-y-3 overflow-y-auto">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-black text-[#C8102E]">{lightboxMedia.registration}</span>
+                  <span className="text-xs text-slate-400 font-bold">• {lightboxMedia.filename}</span>
+                </div>
 
-                     />
-                   ) : (
-                     <img
-                       src={lightboxMedia.imageUrl}
-                       alt={lightboxMedia.registration}
-                       className="w-full h-full object-contain"
-
-                     />
-                   )}
-                 </div>
-
-                  <div className="space-y-4 text-xs font-mono p-4 overflow-y-auto h-full">
-                   <div className="p-4 rounded-xl bg-slate-950 border border-white/10 space-y-3">
-                     <h4 className="text-xs font-black text-[#C8102E] uppercase tracking-wider">Photo Metadata</h4>
-                    <div className="space-y-2 text-slate-300">
-                     <div className="flex justify-between"><span>Registration</span><span className="text-white font-bold">{lightboxMedia.registration}</span></div>
-                     <div className="flex justify-between"><span>Airline</span><span className="text-white font-bold">{lightboxMedia.airline || 'N/A'}</span></div>
-                     <div className="flex justify-between"><span>Model</span><span className="text-white font-bold">{lightboxMedia.aircraftModel || 'N/A'}</span></div>
-                     <div className="flex justify-between"><span>Location</span><span className="text-white font-bold">{lightboxMedia.location || 'N/A'}</span></div>
-                     <div className="flex justify-between"><span>Livery</span><span className="text-[#C8102E] font-bold">{lightboxMedia.specialLivery}</span></div>
-                     <div className="flex justify-between"><span>Date</span><span className="text-white font-bold">{lightboxMedia.formattedDate || lightboxMedia.dateCaptured || 'N/A'}</span></div>
-                     <div className="flex justify-between"><span>Format</span><span className="text-red-400 font-bold">{lightboxMedia.formatPattern}</span></div>
-                     <div className="flex justify-between"><span>Shot</span><span className="text-white font-bold">{lightboxMedia.shotNumber !== undefined ? `#${lightboxMedia.shotNumber}` : 'Single'}</span></div>
-                     <div className="flex justify-between"><span>Type</span><span className="text-white font-bold">{lightboxMedia.mediaType === 'video' ? t.video : 'Image'}</span></div>
-                    </div>
+                <div className="space-y-2 text-xs font-mono">
+                  <div className="flex justify-between p-2 rounded-lg bg-white/5 border border-white/10">
+                    <span className="text-slate-400">Airline</span>
+                    <span className="text-white font-bold">{lightboxMedia.airline || 'N/A'}</span>
+                  </div>
+                  <div className="flex justify-between p-2 rounded-lg bg-white/5 border border-white/10">
+                    <span className="text-slate-400">Model</span>
+                    <span className="text-white font-bold">{lightboxMedia.aircraftModel || 'N/A'}</span>
+                  </div>
+                  <div className="flex justify-between p-2 rounded-lg bg-white/5 border border-white/10">
+                    <span className="text-slate-400">Location</span>
+                    <span className="text-white font-bold">{lightboxMedia.location || 'N/A'}</span>
+                  </div>
+                  <div className="flex justify-between p-2 rounded-lg bg-white/5 border border-white/10">
+                    <span className="text-slate-400">Livery</span>
+                    <span className="text-[#C8102E] font-bold">{lightboxMedia.specialLivery}</span>
+                  </div>
+                  <div className="flex justify-between p-2 rounded-lg bg-white/5 border border-white/10">
+                    <span className="text-slate-400">Date</span>
+                    <span className="text-white font-bold">{lightboxMedia.formattedDate || lightboxMedia.dateCaptured || 'N/A'}</span>
+                  </div>
+                  <div className="flex justify-between p-2 rounded-lg bg-white/5 border border-white/10">
+                    <span className="text-slate-400">Format</span>
+                    <span className="text-red-400 font-bold">{lightboxMedia.formatPattern}</span>
+                  </div>
+                  <div className="flex justify-between p-2 rounded-lg bg-white/5 border border-white/10">
+                    <span className="text-slate-400">Shot</span>
+                    <span className="text-white font-bold">{lightboxMedia.shotNumber !== undefined ? `#${lightboxMedia.shotNumber}` : 'Single'}</span>
+                  </div>
+                  <div className="flex justify-between p-2 rounded-lg bg-white/5 border border-white/10">
+                    <span className="text-slate-400">Type</span>
+                    <span className="text-white font-bold">{lightboxMedia.mediaType === 'video' ? t.video : 'Image'}</span>
                   </div>
                 </div>
-             </div>
 
-             <div className="flex items-center justify-between text-xs font-mono text-slate-300 relative z-10 p-4 border-t border-white/10">
-               <div className="flex items-center gap-4">
-                 <span className="text-slate-400">Airline: <span className="skeuo-btn text-white font-bold">{lightboxMedia.airline || 'N/A'}</span></span>
-                 <span className="text-slate-400">Model: <span className="skeuo-btn text-white font-bold">{lightboxMedia.aircraftModel || 'N/A'}</span></span>
-               </div>
-               <span className="text-slate-400">Location: <span className="skeuo-btn text-white font-bold">{lightboxMedia.location || 'N/A'}</span></span>
-             </div>
+                <div className="flex flex-wrap gap-2">
+                  <button onClick={() => { toggleWatchlist(lightboxMedia.id); }} className="liquid-glass-btn px-3 py-2 text-xs font-bold">
+                    <Bookmark className="w-3.5 h-3.5" /> Watchlist
+                  </button>
+                  <button onClick={() => { setShareTarget(lightboxMedia); setShowShareModal(true); }} className="liquid-glass-btn px-3 py-2 text-xs font-bold">
+                    <Share2 className="w-3.5 h-3.5" /> Share
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -2240,7 +2436,231 @@ export const MyPlanePicsSuite: React.FC = () => {
         </div>
       )}
 
-      {/* COLLECTIONS TAB */}
+      {/* BATCH ACTIONS PANEL */}
+      {showBatchActions && selectedIds.size > 0 && (
+        <div className="liquid-glass p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-black text-white uppercase tracking-widest">Batch Actions ({selectedIds.size})</h4>
+            <button onClick={() => { setShowBatchActions(false); setSelectedIds(new Set()); }} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400"><X className="w-4 h-4" /></button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button onClick={() => { setShowBatchEdit(true); setShowBatchActions(false); }} className="liquid-glass-btn px-3 py-2 text-xs font-bold"><Edit3 className="w-3.5 h-3.5" /> Batch Edit</button>
+            <button onClick={() => { selectedIds.forEach(id => setRatings(p => ({ ...p, [id]: 5 }))); showToast('Rated', 'Selected photos rated 5 stars', 'success'); }} className="liquid-glass-btn px-3 py-2 text-xs font-bold"><Star className="w-3.5 h-3.5" /> Rate 5 Stars</button>
+            <button onClick={() => { selectedIds.forEach(id => { setPhotoTags(p => ({ ...p, [id]: ['favorite'] })); }); showToast('Tagged', 'Added favorite tag', 'success'); }} className="liquid-glass-btn px-3 py-2 text-xs font-bold"><Tag className="w-3.5 h-3.5" /> Tag Favorite</button>
+            <button onClick={() => { const blob = new Blob([Array.from(selectedIds).join('\n')], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'selected-ids.txt'; a.click(); URL.revokeObjectURL(url); showToast('Exported', 'Selected IDs exported', 'success'); }} className="liquid-glass-btn px-3 py-2 text-xs font-bold"><Download className="w-3.5 h-3.5" /> Export IDs</button>
+            <button onClick={() => { setSelectedIds(new Set()); setShowBatchActions(false); }} className="liquid-glass-btn px-3 py-2 text-xs font-bold text-slate-300">Clear</button>
+          </div>
+        </div>
+      )}
+
+      {/* ALBUM MODAL */}
+      {showAlbumModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+          <div className="liquid-glass p-6 space-y-4 w-full max-w-md">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-black text-white uppercase tracking-widest">Create Album</h4>
+              <button onClick={() => setShowAlbumModal(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400"><X className="w-4 h-4" /></button>
+            </div>
+            <input type="text" value={newAlbumName} onChange={(e) => setNewAlbumName(e.target.value)} placeholder="Album name..." className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-[#C8102E]" />
+            <div className="flex gap-2">
+              <button onClick={() => { if (!newAlbumName.trim()) return; setAlbums(p => ({ ...p, [newAlbumName.trim()]: [] })); setNewAlbumName(''); setShowAlbumModal(false); showToast('Created', `Album "${newAlbumName.trim()}" created`, 'success'); }} className="liquid-glass-btn px-4 py-2 text-xs font-bold">Create</button>
+              <button onClick={() => setShowAlbumModal(false)} className="liquid-glass-btn px-4 py-2 text-xs font-bold text-slate-300">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SLIDESHOW MODAL */}
+      {showSlideshow && slideshowIds.length > 0 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl">
+          <div className="relative w-full max-w-4xl">
+            <button onClick={() => setShowSlideshow(false)} className="absolute top-3 right-3 z-20 p-2 bg-black/60 hover:bg-black/80 text-white rounded-full"><X className="w-5 h-5" /></button>
+            <img src={myPlanePics.find(p => p.id === slideshowIds[slideshowIndex])?.imageUrl} alt="" className="w-full max-h-[70vh] object-contain rounded-2xl" />
+            <div className="flex items-center justify-between mt-4">
+              <button onClick={() => setSlideshowIndex(i => (i - 1 + slideshowIds.length) % slideshowIds.length)} className="liquid-glass-btn p-2"><ArrowLeft className="w-5 h-5" /></button>
+              <span className="text-xs text-slate-400 font-mono">{slideshowIndex + 1} / {slideshowIds.length}</span>
+              <button onClick={() => setSlideshowIndex(i => (i + 1) % slideshowIds.length)} className="liquid-glass-btn p-2"><ArrowRight className="w-5 h-5" /></button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* COMPARE MODAL */}
+      {showCompare && compareIds.length === 2 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+          <div className="liquid-glass p-6 space-y-4 w-full max-w-4xl">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-black text-white uppercase tracking-widest">Compare Photos</h4>
+              <button onClick={() => setShowCompare(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {compareIds.map(id => {
+                const photo = myPlanePics.find(p => p.id === id);
+                if (!photo) return null;
+                return (
+                  <div key={id} className="space-y-2">
+                    <img src={photo.imageUrl} alt={photo.registration} className="w-full h-64 object-cover rounded-xl" />
+                    <div className="text-xs font-mono text-white space-y-1">
+                      <p><strong>Reg:</strong> {photo.registration}</p>
+                      <p><strong>Airline:</strong> {photo.airline}</p>
+                      <p><strong>Model:</strong> {photo.aircraftModel}</p>
+                      <p><strong>Location:</strong> {photo.location}</p>
+                      <p><strong>Date:</strong> {photo.formattedDate}</p>
+                      <p><strong>Rating:</strong> {ratings[id] || 'N/A'} ★</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SHARE MODAL */}
+      {showShareModal && shareTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+          <div className="liquid-glass p-6 space-y-4 w-full max-w-md">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-black text-white uppercase tracking-widest">Share Photo</h4>
+              <button onClick={() => setShowShareModal(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="space-y-2">
+              <button onClick={() => { navigator.clipboard.writeText(shareTarget.imageUrl); showToast('Copied', 'Image URL copied', 'success'); }} className="liquid-glass-btn w-full px-4 py-2 text-xs font-bold"><Copy className="w-3.5 h-3.5" /> Copy Image URL</button>
+              <button onClick={() => { window.open(shareTarget.imageUrl, '_blank'); }} className="liquid-glass-btn w-full px-4 py-2 text-xs font-bold"><ExternalLink className="w-3.5 h-3.5" /> Open Original</button>
+              <button onClick={() => { setQrTarget(shareTarget); setShowQrModal(true); setShowShareModal(false); }} className="liquid-glass-btn w-full px-4 py-2 text-xs font-bold"><QrCode className="w-3.5 h-3.5" /> Generate QR Code</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* QR CODE MODAL */}
+      {showQrModal && qrTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+          <div className="liquid-glass p-6 space-y-4 w-full max-w-md text-center">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-black text-white uppercase tracking-widest">QR Code</h4>
+              <button onClick={() => setShowQrModal(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="p-4 bg-white rounded-xl inline-block">
+              <div className="w-48 h-48 bg-slate-900 flex items-center justify-center text-white text-xs font-mono">QR: {qrTarget.registration}</div>
+            </div>
+            <p className="text-[10px] text-slate-400 font-mono">{qrTarget.registration} - {qrTarget.airline}</p>
+          </div>
+        </div>
+      )}
+
+      {/* ADVANCED FILTERS PANEL */}
+      {showAdvancedFilters && (
+        <div className="liquid-glass p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-black text-white uppercase tracking-widest">Advanced Filters</h4>
+            <button onClick={() => setShowAdvancedFilters(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400"><X className="w-4 h-4" /></button>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-[10px] font-mono text-slate-400 block mb-1">Min Rating</label>
+              <select value={advancedFilters.minRating} onChange={(e) => setAdvancedFilters(p => ({ ...p, minRating: Number(e.target.value) }))} className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white">
+                <option value="0">Any</option>
+                {[1,2,3,4,5].map(n => <option key={n} value={n}>{n} ★</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-[10px] font-mono text-slate-400 block mb-1">Date From</label>
+              <input type="date" value={advancedFilters.dateFrom} onChange={(e) => setAdvancedFilters(p => ({ ...p, dateFrom: e.target.value }))} className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
+            </div>
+            <div>
+              <label className="text-[10px] font-mono text-slate-400 block mb-1">Date To</label>
+              <input type="date" value={advancedFilters.dateTo} onChange={(e) => setAdvancedFilters(p => ({ ...p, dateTo: e.target.value }))} className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
+            </div>
+            <div className="flex items-center gap-2">
+              <input type="checkbox" checked={advancedFilters.hasNotes} onChange={(e) => setAdvancedFilters(p => ({ ...p, hasNotes: e.target.checked }))} className="rounded" />
+              <span className="text-xs text-slate-300">Has Notes Only</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MAP VIEW MODAL */}
+      {showMapView && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+          <div className="liquid-glass p-6 space-y-4 w-full max-w-4xl">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-black text-white uppercase tracking-widest">Photo Map View</h4>
+              <button onClick={() => setShowMapView(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="p-8 bg-slate-950 rounded-2xl border border-white/10 text-center">
+              <MapPin className="w-12 h-12 text-red-400 mx-auto mb-2" />
+              <p className="text-xs text-slate-400">Map view would display photo locations on an interactive map.</p>
+              <p className="text-[10px] text-slate-500 mt-1">Integrate with Mapbox/Google Maps for full functionality.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* METADATA EDITOR MODAL */}
+      {editingMetadataId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+          <div className="liquid-glass p-6 space-y-4 w-full max-w-lg">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-black text-white uppercase tracking-widest">Edit Metadata</h4>
+              <button onClick={() => setEditingMetadataId(null)} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="space-y-3">
+              <input type="text" value={metadataDraft.registration} onChange={(e) => setMetadataDraft(p => ({ ...p, registration: e.target.value }))} placeholder="Registration" className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
+              <input type="text" value={metadataDraft.airline} onChange={(e) => setMetadataDraft(p => ({ ...p, airline: e.target.value }))} placeholder="Airline" className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
+              <input type="text" value={metadataDraft.aircraftModel} onChange={(e) => setMetadataDraft(p => ({ ...p, aircraftModel: e.target.value }))} placeholder="Aircraft Model" className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
+              <input type="text" value={metadataDraft.location} onChange={(e) => setMetadataDraft(p => ({ ...p, location: e.target.value }))} placeholder="Location" className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white" />
+              <textarea value={metadataDraft.notes} onChange={(e) => setMetadataDraft(p => ({ ...p, notes: e.target.value }))} placeholder="Notes" className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white h-24 resize-none" />
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => { if (editingMetadataId) { setMyPlanePics(prev => prev.map(p => p.id === editingMetadataId ? { ...p, registration: metadataDraft.registration || p.registration, airline: metadataDraft.airline || p.airline, aircraftModel: metadataDraft.aircraftModel || p.aircraftModel, location: metadataDraft.location || p.location, notes: metadataDraft.notes || p.notes } : p)); } setEditingMetadataId(null); showToast('Updated', 'Metadata updated', 'success'); }} className="liquid-glass-btn px-4 py-2 text-xs font-bold">Save</button>
+              <button onClick={() => setEditingMetadataId(null)} className="liquid-glass-btn px-4 py-2 text-xs font-bold text-slate-300">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* STATS PANEL */}
+      {showStats && (
+        <div className="liquid-glass p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-black text-white uppercase tracking-widest">Photo Statistics</h4>
+            <button onClick={() => setShowStats(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400"><X className="w-4 h-4" /></button>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+              <div className="text-2xl font-black text-white">{myPlanePics.length}</div>
+              <div className="text-[10px] text-slate-400 font-mono">Total Photos</div>
+            </div>
+            <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+              <div className="text-2xl font-black text-[#C8102E]">{liveStats.uniqueRegistrations}</div>
+              <div className="text-[10px] text-slate-400 font-mono">Unique Regs</div>
+            </div>
+            <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+              <div className="text-2xl font-black text-red-400">{watchlist.length}</div>
+              <div className="text-[10px] text-slate-400 font-mono">Watchlist</div>
+            </div>
+            <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+              <div className="text-2xl font-black text-amber-400">{Object.keys(ratings).length}</div>
+              <div className="text-[10px] text-slate-400 font-mono">Rated</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DUPLICATES PANEL */}
+      {showDuplicates && (
+        <div className="liquid-glass p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-black text-white uppercase tracking-widest">Duplicate Detection</h4>
+            <button onClick={() => setShowDuplicates(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400"><X className="w-4 h-4" /></button>
+          </div>
+          <p className="text-[11px] text-slate-400">Scanning for duplicate registrations...</p>
+          <button onClick={() => { const regs = myPlanePics.map(p => p.registration); const dupes = regs.filter((r, i) => regs.indexOf(r) !== i); showToast('Scan Complete', `Found ${dupes.length} potential duplicates`, 'info'); }} className="liquid-glass-btn px-3 py-2 text-xs font-bold">Scan Now</button>
+        </div>
+      )}
+
+      {/* QUICK ACTIONS TAB */}
       {activeTab === 'collections' && (
         <div className="space-y-6">
           <div className="bg-slate-900/60 backdrop-blur-2xl border border-white/15 rounded-[28px] p-6 shadow-2xl space-y-6 ">
@@ -2251,122 +2671,128 @@ export const MyPlanePicsSuite: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-[10px] text-slate-400 uppercase tracking-widest font-mono font-bold">
-                    Collections & Tools
+                    Shortcuts &amp; Exports
                   </p>
-                  <h3 className="text-base font-black text-white">Manage Your Photo Collections</h3>
+                  <h3 className="text-base font-black text-white">Quick Actions</h3>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+            </div>
+
+            {/* Quick Filters */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div
+                onClick={() => setSelectedCollection('all')}
+                className={`p-4 rounded-xl border cursor-pointer transition-all ${selectedCollection === 'all' ? 'bg-[#C8102E]/20 border-[#C8102E]/40' : 'bg-slate-950 border-white/10 hover:border-white/20'}`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-bold text-white">All Photos</span>
+                  <span className="text-xs text-slate-400 font-mono">{myPlanePics.length}</span>
+                </div>
+              </div>
+               <div
+                 onClick={() => setSelectedCollection('favorites')}
+                 className={`p-4 rounded-xl border cursor-pointer transition-all ${selectedCollection === 'favorites' ? 'bg-[#C8102E]/20 border-[#C8102E]/40' : 'bg-slate-950 border-white/10 hover:border-white/20'}`}
+               >
+                 <div className="flex items-center justify-between">
+                   <span className="text-sm font-bold text-white flex items-center gap-2"><Star className="w-4 h-4 text-red-400" /> Favorites</span>
+                   <span className="text-xs text-slate-400 font-mono">{myPlanePics.filter(p => p.favorite).length}</span>
+                 </div>
+               </div>
+               <div
+                 onClick={() => setSelectedCollection('watchlist')}
+                 className={`p-4 rounded-xl border cursor-pointer transition-all ${selectedCollection === 'watchlist' ? 'bg-[#C8102E]/20 border-[#C8102E]/40' : 'bg-slate-950 border-white/10 hover:border-white/20'}`}
+               >
+                 <div className="flex items-center justify-between">
+                   <span className="text-sm font-bold text-white flex items-center gap-2"><Bookmark className="w-4 h-4 text-red-400" /> Watchlist</span>
+                   <span className="text-xs text-slate-400 font-mono">{watchlist.length}</span>
+                 </div>
+               </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-bold text-slate-300 uppercase tracking-widest font-mono">Quick Actions</h4>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <button onClick={exportToCSV} className="p-4 rounded-xl bg-slate-950 border border-white/10 hover:border-red-500/40 transition-all text-left cursor-pointer">
+                  <FileDown className="w-6 h-6 text-red-400 mb-2" />
+                  <p className="text-xs font-bold text-white">Export CSV</p>
+                  <p className="text-[10px] text-slate-400">Spreadsheet data</p>
+                </button>
+                <button onClick={exportToHTML} className="p-4 rounded-xl bg-slate-950 border border-white/10 hover:border-red-500/40 transition-all text-left cursor-pointer">
+                  <Globe className="w-6 h-6 text-red-400 mb-2" />
+                  <p className="text-xs font-bold text-white">HTML Gallery</p>
+                  <p className="text-[10px] text-slate-400">Shareable web page</p>
+                </button>
+                <button
+                  onClick={exportToPDF}
+                  disabled={isExportingPdf}
+                  className="p-4 rounded-xl bg-slate-950 border border-white/10 hover:border-rose-500/40 transition-all text-left cursor-pointer disabled:opacity-60"
+                >
+                  <div className="flex items-center gap-3">
+                    {isExportingPdf ? (
+                      <div className="w-6 h-6 border-2 border-rose-400 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <FileText className="w-6 h-6 text-rose-400" />
+                    )}
+                    <div>
+                      <p className="text-xs font-bold text-white">{isExportingPdf ? 'Generating PDF...' : 'Export PDF'}</p>
+                      <p className="text-[10px] text-slate-400">{isExportingPdf ? 'Please wait' : 'Print-ready album'}</p>
+                    </div>
+                  </div>
+                </button>
+                 <button onClick={() => setShowWatchlistPanel(true)} className="p-4 rounded-xl bg-slate-950 border border-white/10 hover:border-red-500/40 transition-all text-left cursor-pointer">
+                   <div className="flex items-center gap-2 mb-2">
+                     <Bookmark className="w-6 h-6 text-red-400" />
+                     <span className="text-xs font-black text-white bg-red-500/20 border border-red-500/40 px-2 py-0.5 rounded-full">{watchlist.length}</span>
+                   </div>
+                   <p className="text-xs font-bold text-white">Watchlist</p>
+                   <p className="text-[10px] text-slate-400">Track registrations</p>
+                 </button>
+              </div>
+            </div>
+
+            {/* Saved Filters */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold text-slate-300 uppercase tracking-widest font-mono">Saved Filters</h4>
                 <button
                   onClick={() => setShowCreateCollection(true)}
                   className="skeuo-btn px-3 py-1.5 bg-[#C8102E] hover:bg-[#ff7236] text-black font-extrabold text-xs rounded-xl transition-all flex items-center gap-1 cursor-pointer"
                 >
-                  <Plus className="w-3.5 h-3.5" /> New Collection
+                  <Plus className="w-3.5 h-3.5" /> Add Filter
                 </button>
               </div>
-            </div>
-
-            {showCreateCollection && (
-              <div className="p-4 rounded-2xl bg-slate-950 border border-white/10 space-y-3">
-                <label className="text-xs font-mono text-slate-300 font-bold">Collection Name</label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newCollectionName}
-                    onChange={(e) => setNewCollectionName(e.target.value)}
-                    placeholder="e.g. Paris Air Show 2025"
-                    className="flex-1 px-3 py-2 bg-slate-900 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-[#C8102E] font-mono"
-                  />
-                  <button onClick={addCollection} className="px-4 py-2 bg-[#C8102E] text-black font-bold text-xs rounded-xl">Create</button>
-                  <button onClick={() => { setShowCreateCollection(false); setNewCollectionName(''); }} className="px-4 py-2 bg-slate-800 text-slate-300 text-xs rounded-xl">{t.cancel}</button>
-                </div>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <h4 className="text-xs font-bold text-slate-300 uppercase tracking-widest font-mono">Your Collections</h4>
-                <div className="space-y-2">
-                  <div
-                    onClick={() => setSelectedCollection('all')}
-                    className={`p-3 rounded-xl border cursor-pointer transition-all ${selectedCollection === 'all' ? 'bg-[#C8102E]/20 border-[#C8102E]/40' : 'bg-slate-950 border-white/10 hover:border-white/20'}`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-bold text-white">All Photos</span>
-                      <span className="text-xs text-slate-400 font-mono">{myPlanePics.length}</span>
-                    </div>
+              {showCreateCollection && (
+                <div className="p-4 rounded-2xl bg-slate-950 border border-white/10 space-y-3">
+                  <label className="text-xs font-mono text-slate-300 font-bold">Filter Name</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newCollectionName}
+                      onChange={(e) => setNewCollectionName(e.target.value)}
+                      placeholder="e.g. Paris Air Show 2025"
+                      className="flex-1 px-3 py-2 bg-slate-900 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-[#C8102E] font-mono"
+                    />
+                    <button onClick={addCollection} className="px-4 py-2 bg-[#C8102E] text-black font-bold text-xs rounded-xl">Create</button>
+                    <button onClick={() => { setShowCreateCollection(false); setNewCollectionName(''); }} className="px-4 py-2 bg-slate-800 text-slate-300 text-xs rounded-xl">{t.cancel}</button>
                   </div>
-                   <div
-                     onClick={() => setSelectedCollection('favorites')}
-                     className={`p-3 rounded-xl border cursor-pointer transition-all ${selectedCollection === 'favorites' ? 'bg-[#C8102E]/20 border-[#C8102E]/40' : 'bg-slate-950 border-white/10 hover:border-white/20'}`}
-                   >
-                     <div className="flex items-center justify-between">
-                       <span className="text-sm font-bold text-white flex items-center gap-2"><Star className="w-4 h-4 text-red-400" /> Favorites</span>
-                       <span className="text-xs text-slate-400 font-mono">{myPlanePics.filter(p => p.favorite).length}</span>
-                     </div>
-                   </div>
-                   <div
-                     onClick={() => setSelectedCollection('watchlist')}
-                     className={`p-3 rounded-xl border cursor-pointer transition-all ${selectedCollection === 'watchlist' ? 'bg-[#C8102E]/20 border-[#C8102E]/40' : 'bg-slate-950 border-white/10 hover:border-white/20'}`}
-                   >
-                     <div className="flex items-center justify-between">
-                       <span className="text-sm font-bold text-white flex items-center gap-2"><Bookmark className="w-4 h-4 text-red-400" /> Watchlist</span>
-                       <span className="text-xs text-slate-400 font-mono">{watchlist.length}</span>
-                     </div>
-                   </div>
-                   {collections.map(c => (
-                    <div key={c} className="p-3 rounded-xl border bg-slate-950 border-white/10 hover:border-white/20 flex items-center justify-between">
-                      <div onClick={() => setSelectedCollection(c)} className="flex-1 cursor-pointer">
-                        <span className="text-sm font-bold text-white">{c}</span>
-                        <span className="text-xs text-slate-400 font-mono block">{myPlanePics.filter(p => p.collections?.includes(c)).length} photos</span>
-                      </div>
-                      <button onClick={() => removeCollection(c)} className="p-1.5 text-red-400 hover:text-red-300 cursor-pointer">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
                 </div>
-              </div>
-
-              <div className="space-y-3">
-                <h4 className="text-xs font-bold text-slate-300 uppercase tracking-widest font-mono">Quick Actions</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  <button onClick={exportToCSV} className="p-4 rounded-xl bg-slate-950 border border-white/10 hover:border-red-500/40 transition-all text-left cursor-pointer">
-                    <FileDown className="w-6 h-6 text-red-400 mb-2" />
-                    <p className="text-xs font-bold text-white">Export CSV</p>
-                    <p className="text-[10px] text-slate-400">Spreadsheet data</p>
-                  </button>
-                  <button onClick={exportToHTML} className="p-4 rounded-xl bg-slate-950 border border-white/10 hover:border-red-500/40 transition-all text-left cursor-pointer">
-                    <Globe className="w-6 h-6 text-red-400 mb-2" />
-                    <p className="text-xs font-bold text-white">HTML Gallery</p>
-                    <p className="text-[10px] text-slate-400">Shareable web page</p>
-                  </button>
-                  <button 
-                    onClick={exportToPDF} 
-                    disabled={isExportingPdf}
-                    className="p-4 rounded-xl bg-slate-950 border border-white/10 hover:border-rose-500/40 transition-all text-left cursor-pointer disabled:opacity-60"
-                  >
-                    <div className="flex items-center gap-3">
-                      {isExportingPdf ? (
-                        <div className="w-6 h-6 border-2 border-rose-400 border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <FileText className="w-6 h-6 text-rose-400" />
-                      )}
-                      <div>
-                        <p className="text-xs font-bold text-white">{isExportingPdf ? 'Generating PDF...' : 'Export PDF'}</p>
-                        <p className="text-[10px] text-slate-400">{isExportingPdf ? 'Please wait' : 'Print-ready album'}</p>
-                      </div>
-                    </div>
-                  </button>
-                   <button onClick={() => setShowWatchlistPanel(true)} className="p-4 rounded-xl bg-slate-950 border border-white/10 hover:border-red-500/40 transition-all text-left cursor-pointer">
-                     <div className="flex items-center gap-2 mb-2">
-                       <Bookmark className="w-6 h-6 text-red-400" />
-                       <span className="text-xs font-black text-white bg-red-500/20 border border-red-500/40 px-2 py-0.5 rounded-full">{watchlist.length}</span>
-                     </div>
-                     <p className="text-xs font-bold text-white">Watchlist</p>
-                     <p className="text-[10px] text-slate-400">Track registrations</p>
+              )}
+              <div className="space-y-2">
+                {collections.map(c => (
+                 <div key={c} className="p-3 rounded-xl border bg-slate-950 border-white/10 hover:border-white/20 flex items-center justify-between">
+                   <div onClick={() => setSelectedCollection(c)} className="flex-1 cursor-pointer">
+                     <span className="text-sm font-bold text-white">{c}</span>
+                     <span className="text-xs text-slate-400 font-mono block">{myPlanePics.filter(p => p.collections?.includes(c)).length} photos</span>
+                   </div>
+                   <button onClick={() => removeCollection(c)} className="p-1.5 text-red-400 hover:text-red-300 cursor-pointer">
+                     <Trash2 className="w-4 h-4" />
                    </button>
-                </div>
+                 </div>
+               ))}
+               {collections.length === 0 && (
+                 <p className="text-xs text-slate-500 font-mono text-center py-4">No saved filters yet. Create one above.</p>
+               )}
               </div>
             </div>
           </div>
@@ -2471,131 +2897,6 @@ export const MyPlanePicsSuite: React.FC = () => {
                 })}
               </div>
             )}
-          </div>
-        </div>
-      )}
-
-      {/* LIGHTBOX NOTE EDITOR */}
-      {isLightboxOpen && lightboxMedia && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-2xl flex items-center justify-center p-4 sm:p-6">
-          <div className="skeuo-panel relative w-full max-w-5xl bg-slate-900/90 border border-white/20 rounded-[28px] p-6 shadow-[0_0_80px_rgba(0,0,0,0.9)] space-y-4 overflow-hidden ">
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[#C8102E]/20 via-red-600/10 to-red-500/20 opacity-50 pointer-events-none" />
-            <div className="flex items-center justify-between pb-3 border-b border-white/10 relative z-10">
-              <div className="flex items-center gap-3 font-mono">
-                <button
-                  onClick={() => {
-                    const currentIndex = sortedPhotos.findIndex(p => p.id === lightboxMedia.id);
-                    const prevIndex = (currentIndex - 1 + sortedPhotos.length) % sortedPhotos.length;
-                    if (sortedPhotos[prevIndex]) setLightboxMedia(sortedPhotos[prevIndex]);
-                  }}
-                  className="skeuo-btn p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all cursor-pointer"
-                >
-                  <ArrowLeft className="w-5 h-5" />
-                </button>
-                <div>
-                  <span className="text-lg font-black text-[#C8102E]">{lightboxMedia.registration}</span>
-                  <span className="text-xs text-slate-400 font-bold block">• {lightboxMedia.filename}</span>
-                </div>
-                <button
-                  onClick={() => {
-                    const currentIndex = sortedPhotos.findIndex(p => p.id === lightboxMedia.id);
-                    const nextIndex = (currentIndex + 1) % sortedPhotos.length;
-                    if (sortedPhotos[nextIndex]) setLightboxMedia(sortedPhotos[nextIndex]);
-                  }}
-                  className="skeuo-btn p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all cursor-pointer"
-                >
-                  <ArrowRight className="w-5 h-5" />
-                </button>
-              </div>
-              <button onClick={() => { setIsLightboxOpen(false); setEditingNotesForId(null); setEditingTagsForId(null); }} className="skeuo-btn p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl transition-all cursor-pointer">
-                <X className="skeuo-btn w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
-              <div className="lg:col-span-2 relative rounded-2xl overflow-hidden bg-black max-h-[60vh] flex items-center justify-center">
-                {lightboxMedia.mediaType === 'video' && lightboxMedia.videoUrl ? (
-                  <video src={lightboxMedia.videoUrl} controls autoPlay className="w-full h-full object-contain max-h-[60vh]" />
-                ) : (
-                  <img src={lightboxMedia.imageUrl} alt={lightboxMedia.registration} className="w-full h-full object-contain max-h-[60vh]" />
-                )}
-              </div>
-
-              <div className="space-y-4 text-xs font-mono">
-                 <div className="p-4 rounded-2xl bg-slate-950 border border-white/10 space-y-3">
-                   <h4 className="text-xs font-black text-[#C8102E] uppercase tracking-wider">Photo Metadata</h4>
-                   <div className="space-y-2 text-slate-300">
-                    <div className="flex justify-between"><span>Registration</span><span className="text-white font-bold">{lightboxMedia.registration}</span></div>
-                    <div className="flex justify-between"><span>Airline</span><span className="text-white font-bold">{lightboxMedia.airline || 'N/A'}</span></div>
-                    <div className="flex justify-between"><span>Model</span><span className="text-white font-bold">{lightboxMedia.aircraftModel || 'N/A'}</span></div>
-                    <div className="flex justify-between"><span>Location</span><span className="text-white font-bold">{lightboxMedia.location || 'N/A'}</span></div>
-                    <div className="flex justify-between"><span>Livery</span><span className="text-[#C8102E] font-bold">{lightboxMedia.specialLivery}</span></div>
-                    <div className="flex justify-between"><span>Date</span><span className="text-white font-bold">{lightboxMedia.formattedDate || lightboxMedia.dateCaptured || 'N/A'}</span></div>
-                    <div className="flex justify-between"><span>Format</span><span className="text-red-400 font-bold">{lightboxMedia.formatPattern}</span></div>
-                    <div className="flex justify-between"><span>Shot</span><span className="text-white font-bold">{lightboxMedia.shotNumber !== undefined ? `#${lightboxMedia.shotNumber}` : 'Single'}</span></div>
-                    <div className="flex justify-between"><span>Type</span><span className="text-white font-bold">{lightboxMedia.mediaType === 'video' ? t.video : 'Image'}</span></div>
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-slate-950 border border-white/10 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-black text-red-400 uppercase tracking-wider">Notes</h4>
-                    <button onClick={() => { setEditingNotesForId(editingNotesForId === lightboxMedia.id ? null : lightboxMedia.id); setNotesDraft(lightboxMedia.notes || ''); }} className="skeuo-btn p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white">
-                      <Edit3 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                  {editingNotesForId === lightboxMedia.id ? (
-                    <textarea
-                      value={notesDraft}
-                      onChange={(e) => setNotesDraft(e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-900 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-red-500 font-mono"
-                      rows={3}
-                    />
-                  ) : (
-                    <p className="text-slate-300 text-[11px]">{lightboxMedia.notes || 'No notes added.'}</p>
-                  )}
-                  {editingNotesForId === lightboxMedia.id && (
-                    <button onClick={() => { setMyPlanePics(prev => prev.map(p => p.id === lightboxMedia.id ? { ...p, notes: notesDraft } : p)); setEditingNotesForId(null); showToast('Notes Saved', 'Photo notes updated', 'success'); }} className="px-3 py-1.5 bg-red-600 text-white text-xs rounded-lg">Save Notes</button>
-                  )}
-                </div>
-
-                <div className="p-4 rounded-2xl bg-slate-950 border border-white/10 space-y-3">
-                  <h4 className="text-xs font-black text-red-400 uppercase tracking-wider">Tags</h4>
-                  <div className="flex flex-wrap gap-1.5">
-                    {(lightboxMedia.tags || []).map(tag => (
-                      <span key={tag} className="px-2 py-0.5 rounded-full bg-red-500/20 border border-red-500/40 text-red-300 text-[10px] font-mono flex items-center gap-1">
-                        {tag}
-                        <button onClick={() => removeTagFromPhoto(lightboxMedia.id, tag)} className="text-red-400 hover:text-white"><X className="w-3 h-3" /></button>
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={editingTagsForId === lightboxMedia.id ? tagInput : ''}
-                      onChange={(e) => setTagInput(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === 'Enter' && editingTagsForId === lightboxMedia.id) { addTagToPhoto(lightboxMedia.id, tagInput); setTagInput(''); } }}
-                      placeholder="Add tag..."
-                      className="flex-1 px-3 py-1.5 bg-slate-900 border border-white/10 rounded-lg text-xs text-white focus:outline-none focus:border-red-500 font-mono"
-                      onFocus={() => setEditingTagsForId(lightboxMedia.id)}
-                      onBlur={() => { if (!tagInput.trim()) setEditingTagsForId(null); }}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button onClick={() => { toggleFavorite(lightboxMedia.id); }} className={`flex-1 p-2 rounded-xl border transition-all cursor-pointer ${lightboxMedia.favorite ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'border-white/10 text-slate-400 hover:text-white'}`}>
-                    <Star className="w-4 h-4 mx-auto" />
-                  </button>
-                  <button onClick={() => { toggleWatchlist(lightboxMedia.id); }} className={`flex-1 p-2 rounded-xl border transition-all cursor-pointer ${watchlist.some(w => w.id === lightboxMedia.id) ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'border-white/10 text-slate-400 hover:text-white'}`}>
-                    <Bookmark className="w-4 h-4 mx-auto" />
-                  </button>
-                  <button onClick={() => { navigator.clipboard.writeText(lightboxMedia.registration); showToast('Copied', 'Registration copied', 'success'); }} className="flex-1 p-2 rounded-xl border border-white/10 text-slate-400 hover:text-white transition-all cursor-pointer">
-                    <Copy className="w-4 h-4 mx-auto" />
-                  </button>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
        )}

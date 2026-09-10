@@ -1338,23 +1338,23 @@ export const NightcorePlayer: React.FC = () => {
                    </h3>
 
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                     <div className="bg-slate-950/60 border border-red-500/20 rounded-2xl p-3 space-y-2 backdrop-blur-xl">
-                       <div className="flex items-center justify-between text-xs font-mono">
-                         <span className="text-red-400 font-bold flex items-center gap-1">
-                           <Sparkles className="w-3.5 h-3.5" /> Nightcore Speed ({nightcorePitch.toFixed(2)}x)
-                         </span>
-                         <span className="text-[10px] text-slate-400">0.80 ➔ 1.50</span>
-                       </div>
-                       <input
-                         type="range"
-                         min="0.8"
-                         max="1.5"
-                         step="0.05"
-                         value={nightcorePitch}
-                         onChange={(e) => setNightcorePitch(Number(e.target.value))}
-                         className="w-full accent-red-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
-                       />
-                     </div>
+                      <div className="bg-slate-950/60 border border-red-500/20 rounded-2xl p-3 space-y-2 backdrop-blur-xl">
+                        <div className="flex items-center justify-between text-xs font-mono">
+                          <span className="text-red-400 font-bold flex items-center gap-1">
+                            <Sparkles className="w-3.5 h-3.5" /> Nightcore Pitch ({nightcorePitch.toFixed(2)}x)
+                          </span>
+                          <span className="text-[10px] text-slate-400">0.5x ➔ 2.0x</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0.5"
+                          max="2"
+                          step="0.05"
+                          value={nightcorePitch}
+                          onChange={(e) => setNightcorePitch(Number(e.target.value))}
+                          className="skeuo-slider w-full cursor-pointer"
+                        />
+                      </div>
 
                      <div className="bg-slate-950/60 border border-red-500/20 rounded-2xl p-3 space-y-2 backdrop-blur-xl">
                        <div className="flex items-center justify-between text-xs font-mono">

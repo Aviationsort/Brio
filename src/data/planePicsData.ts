@@ -24,6 +24,114 @@ export interface AircraftModelRankingItem {
   badge: string;
 }
 
+export interface SpotterTierInfo {
+  tier: string;
+  label: string;
+  minScore: number;
+  maxScore: number;
+  color: string;
+  icon: string;
+}
+
+export interface SpotterRankingItem {
+  rank: number;
+  spotterName: string;
+  photos: number;
+  registrations: number;
+  tier: SpotterTierInfo;
+  trend: 'up' | 'down' | 'stable';
+}
+
+export interface LocationRankingItem {
+  rank: number;
+  location: string;
+  photoCount: number;
+  percentage: number;
+  uniqueRegistrations: number;
+  topAirlines: string[];
+  badge: string;
+}
+
+export const SPOTTER_TIERS: SpotterTierInfo[] = [
+  { tier: 'Newcomer', label: 'Newcomer Spotter', minScore: 0, maxScore: 19, color: 'text-zinc-400', icon: '🪪' },
+  { tier: 'Observer', label: 'Observer', minScore: 20, maxScore: 49, color: 'text-emerald-400', icon: '🧐' },
+  { tier: 'Spotter', label: 'Spotter', minScore: 50, maxScore: 99, color: 'text-sky-400', icon: '👁️' },
+  { tier: 'Enthusiast', label: 'Enthusiast', minScore: 100, maxScore: 199, color: 'text-blue-400', icon: '✈️' },
+  { tier: 'Regular', label: 'Regular Spotter', minScore: 200, maxScore: 349, color: 'text-indigo-400', icon: '📸' },
+  { tier: 'Veteran', label: 'Veteran', minScore: 350, maxScore: 549, color: 'text-purple-400', icon: '🎖️' },
+  { tier: 'Expert', label: 'Expert Spotter', minScore: 550, maxScore: 799, color: 'text-amber-400', icon: '🏅' },
+  { tier: 'Master', label: 'Master Spotter', minScore: 800, maxScore: 1199, color: 'text-orange-400', icon: '⭐' },
+  { tier: 'Elite', label: 'Elite Spotter', minScore: 1200, maxScore: 1799, color: 'text-rose-400', icon: '🌟' },
+  { tier: 'Legend', label: 'Legendary Spotter', minScore: 1800, maxScore: Infinity, color: 'text-red-500', icon: '👑' },
+];
+
+export function computeSpotterScore(photoList: PlanePhoto[]): number {
+  const totalMedia = photoList.length;
+  const airlines = new Set(photoList.map(p => p.airline).filter(Boolean)).size;
+  const registrations = new Set(photoList.map(p => p.registration).filter(Boolean)).size;
+  const liveries = new Set(photoList.map(p => p.specialLivery).filter(Boolean)).size;
+  const aircraft = new Set(photoList.map(p => p.aircraftModel).filter(Boolean)).size;
+
+  return totalMedia + airlines * 3 + registrations * 4 + liveries * 5 + aircraft * 4;
+}
+
+export function getSpotterTier(photoList: PlanePhoto[]): SpotterTierInfo {
+  const score = computeSpotterScore(photoList);
+  return SPOTTER_TIERS.find(t => score >= t.minScore && score <= t.maxScore) || SPOTTER_TIERS[SPOTTER_TIERS.length - 1];
+}
+
+export function computeSpotterRanking(photoList: PlanePhoto[], spotterName: string): SpotterRankingItem {
+  const photos = photoList.length;
+  const registrations = new Set(photoList.map(p => p.registration).filter(Boolean)).size;
+  const tier = getSpotterTier(photoList);
+
+  return {
+    rank: 0,
+    spotterName,
+    photos,
+    registrations,
+    tier,
+    trend: 'stable',
+  };
+}
+
+export function computeLocationRankings(photoList: PlanePhoto[]): LocationRankingItem[] {
+  const map: Record<string, { count: number; regs: Set<string>; airlines: Set<string> }> = {};
+
+  photoList.forEach((p) => {
+    const location = p.location || 'Unknown Location';
+    if (!map[location]) map[location] = { count: 0, regs: new Set(), airlines: new Set() };
+    map[location].count += 1;
+    if (p.registration) map[location].regs.add(p.registration);
+    if (p.airline) map[location].airlines.add(p.airline);
+  });
+
+  const total = photoList.length || 1;
+
+  const sorted = Object.entries(map)
+    .map(([location, data]) => ({
+      location,
+      photoCount: data.count,
+      percentage: Math.round((data.count / total) * 100),
+      uniqueRegistrations: data.regs.size,
+      topAirlines: Array.from(data.airlines).slice(0, 3),
+    }))
+    .sort((a, b) => b.photoCount - a.photoCount);
+
+  return sorted.map((item, idx) => ({
+    ...item,
+    rank: idx + 1,
+    badge:
+      idx === 0
+        ? '🏆 Top Location'
+        : idx === 1
+        ? '⭐ Prime Spot'
+        : idx === 2
+        ? '🌟 Rising Hub'
+        : '✈️ Regular Stop',
+  }));
+}
+
 export const INITIAL_PLANE_PHOTOS: PlanePhoto[] = [];
 
 /**

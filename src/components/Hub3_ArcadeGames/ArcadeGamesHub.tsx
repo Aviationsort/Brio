@@ -17,6 +17,7 @@ import { FlagQuizGame } from './FlagQuizGame';
 import { MemoryCardGame } from './MemoryCardGame';
 import { SnakeGame } from './SnakeGame';
 import { TypingGame } from './TypingGame';
+import { HangmanGame } from './HangmanGame';
 import {
   Gamepad2,
   Grid,
@@ -181,6 +182,17 @@ const GAMES_LIST: GameItem[] = [
     difficulty: 'medium',
     tutorial: 'Type the displayed text as fast and accurately as possible. Green = correct, Red = incorrect. Score based on WPM × accuracy.',
   },
+  {
+    id: 'hangman',
+    title: 'Hangman',
+    category: 'Trivia',
+    subcategory: 'Word Game',
+    description: 'Classic word guessing game with aviation-themed words and lives system.',
+    icon: Brain,
+    badge: 'Trivia',
+    difficulty: 'easy',
+    tutorial: 'Guess the aviation-themed word one letter at a time. Each wrong guess costs a life. You have 6 lives. Win by revealing all letters before running out of lives.',
+  },
 ];
 
 type CategoryFilter = 'All' | string;
@@ -290,6 +302,7 @@ export const ArcadeGamesHub: React.FC = () => {
           {selectedGame === 'memory' && <MemoryCardGame />}
           {selectedGame === 'snake' && <SnakeGame />}
           {selectedGame === 'typing' && <TypingGame />}
+          {selectedGame === 'hangman' && <HangmanGame />}
         </div>
       </div>
     );

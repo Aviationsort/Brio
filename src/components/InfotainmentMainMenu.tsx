@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useApp } from '../context/AppContext';
+import { useTheme } from '../context/ThemeContext';
 import { getWeather, type WeatherData } from '../utils/weatherService';
 import { ClockSuiteModal } from './ClockSuiteModal';
 import { Sidebar } from './Layout/Sidebar';
@@ -14,6 +15,7 @@ import { ArcadeGamesHub } from './Hub3_ArcadeGames/ArcadeGamesHub';
 import { ProductivityOfficeHub } from './Hub4_ProductivityOffice/ProductivityOfficeHub';
 import { AviationTelemetryHub } from './Hub5_AviationTelemetry/AviationTelemetryHub';
 import { MyPlanePicsHub } from './Hub5_AviationTelemetry/MyPlanePicsHub';
+import { RSSReader } from './Hub2_MediaStreaming/RSSReader';
 
 
 // Feature Imports
@@ -67,6 +69,7 @@ import {
   BookOpen,
   Heart,
   Music,
+  Rss,
 } from 'lucide-react';
 
 function getTempColorClass(tempC: number): string {
@@ -146,10 +149,14 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
    authRequired,
    masterKeySet,
    notifications,
-   telemetry,
-   } = useApp();
+    telemetry,
+    theme,
+    toggleTheme,
+    } = useApp();
 
-  const [screenView, setScreenView] = useState<'home' | 'connect' | 'media' | 'arcade' | 'office' | 'telemetry' | 'myplanepics' | 'security' | 'settings' | 'help' | 'qrcode' | 'colorpicker' | 'notepad' | 'bmi' | 'metronome'>(
+   useTheme();
+
+  const [screenView, setScreenView] = useState<'home' | 'connect' | 'media' | 'arcade' | 'office' | 'telemetry' | 'myplanepics' | 'security' | 'settings' | 'help' | 'qrcode' | 'colorpicker' | 'notepad' | 'bmi' | 'metronome' | 'rss'>(
   () => activeHub || 'home'
   );
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -247,8 +254,8 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
  }
  }, [authRequired, user, setShowAuthModal]);
 
- const switchScreenView = useCallback(
- (view: 'home' | 'connect' | 'media' | 'arcade' | 'office' | 'telemetry' | 'myplanepics' | 'security' | 'settings' | 'help' | 'qrcode' | 'colorpicker' | 'notepad' | 'bmi' | 'metronome') => {
+  const switchScreenView = useCallback(
+  (view: 'home' | 'connect' | 'media' | 'arcade' | 'office' | 'telemetry' | 'myplanepics' | 'security' | 'settings' | 'help' | 'qrcode' | 'colorpicker' | 'notepad' | 'bmi' | 'metronome' | 'rss') => {
  try {
  setScreenView(view);
  if (view !== 'home' && view !== activeHub) {
@@ -313,7 +320,7 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
    {sidebarOpen && (
      <div className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
    )}
-   <div className={`lg:relative lg:block ${sidebarOpen ? 'fixed inset-y-0 left-0 z-50 w-64 shadow-2xl' : 'hidden lg:block'}`}>
+    <div className={`lg:relative lg:block ${sidebarOpen ? 'fixed inset-y-0 left-0 z-50 w-full shadow-2xl' : 'hidden lg:block'}`}>
      <Sidebar
      onHome={goHome}
      onOpenOverlay={(overlay) => { setActiveOverlay(overlay); setSidebarOpen(false); }}
@@ -345,6 +352,11 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && searchQuery.trim()) {
+                switchScreenView('connect');
+              }
+            }}
             placeholder="Search..."
             className="w-full bg-transparent border-none outline-none text-xs text-white placeholder:text-zinc-500"
           />
@@ -430,7 +442,7 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
                 <div className="w-px h-3 bg-white/10" />
                 <div className="quick-stat-item">
                   <span className="text-zinc-500 text-[10px]">Hubs:</span>
-                  <span className="quick-stat-value text-[10px]">6</span>
+                  <span className="quick-stat-value text-[10px]">7</span>
                 </div>
                 <div className="w-px h-3 bg-white/10" />
                 <div className="quick-stat-item">
@@ -477,42 +489,39 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
               <div className="home-featured-title">Arcade</div>
               <div className="home-featured-desc">11 built-in games</div>
             </div>
+
+            <div
+              onClick={() => switchScreenView('rss')}
+              className="home-featured-card"
+            >
+              <div className="home-featured-icon text-red-400">
+                <Rss className="w-5 h-5" />
+              </div>
+              <div className="home-featured-title">News</div>
+              <div className="home-featured-desc">Aviation & world news</div>
+            </div>
           </div>
         </div>
 
         {/* Quick Actions */}
         <div className="home-quick-actions">
           <button
-            onClick={() => setActiveOverlay('WEATHER')}
-            className="home-quick-action"
-          >
-            <CloudSun className="w-3.5 h-3.5 text-sky-400" />
-            <span>Weather</span>
-          </button>
-          <button
-            onClick={() => setActiveOverlay('ACCOUNT')}
-            className="home-quick-action"
-          >
-            <UserCircle className="w-3.5 h-3.5 text-red-400" />
-            <span>Account</span>
-          </button>
-          <button
             onClick={() => setActiveOverlay('SETTINGS')}
-            className="home-quick-action"
+            className="liquid-glass"
           >
             <Settings className="w-3.5 h-3.5 text-zinc-400" />
             <span>Settings</span>
           </button>
           <button
             onClick={() => setActiveOverlay('HELP')}
-            className="home-quick-action"
+            className="liquid-glass"
           >
             <HelpCircle className="w-3.5 h-3.5 text-amber-400" />
             <span>Help</span>
           </button>
           <button
             onClick={() => switchScreenView('qrcode')}
-            className="home-quick-action home-quick-action--accent"
+            className="liquid-glass liquid-glass--accent"
           >
             <QrCode className="w-3.5 h-3.5" />
             <span>QR</span>
@@ -607,17 +616,22 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
     )}
 
  {/* SCREEN VIEW HUBS */}
- {screenView === 'connect' && (
- <ErrorBoundary name="ConnectSocialHub">
- <ConnectSocialHub />
- </ErrorBoundary>
- )}
- {screenView === 'media' && (
- <ErrorBoundary name="MediaStreamingHub">
- <MediaStreamingHub />
- </ErrorBoundary>
- )}
- {screenView === 'arcade' && (
+  {screenView === 'connect' && (
+  <ErrorBoundary name="ConnectSocialHub">
+  <ConnectSocialHub initialSearchQuery={searchQuery} onSearchOpened={() => setSearchQuery('')} />
+  </ErrorBoundary>
+  )}
+  {screenView === 'media' && (
+  <ErrorBoundary name="MediaStreamingHub">
+  <MediaStreamingHub />
+  </ErrorBoundary>
+  )}
+  {screenView === 'rss' && (
+  <ErrorBoundary name="RSSReader">
+  <RSSReader />
+  </ErrorBoundary>
+  )}
+  {screenView === 'arcade' && (
  <ErrorBoundary name="ArcadeGamesHub">
  <ArcadeGamesHub />
  </ErrorBoundary>
@@ -983,47 +997,91 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
  <ClockSuiteModal onClose={() => setActiveOverlay('NONE')} />
  )}
 
- {/* SETTINGS OVERLAY */}
- {activeOverlay === 'SETTINGS' && (
- <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4">
- <div className="relative w-full max-w-lg skeuo-inset-panel p-6 text-white space-y-5 animate-slideIn">
- <div className="flex items-center justify-between pb-3 border-b border-white/10">
- <div className="flex items-center gap-2 text-red-400">
- <Settings className="w-6 h-6" />
- <h2 className="text-xl font-bold uppercase tracking-wider">Settings</h2>
- </div>
- <button
- onClick={() => setActiveOverlay('NONE')}
- className="skeuo-panel p-2 rounded-xl text-zinc-400 hover:text-white bg-white/5"
- >
- <X className="w-5 h-5" />
- </button>
- </div>
+  {/* SETTINGS OVERLAY */}
+  {activeOverlay === 'SETTINGS' && (
+  <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4">
+  <div className="relative w-full max-w-lg skeuo-inset-panel p-6 text-white space-y-5 animate-slideIn max-h-[90vh] overflow-y-auto skeuo-scrollbar">
+  <div className="flex items-center justify-between pb-3 border-b border-white/10 sticky top-0 bg-inherit z-10">
+  <div className="flex items-center gap-2 text-red-400">
+  <Settings className="w-6 h-6" />
+  <h2 className="text-xl font-bold uppercase tracking-wider">Settings</h2>
+  </div>
+  <button
+  onClick={() => setActiveOverlay('NONE')}
+  className="skeuo-panel p-2 rounded-xl text-zinc-400 hover:text-white bg-white/5"
+  >
+  <X className="w-5 h-5" />
+  </button>
+  </div>
 
- <div className="space-y-3">
- {[
- { label: 'Display & Brightness', desc: 'Screen theme, contrast, and night mode' },
- { label: 'Audio & Notifications', desc: 'Volume levels, alerts, and haptics' },
- { label: 'Network & Connectivity', desc: 'Wi-Fi, Bluetooth, and Airplane mode' },
- { label: 'Privacy & Permissions', desc: 'Location, microphone, and data access' },
- { label: 'Accessibility', desc: 'Text size, captions, and screen reader' },
- ].map((item) => (
- <button
- key={item.label}
- onClick={() => showToast('Settings', `${item.label} — ${item.desc}`, 'info')}
- className="w-full skeuo-panel p-4 flex items-center justify-between bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all cursor-pointer"
- >
- <div>
- <p className="text-sm font-bold text-white">{item.label}</p>
- <p className="text-[10px] text-zinc-400 font-mono">{item.desc}</p>
- </div>
- <ChevronRight className="w-4 h-4 text-zinc-500" />
- </button>
- ))}
- </div>
- </div>
- </div>
- )}
+  <div className="space-y-4">
+    {/* Display Mode */}
+    <div className="skeuo-panel p-4 space-y-3">
+      <div className="flex items-center gap-2">
+        <Monitor className="w-4 h-4 text-red-400" />
+        <p className="text-xs font-bold text-zinc-300 uppercase tracking-wider">Display Mode</p>
+      </div>
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => {
+            if (theme === 'light') {
+              toggleTheme();
+              showToast('Settings', 'Switched to Dark Mode', 'success');
+            }
+          }}
+          className={`skeuo-btn flex-1 py-2 rounded-lg text-xs font-bold cursor-pointer transition-all ${
+            theme === 'dark'
+              ? 'bg-gradient-to-b from-red-600 to-red-800 text-white shadow-lg shadow-red-900/30 border border-red-400/40'
+              : 'bg-zinc-800 text-zinc-400 hover:text-white border border-white/10'
+          }`}
+        >
+          <Moon className="w-3.5 h-3.5 inline mr-1" />
+          Dark
+        </button>
+        <button
+          onClick={() => {
+            if (theme === 'dark') {
+              toggleTheme();
+              showToast('Settings', 'Switched to Light Mode', 'success');
+            }
+          }}
+          className={`skeuo-btn flex-1 py-2 rounded-lg text-xs font-bold cursor-pointer transition-all ${
+            theme === 'light'
+              ? 'bg-gradient-to-b from-red-600 to-red-800 text-white shadow-lg shadow-red-900/30 border border-red-400/40'
+              : 'bg-zinc-800 text-zinc-400 hover:text-white border border-white/10'
+          }`}
+        >
+          <Sun className="w-3.5 h-3.5 inline mr-1" />
+          Light
+        </button>
+      </div>
+    </div>
+
+    {/* Accessibility */}
+    <div className="skeuo-panel p-4 space-y-3">
+      <div className="flex items-center gap-2">
+        <Eye className="w-4 h-4 text-red-400" />
+        <p className="text-xs font-bold text-zinc-300 uppercase tracking-wider">Accessibility</p>
+      </div>
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-zinc-400">Reduced Motion</span>
+        <label className="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" className="sr-only peer" />
+          <div className="w-9 h-5 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-600"></div>
+        </label>
+      </div>
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-zinc-400">High Contrast</span>
+        <label className="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" className="sr-only peer" />
+          <div className="w-9 h-5 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-600"></div>
+        </label>
+      </div>
+    </div>
+  </div>
+  </div>
+  </div>
+  )}
 
 
  {/* HELP / FAQ OVERLAY */}
@@ -1048,7 +1106,7 @@ export const InfotainmentMainMenu: React.FC<InfotainmentMainMenuProps> = ({ onNa
  { q: 'How do I connect with other passengers?', a: 'Open the Connect tile to browse the social feed, send messages, and make in-flight calls.' },
  { q: 'Is my data encrypted?', a: 'Yes. Brio uses end-to-end encryption for all messages, vault data, and media streams.' },
  { q: 'How do I change the weather city?', a: 'Open the Weather tile and use the search bar to select any city worldwide.' },
- { q: 'Can I stream my own media?', a: 'Use the Media tile to connect via IPTV or Nightcore URL for personalized streaming.' },
+  { q: 'Can I stream my own media?', a: 'Use the Media tile to connect via Nightcore for personalized music and video streaming.' },
  { q: 'How do I access the vault?', a: 'Navigate to Account or Security to set your master passphrase and manage vault settings.' },
  { q: 'Who do I contact for support?', a: 'Press the Run Diagnostics button in System Info to submit a support ticket to ground crew.' },
  ].map((faq) => (

@@ -2,7 +2,7 @@
  * Brio Application Type Definitions
  */
 
-export type HubId = 'connect' | 'media' | 'arcade' | 'office' | 'telemetry' | 'myplanepics' | 'home' | 'security';
+export type HubId = 'connect' | 'media' | 'arcade' | 'office' | 'telemetry' | 'myplanepics' | 'home' | 'security' | 'rss';
 
 export interface UserAccount {
   id: string;
@@ -204,17 +204,6 @@ export interface MediaTrack {
   addedAt: number;
 }
 
-// Hub 2: IPTV
-export interface IPTVChannel {
-  id: string;
-  name: string;
-  category: string;
-  streamUrl: string;
-  logoUrl: string;
-  country: string;
-  isFavorite?: boolean;
-}
-
 // Hub 2: RSS Feed
 export interface RSSArticle {
   id: string;
@@ -240,7 +229,8 @@ export type GameId =
   | 'flagquiz'
   | 'memory'
   | 'snake'
-  | 'typing';
+  | 'typing'
+  | 'hangman';
 
 export interface GameHighScore {
   gameId: GameId;

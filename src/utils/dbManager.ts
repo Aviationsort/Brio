@@ -38,7 +38,6 @@ export interface BrioDatabaseDump {
     socialPosts?: any[];
     stickers?: any[];
     mediaTracks?: any[];
-    iptvChannels?: any[];
     notes?: any[];
     todos?: any[];
     calendarEvents?: any[];
@@ -212,7 +211,6 @@ class DatabaseManager {
         (dumpData.socialPosts?.length || 0) +
         (dumpData.stickers?.length || 0) +
         (dumpData.mediaTracks?.length || 0) +
-        (dumpData.iptvChannels?.length || 0) +
         (dumpData.notes?.length || 0) +
         (dumpData.todos?.length || 0) +
         (dumpData.myPlanePics?.length || 0);
@@ -356,7 +354,6 @@ class DatabaseManager {
         (dumpData.socialPosts?.length || 0) +
         (dumpData.stickers?.length || 0) +
         (dumpData.mediaTracks?.length || 0) +
-        (dumpData.iptvChannels?.length || 0) +
         (dumpData.notes?.length || 0) +
         (dumpData.todos?.length || 0) +
         (dumpData.myPlanePics?.length || 0);

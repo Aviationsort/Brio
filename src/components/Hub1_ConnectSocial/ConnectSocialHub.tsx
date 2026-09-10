@@ -8,9 +8,10 @@ import { useApp } from '../../context/AppContext';
 import { Messaging } from './Messaging';
 import { SocialFeed } from './SocialFeed';
 import { StickersVault } from './StickersVault';
-import { MessageSquare, Sparkles, Smile, Bell, Search, User, Heart, MessageCircle, UserPlus, Info, X } from 'lucide-react';
+import { MessageSquare, Sparkles, Smile, Bell, Search, User, Heart, MessageCircle, UserPlus, Info, X, Trash2 } from 'lucide-react';
+import { type ChatContact } from '../../types';
 
-type SubTab = 'messaging' | 'social' | 'stickers';
+type SubTab = 'messaging' | 'social' | 'stickers' | 'contacts';
 type SearchTab = 'messages' | 'contacts' | 'posts';
 
 interface SearchResultMessage {
@@ -45,7 +46,7 @@ interface SearchResultPost {
 
 type SearchResult = SearchResultMessage | SearchResultContact | SearchResultPost;
 
-export const ConnectSocialHub: React.FC = () => {
+export const ConnectSocialHub: React.FC<{ initialSearchQuery?: string; onSearchOpened?: () => void }> = ({ initialSearchQuery, onSearchOpened }) => {
   const {
     t, user,
     notifications,
@@ -57,6 +58,10 @@ export const ConnectSocialHub: React.FC = () => {
     searchContacts,
     addConversation,
     updateConversation,
+    contacts,
+    addContact,
+    removeContact,
+    searchContactsByUsername,
   } = useApp();
 
   const [subTab, setSubTab] = useState<SubTab>('messaging');
@@ -66,6 +71,10 @@ export const ConnectSocialHub: React.FC = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [targetConversationId, setTargetConversationId] = useState<string | null>(null);
   const [targetPostId, setTargetPostId] = useState<string | null>(null);
+  const [contactSearch, setContactSearch] = useState('');
+  const [showAddContact, setShowAddContact] = useState(false);
+  const [newContactName, setNewContactName] = useState('');
+  const [selectedContactId, setSelectedContactId] = useState<string | null>(null);
 
   const notifRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -93,6 +102,15 @@ export const ConnectSocialHub: React.FC = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  useEffect(() => {
+    if (initialSearchQuery && initialSearchQuery.trim()) {
+      setShowSearch(true);
+      setGlobalSearch(initialSearchQuery.trim());
+      setSearchTab('messages');
+      if (onSearchOpened) onSearchOpened();
+    }
+  }, [initialSearchQuery, onSearchOpened]);
 
   const totalUnreadMessages = useMemo(() => {
     return conversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
@@ -188,6 +206,40 @@ export const ConnectSocialHub: React.FC = () => {
     setShowSearch(false);
     setGlobalSearch('');
   };
+
+  const handleAddContact = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newContactName.trim() || !user?.id) return;
+    const name = newContactName.trim();
+    const newContact: ChatContact = {
+      id: `contact-${Date.now()}`,
+      name,
+      avatar: `https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop`,
+      online: false,
+      bluetoothNearby: false,
+      signalStrength: undefined,
+      lastMessage: undefined,
+      lastSeen: undefined,
+      unreadCount: 0,
+      publicKeyFingerprint: `EC:${Math.floor(Math.random() * 89 + 10)}:${Math.floor(Math.random() * 89 + 10)}:FF`,
+      bio: undefined,
+    };
+    addContact(newContact);
+    setNewContactName('');
+    setShowAddContact(false);
+  };
+
+  const handleRemoveContact = (contactId: string) => {
+    removeContact(contactId);
+    if (selectedContactId === contactId) setSelectedContactId(null);
+  };
+
+  const handleStartChatWithContact = (contactId: string, contactName: string, contactAvatar: string) => {
+    handleContactResultClick(contactId, contactName, contactAvatar);
+  };
+
+  const filteredContacts = searchContactsByUsername(contactSearch);
+  const selectedContact = contacts.find(c => c.id === selectedContactId) || null;
 
   const handleNotificationClick = (notif: { id: string; type: string; data?: Record<string, any> }) => {
     markNotificationRead(notif.id);
@@ -453,6 +505,18 @@ export const ConnectSocialHub: React.FC = () => {
           <Smile className="w-4 h-4" />
           <span>Stickers</span>
         </button>
+
+        <button
+          onClick={() => setSubTab('contacts')}
+          className={`skeuo-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+            subTab === 'contacts'
+              ? 'bg-gradient-to-r from-[#C8102E] to-[#8B0000] text-white shadow-lg shadow-red-900/30 border border-red-400/40'
+              : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
+          }`}
+        >
+          <User className="w-4 h-4" />
+          <span>Contacts</span>
+        </button>
       </div>
 
       <div className="transition-all duration-300">
@@ -463,6 +527,130 @@ export const ConnectSocialHub: React.FC = () => {
           <SocialFeed highlightedPostId={targetPostId || undefined} />
         )}
         {subTab === 'stickers' && <StickersVault />}
+        {subTab === 'contacts' && (
+          <div className="skeuo-panel p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 skeuo-inset-panel border border-red-500/40 rounded-xl text-red-400">
+                  <User className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white drop-shadow-md">Contacts</h3>
+                  <p className="text-xs text-red-200/90 font-medium">{contacts.length} contacts</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAddContact(!showAddContact)}
+                className="skeuo-btn px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-lg flex items-center gap-1"
+              >
+                <UserPlus className="w-3.5 h-3.5" />
+                Add
+              </button>
+            </div>
+
+            {showAddContact && (
+              <form onSubmit={handleAddContact} className="p-3 bg-slate-900 border border-red-500/30 rounded-xl">
+                <input
+                  type="text"
+                  value={newContactName}
+                  onChange={(e) => setNewContactName(e.target.value)}
+                  placeholder="Enter username or name..."
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-red-500"
+                  autoFocus
+                />
+                <button
+                  type="submit"
+                  className="mt-2 skeuo-btn w-full py-1.5 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-lg"
+                >
+                  Add Contact
+                </button>
+              </form>
+            )}
+
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+              <input
+                type="text"
+                value={contactSearch}
+                onChange={(e) => setContactSearch(e.target.value)}
+                placeholder="Search contacts..."
+                className="w-full pl-8 pr-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white focus:outline-none focus:border-red-400"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                {filteredContacts.length === 0 ? (
+                  <p className="text-xs text-slate-500 text-center py-4">No contacts found</p>
+                ) : (
+                  filteredContacts.map(contact => (
+                    <button
+                      key={contact.id}
+                      onClick={() => setSelectedContactId(contact.id)}
+                      className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all ${
+                        selectedContactId === contact.id
+                          ? 'bg-slate-800/90 border border-slate-700 text-white shadow'
+                          : 'text-slate-300 hover:bg-slate-900/50 hover:text-white'
+                      }`}
+                    >
+                      <div className="relative shrink-0">
+                        <img src={contact.avatar} alt={contact.name} className="w-9 h-9 rounded-full object-cover" />
+                        {contact.online && (
+                          <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-slate-900 rounded-full" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold truncate">{contact.name}</p>
+                        <p className="text-[10px] text-slate-400 truncate">{contact.publicKeyFingerprint}</p>
+                      </div>
+                    </button>
+                  ))
+                )}
+              </div>
+              {selectedContact && (
+                <div className="md:col-span-2 bg-slate-900 border border-slate-700 rounded-xl p-5 space-y-4">
+                  <div className="flex items-center gap-4">
+                    <img src={selectedContact.avatar} alt={selectedContact.name} className="w-16 h-16 rounded-full object-cover border-2 border-red-500/30" />
+                    <div>
+                      <h3 className="text-lg font-bold text-white">{selectedContact.name}</h3>
+                      <p className="text-xs text-slate-400">{selectedContact.publicKeyFingerprint}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className={`w-2 h-2 rounded-full ${selectedContact.online ? 'bg-emerald-500' : 'bg-slate-500'}`} />
+                        <span className="text-xs text-slate-300">{selectedContact.online ? 'Online' : 'Offline'}</span>
+                      </div>
+                    </div>
+                  </div>
+                  {selectedContact.bio && (
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Bio</h4>
+                      <p className="text-xs text-slate-300">{selectedContact.bio}</p>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 pt-3 border-t border-slate-700">
+                    <button
+                      onClick={() => handleStartChatWithContact(selectedContact.id, selectedContact.name, selectedContact.avatar)}
+                      className="skeuo-btn flex-1 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-lg"
+                    >
+                      Start Chat
+                    </button>
+                    <button
+                      onClick={() => handleRemoveContact(selectedContact.id)}
+                      className="skeuo-btn p-2 text-red-400 hover:text-red-300 hover:bg-slate-800 rounded-lg"
+                      title="Remove contact"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+              {!selectedContact && (
+                <div className="md:col-span-2 bg-slate-900/50 border border-slate-800 rounded-xl flex items-center justify-center text-slate-500 text-xs py-12">
+                  Select a contact to view details
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

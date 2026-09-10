@@ -131,6 +131,8 @@ export const AviationTelemetryHub: React.FC = () => {
   const [pingHistoryArr, setPingHistoryArr] = useState<number[]>([]);
   const [downloadSamplesArr, setDownloadSamplesArr] = useState<number[]>([]);
   const [uploadSamplesArr, setUploadSamplesArr] = useState<number[]>([]);
+  const [dlTestSize, setDlTestSize] = useState<string>('2 MB');
+  const [ulTestSize, setUlTestSize] = useState<string>('0.5 MB');
 
   useEffect(() => {
     try {
@@ -177,11 +179,18 @@ export const AviationTelemetryHub: React.FC = () => {
       setPacketLoss(loss);
 
       const downloadSamples: number[] = [];
-      const dlChunks = [
-        'https://httpbin.org/bytes/524288',
-        'https://httpbin.org/bytes/524288',
-        'https://httpbin.org/bytes/524288',
-      ];
+      const conn = (navigator as any).connection;
+      let isWifiOrEthernet = false;
+      let isCellular = false;
+      if (conn) {
+        const type = conn.type || conn.effectiveType || 'unknown';
+        isWifiOrEthernet = type === 'wifi' || type === 'ethernet';
+        isCellular = ['cellular', '4g', '3g', '2g', 'slow-2g'].includes(type);
+      }
+      const dlChunks = isWifiOrEthernet
+        ? Array.from({ length: 3 }, () => 'https://httpbin.org/bytes/2359296')
+        : Array.from({ length: 2 }, () => 'https://httpbin.org/bytes/1048576');
+      setDlTestSize(isWifiOrEthernet ? '7 MB' : '2 MB');
       let totalDlBits = 0;
       let totalDlTime = 0;
 
@@ -206,11 +215,13 @@ export const AviationTelemetryHub: React.FC = () => {
       setDownloadSamplesArr(downloadSamples);
 
       const uploadSamples: number[] = [];
-      const ulSize = 256 * 1024;
+      const ulSize = isWifiOrEthernet ? 1024 * 1024 : 512 * 1024;
+      const ulChunks = isWifiOrEthernet ? 3 : 1;
+      setUlTestSize(isWifiOrEthernet ? '3 MB' : '0.5 MB');
       let totalUlBits = 0;
       let totalUlTime = 0;
 
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < ulChunks; i++) {
         const blob = new Blob([new Uint8Array(ulSize)], { type: 'application/octet-stream' });
         const start = performance.now();
         try {
@@ -320,9 +331,14 @@ export const AviationTelemetryHub: React.FC = () => {
           {/* Speed Test */}
           <div className="skeuo-card p-4 space-y-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Gauge className="w-4 h-4 text-red-400" />
-                <p className="text-xs font-bold text-white uppercase tracking-widest">Network Speed Test</p>
+               <div className="flex items-center gap-2">
+                 <Gauge className="w-4 h-4 text-red-400" />
+                 <p className="text-xs font-bold text-white uppercase tracking-widest">Network Speed Test</p>
+                 {(speedState === 'idle' || speedState === 'done') && (
+                   <span className="text-[10px] text-zinc-400 font-mono">
+                     {dlTestSize} DL + {ulTestSize} UL
+                   </span>
+                 )}
                 {testQuality && speedState === 'done' && (
                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                     testQuality === 'Excellent' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
@@ -421,7 +437,7 @@ export const AviationTelemetryHub: React.FC = () => {
             <p className="text-[10px] text-zinc-500 font-mono">
               {speedState === 'testing' ? 'Measuring... Please wait.' :
                speedState === 'done' ? `Test completed at ${testHistory[0]?.date}` :
-               'Max transfer per test: ~1.5 MB download + ~0.5 MB upload (multi-chunk)'}
+               `Max transfer per test: ~${dlTestSize || '2 MB'} download + ~${ulTestSize || '0.5 MB'} upload (multi-chunk)`}
             </p>
           </div>
 

@@ -7,6 +7,7 @@ export interface UIStrings {
   tagline: string;
   connectHub: string;
   mediaHub: string;
+  rssHub: string;
   arcadeHub: string;
   officeHub: string;
   telemetryHub: string;
@@ -22,7 +23,6 @@ export interface UIStrings {
   phoneDialer: string;
   stickers: string;
   nightcorePlayer: string;
-  iptvPlayer: string;
   rssReader: string;
   gamesArcade: string;
   pdfEditor: string;
@@ -358,11 +358,6 @@ export interface UIStrings {
   drawDeck: string;
   topDiscard: string;
   documentProcessing: string;
-  liveCustomIptvStreamTuner: string;
-  loadSampleStream: string;
-  clearList: string;
-  iptvStreamWaitingRoom: string;
-  noChannelsLoaded: string;
   customAudioStreamUrl: string;
   encryptedStickersVault: string;
   algorithmicSocialFeed: string;
@@ -381,8 +376,6 @@ export interface UIStrings {
   placeholderSearchRssContent: string;
   placeholderFilterNightcore: string;
   placeholderNightcoreStreamUrl: string;
-  placeholderIptvPlaylist: string;
-  placeholderSearchIptvChannels: string;
   placeholderEventReminderTitle: string;
   placeholderChannelRoomName: string;
   placeholderSendMessageEncrypted: string;
@@ -512,6 +505,7 @@ export const t: UIStrings = {
   tagline: 'Encrypted All-In-One Workstation',
   connectHub: 'Connect & Social',
   mediaHub: 'Media & Nightcore',
+  rssHub: 'RSS News',
   arcadeHub: 'Arcade & Games',
   officeHub: 'Office & Productivity',
   telemetryHub: 'Aviation & Telemetry',
@@ -527,7 +521,6 @@ export const t: UIStrings = {
   phoneDialer: 'Call Dialer',
   stickers: 'Stickers Vault',
   nightcorePlayer: 'Nightcore Player',
-  iptvPlayer: 'IPTV Live Streams',
   rssReader: 'RSS News Reader',
   gamesArcade: 'Arcade Games',
   pdfEditor: 'PDF Annotator & Editor',
@@ -838,11 +831,6 @@ export const t: UIStrings = {
   drawDeck: 'Draw Deck',
   topDiscard: 'Top Discard',
   documentProcessing: 'Document Processing',
-  liveCustomIptvStreamTuner: 'Live Custom IPTV Stream Tuner',
-  loadSampleStream: 'Load Sample Stream',
-  clearList: 'Clear List',
-  iptvStreamWaitingRoom: 'IPTV Stream Waiting Room',
-  noChannelsLoaded: 'No Channels Loaded',
   customAudioStreamUrl: 'Custom Audio Stream URL',
   encryptedStickersVault: 'Encrypted Stickers Vault',
   algorithmicSocialFeed: 'Algorithmic Social Feed',
@@ -909,8 +897,6 @@ export const t: UIStrings = {
   placeholderSearchRssContent: 'Search titles, summaries, sources...',
   placeholderFilterNightcore: 'Filter Nightcore streams...',
   placeholderNightcoreStreamUrl: 'Nightcore audio/video stream URL...',
-  placeholderIptvPlaylist: 'IPTV M3U playlist URL...',
-  placeholderSearchIptvChannels: 'Search IPTV channels...',
   placeholderEventReminderTitle: 'Reminder title...',
   placeholderChannelRoomName: 'Channel / room name...',
   placeholderSendMessageEncrypted: 'Send an encrypted message...',

@@ -148,11 +148,22 @@ body {
   transition: background 0.15s ease;
   position: relative;
   overflow: hidden;
+  transform: translateZ(0);
 }
 
 .liquid-glass:hover {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.14);
+}
+
+.liquid-glass--accent {
+  background: rgba(200, 16, 46, 0.15);
+  border-color: rgba(200, 16, 46, 0.3);
+}
+
+.liquid-glass--accent:hover {
+  background: rgba(200, 16, 46, 0.25);
+  border-color: rgba(200, 16, 46, 0.5);
 }
 
 /* ---------- Liquid Glass Button ---------- */
@@ -165,6 +176,7 @@ body {
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
   transition: background 0.15s ease;
   cursor: pointer;
+  transform: translateZ(0);
 }
 
 .liquid-glass-btn:hover {
@@ -173,8 +185,34 @@ body {
 }
 
 .liquid-glass-btn:active {
-  transform: scale(0.97);
+  transform: translateZ(0) scale(0.97);
   background: rgba(255, 255, 255, 0.04);
+}
+
+@media (max-width: 480px) {
+  .liquid-glass,
+  .liquid-glass-btn {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  }
+}
+
+@media (max-width: 360px) {
+  .liquid-glass,
+  .liquid-glass-btn {
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liquid-glass,
+  .liquid-glass-btn {
+    transition: none !important;
+    transform: none !important;
+  }
 }
 
 /* ---------- Frutiger Aero Panel ---------- */
@@ -2731,4 +2769,235 @@ body {
   background: linear-gradient(180deg, rgba(200, 16, 46, 0.3) 0%, rgba(139, 0, 0, 0.35) 100%);
   border-color: rgba(200, 16, 46, 0.5);
   box-shadow: 0 0 12px rgba(200, 16, 46, 0.2);
+}
+
+/* ---------- Frutiger Aero Clock ---------- */
+.aero-clock-face {
+  background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
+  border: 3px solid #fff;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    inset 0 2px 4px rgba(255, 255, 255, 0.8),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.aero-clock-face::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.aero-clock-hand {
+  background: linear-gradient(to top, #1a1a2e, #16213e);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.aero-clock-hand-hour {
+  width: 4px;
+  height: 60px;
+}
+
+.aero-clock-hand-minute {
+  width: 3px;
+  height: 80px;
+  background: linear-gradient(to top, #1a1a2e, #0f3460);
+}
+
+.aero-clock-hand-second {
+  width: 2px;
+  height: 90px;
+  background: linear-gradient(to top, #e94560, #ff6b6b);
+  box-shadow: 0 0 6px rgba(233, 69, 96, 0.5);
+}
+
+.aero-clock-marker {
+  position: absolute;
+  width: 2px;
+  height: 8px;
+  background: #495057;
+  border-radius: 1px;
+}
+
+.aero-clock-marker-hour {
+  width: 3px;
+  height: 14px;
+  background: #212529;
+}
+
+.aero-clock-number {
+  position: absolute;
+  font-size: 14px;
+  font-weight: 700;
+  color: #212529;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.aero-clock-center {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #e94560, #c23152);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================================
+   MOBILE / CELLPHONE RESPONSIVE BREAKPOINTS
+   ============================================================ */
+
+/* ---------- Tap highlight removal ---------- */
+button, a, input, select, textarea, [role="button"], [role="link"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------- 480px breakpoint: reduce density by ~20% ---------- */
+@media (max-width: 480px) {
+  html {
+    font-size: 15px;
+  }
+
+  /* Touch targets at least 44px */
+  button,
+  [role="button"],
+  input[type="submit"],
+  input[type="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Reduce padding/spacing ~20% */
+  .p-6 { padding: 0.75rem !important; }
+  .p-5 { padding: 0.75rem !important; }
+  .p-4 { padding: 0.6rem !important; }
+  .p-3 { padding: 0.5rem !important; }
+  .gap-6 { gap: 0.75rem !important; }
+  .gap-4 { gap: 0.6rem !important; }
+  .gap-3 { gap: 0.5rem !important; }
+  .space-y-4 > * + * { margin-top: 0.6rem !important; }
+  .space-y-3 > * + * { margin-top: 0.5rem !important; }
+
+  /* Smaller tile labels on mobile */
+  .home-tile-label {
+    font-size: 0.6rem;
+  }
+
+  .home-tile--compact .home-tile-label {
+    font-size: 0.55rem;
+  }
+
+  /* Reduce skeuomorphic shadow/border weight for performance */
+  .skeuo-panel,
+  .skeuo-card,
+  .skeuo-inset-panel {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+  }
+
+  /* Faster transitions */
+  .skeuo-btn,
+  .skeuo-btn-primary,
+  .skeuo-card,
+  .skeuo-panel,
+  .home-tile,
+  .home-featured-card,
+  .liquid-glass,
+  .liquid-glass-btn {
+    transition-duration: 0.1s !important;
+  }
+
+  /* Shorter animations */
+  .animate-spin { animation-duration: 3s !important; }
+  .animate-pulse { animation-duration: 2s !important; }
+  .animate-bounce { animation-duration: 1.5s !important; }
+
+  /* Stack featured cards vertically on very small screens */
+  .home-featured {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Make home-quick-actions wrap better */
+  .home-quick-actions {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .home-quick-actions .liquid-glass,
+  .home-quick-actions .liquid-glass-btn {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 0.65rem;
+    padding: 0.4rem 0.6rem;
+  }
+}
+
+/* ---------- 360px breakpoint: further reduce by ~15% ---------- */
+@media (max-width: 360px) {
+  html {
+    font-size: 14px;
+  }
+
+  .p-6 { padding: 0.6rem !important; }
+  .p-5 { padding: 0.6rem !important; }
+  .p-4 { padding: 0.5rem !important; }
+  .p-3 { padding: 0.4rem !important; }
+  .gap-6 { gap: 0.6rem !important; }
+  .gap-4 { gap: 0.5rem !important; }
+  .gap-3 { gap: 0.4rem !important; }
+  .space-y-4 > * + * { margin-top: 0.5rem !important; }
+  .space-y-3 > * + * { margin-top: 0.4rem !important; }
+
+  .home-tile-label {
+    font-size: 0.5rem;
+  }
+
+  .home-tile--compact .home-tile-label {
+    font-size: 0.45rem;
+  }
+
+  .home-tile-icon {
+    width: 2rem !important;
+    height: 2rem !important;
+  }
+
+  .skeuo-panel,
+  .skeuo-card,
+  .skeuo-inset-panel {
+    box-shadow: none !important;
+    border-width: 1px !important;
+  }
+
+  .skeuo-btn,
+  .skeuo-btn-primary,
+  .skeuo-card,
+  .skeuo-panel,
+  .home-tile,
+  .home-featured-card,
+  .liquid-glass,
+  .liquid-glass-btn {
+    transition-duration: 0.05s !important;
+  }
+
+  .animate-spin { animation-duration: 4s !important; }
+  .animate-pulse { animation-duration: 3s !important; }
+
+  .home-quick-actions .liquid-glass,
+  .home-quick-actions .liquid-glass-btn {
+    font-size: 0.6rem;
+    padding: 0.35rem 0.5rem;
+  }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.2s ease-out;
 }

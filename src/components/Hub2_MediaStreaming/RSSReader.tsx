@@ -45,6 +45,24 @@ import {
   Newspaper,
   TrendingUp,
   Zap,
+  Download,
+  PenLine,
+  Star,
+  Target,
+  Trash2,
+  Printer,
+  Keyboard,
+  WifiOff,
+  RefreshCcw,
+  BookmarkPlus,
+  Highlighter,
+  FileDown,
+  Volume2,
+  VolumeX,
+  FileText,
+  Flame,
+  Upload,
+  BarChart3,
 } from 'lucide-react';
 
 const READING_TIME_WPM = 200;
@@ -80,8 +98,47 @@ export const RSSReader: React.FC = () => {
   const [showShareMenu, setShowShareMenu] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [swipeState, setSwipeState] = useState<{ id: string; startX: number; currentX: number } | null>(null);
+  const [sortMode, setSortMode] = useState<'date' | 'source'>('date');
+  const [readerArticle, setReaderArticle] = useState<NewsItem | null>(null);
+  const [articleNotes, setArticleNotes] = useState<Record<string, string>>({});
+  const [exportFormat, setExportFormat] = useState<'json' | 'text'>('json');
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [fontSize, setFontSize] = useState<'sm' | 'md' | 'lg'>('md');
+  const [highlightMode, setHighlightMode] = useState(false);
+  const [highlights, setHighlights] = useState<Record<string, string[]>>({});
+  const [dailyDigest, setDailyDigest] = useState<NewsItem[]>([]);
+  const [showDigest, setShowDigest] = useState(false);
+  const [bookmarkFolders, setBookmarkFolders] = useState<Record<string, NewsItem[]>>({});
+  const [newFolderName, setNewFolderName] = useState('');
+  const [showFolderModal, setShowFolderModal] = useState(false);
+  const [activeBookmarkFolder, setActiveBookmarkFolder] = useState<string | null>(null);
+  const [feedHealth, setFeedHealth] = useState<Record<string, { success: number; fail: number; lastChecked: string }>>({});
+  const [duplicateGroups, setDuplicateGroups] = useState<Record<string, string[]>>({});
+  const [showDuplicates, setShowDuplicates] = useState(false);
+  const [opmlImportUrl, setOpmlImportUrl] = useState('');
+  const [showOpmlModal, setShowOpmlModal] = useState(false);
+  const [readingGoal, setReadingGoal] = useState(10);
+  const [articlesReadToday, setArticlesReadToday] = useState(0);
+  const [showGoalModal, setShowGoalModal] = useState(false);
+  const [streak, setStreak] = useState(0);
+  const [lastReadDate, setLastReadDate] = useState('');
+  const [showStats, setShowStats] = useState(false);
+  const [starredIds, setStarredIds] = useState<Set<string>>(new Set());
+  const [ratingMode, setRatingMode] = useState(false);
+  const [ratings, setRatings] = useState<Record<string, number>>({});
+  const [showBulkActions, setShowBulkActions] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
+  const [printMode, setPrintMode] = useState(false);
+  const [showShareSheet, setShowShareSheet] = useState(false);
+  const [shareTarget, setShareTarget] = useState<NewsItem | null>(null);
+  const [showImagePreview, setShowImagePreview] = useState<string | null>(null);
+  const [textToSpeech, setTextToSpeech] = useState(false);
+  const [speechUtterance, setSpeechUtterance] = useState<SpeechSynthesisUtterance | null>(null);
+  const [offlineQueue, setOfflineQueue] = useState<NewsItem[]>([]);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
-  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const refreshTimerRef = useRef<number | null>(null);
   const shareMenuRef = useRef<HTMLDivElement | null>(null);
 
@@ -207,6 +264,63 @@ export const RSSReader: React.FC = () => {
   }, [readArticleIds]);
 
   useEffect(() => {
+    try {
+      const raw = localStorage.getItem('brio_rss_notes');
+      if (raw) setArticleNotes(JSON.parse(raw));
+    } catch { /* ignore */ }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('brio_rss_notes', JSON.stringify(articleNotes));
+  }, [articleNotes]);
+
+  useEffect(() => {
+    const loadExtras = async () => {
+      try {
+        const raw = localStorage.getItem('brio_rss_extras');
+        if (raw) {
+          const data = JSON.parse(raw);
+          setHighlights(data.highlights || {});
+          setBookmarkFolders(data.bookmarkFolders || {});
+          setStarredIds(new Set(data.starredIds || []));
+          setRatings(data.ratings || {});
+          setReadingGoal(data.readingGoal || 10);
+          setStreak(data.streak || 0);
+          setLastReadDate(data.lastReadDate || '');
+          setFontSize(data.fontSize || 'md');
+          setOfflineQueue(data.offlineQueue || []);
+        }
+      } catch { /* ignore */ }
+    };
+    loadExtras();
+  }, []);
+
+  useEffect(() => {
+    const payload = { highlights, bookmarkFolders, starredIds: [...starredIds], ratings, readingGoal, streak, lastReadDate, fontSize, offlineQueue };
+    localStorage.setItem('brio_rss_extras', JSON.stringify(payload));
+  }, [highlights, bookmarkFolders, starredIds, ratings, readingGoal, streak, lastReadDate, fontSize, offlineQueue]);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (lastReadDate && lastReadDate !== new Date().toDateString()) {
+      setStreak((s) => s + 1);
+      setLastReadDate(new Date().toDateString());
+    } else if (!lastReadDate) {
+      setLastReadDate(new Date().toDateString());
+    }
+  }, [articlesReadToday, lastReadDate]);
+
+  useEffect(() => {
     if (refreshInterval > 0) {
       refreshTimerRef.current = window.setInterval(() => {
         if (activeTab !== 'saved') loadNews(activeTab);
@@ -312,6 +426,205 @@ export const RSSReader: React.FC = () => {
     });
   };
 
+  const toggleStar = (id: string) => {
+    setStarredIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const rateArticle = (id: string, rating: number) => {
+    setRatings((prev) => ({ ...prev, [id]: rating }));
+  };
+
+  const toggleHighlight = (id: string, text: string) => {
+    setHighlights((prev) => {
+      const existing = prev[id] || [];
+      const next = existing.includes(text) ? existing.filter((t) => t !== text) : [...existing, text];
+      return { ...prev, [id]: next };
+    });
+  };
+
+  const addBookmarkFolder = () => {
+    if (!newFolderName.trim()) return;
+    setBookmarkFolders((prev) => ({ ...prev, [newFolderName.trim()]: [] }));
+    setNewFolderName('');
+    setShowFolderModal(false);
+  };
+
+  const moveToFolder = (item: NewsItem, folder: string) => {
+    setBookmarkFolders((prev) => ({ ...prev, [folder]: [...(prev[folder] || []), item] }));
+    showToast('Moved', `Added to folder: ${folder}`, 'success');
+  };
+
+  const speakArticle = (item: NewsItem) => {
+    if (!('speechSynthesis' in window)) {
+      showToast('Unsupported', 'Text-to-speech is not supported in this browser', 'error');
+      return;
+    }
+    if (textToSpeech && speechUtterance) {
+      window.speechSynthesis.cancel();
+      setTextToSpeech(false);
+      setSpeechUtterance(null);
+      return;
+    }
+    const utterance = new SpeechSynthesisUtterance(`${item.title}. ${item.summary}`);
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+    utterance.onend = () => {
+      setTextToSpeech(false);
+      setSpeechUtterance(null);
+    };
+    window.speechSynthesis.speak(utterance);
+    setSpeechUtterance(utterance);
+    setTextToSpeech(true);
+  };
+
+  const exportOpml = () => {
+    const items = currentList;
+    const opml = `<?xml version="1.0" encoding="UTF-8"?>
+<opml version="2.0">
+  <head>
+    <title>Brio RSS Feeds</title>
+  </head>
+  <body>
+    ${sources.map((s) => `<outline text="${s.name}" type="rss" xmlUrl="${s.url}" />`).join('\n    ')}
+  </body>
+</opml>`;
+    const blob = new Blob([opml], { type: 'application/xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `brio-rss-${new Date().toISOString().slice(0, 10)}.opml`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Exported', 'OPML file exported successfully', 'success');
+  };
+
+  const importOpml = async () => {
+    if (!opmlImportUrl.trim()) return;
+    try {
+      const res = await fetchSingleFeed(opmlImportUrl.trim());
+      if (res.items.length > 0) {
+        setArticles((prev) => [...res.items, ...prev]);
+        setSources((prev) => [...prev, res.source]);
+        showToast('Imported', `Imported ${res.items.length} articles from OPML feed`, 'success');
+        setOpmlImportUrl('');
+        setShowOpmlModal(false);
+      } else {
+        throw new Error('No valid RSS items found.');
+      }
+    } catch {
+      showToast('Import Failed', 'Unable to import OPML feed', 'error');
+    }
+  };
+
+  const detectDuplicates = () => {
+    const groups: Record<string, string[]> = {};
+    currentList.forEach((item) => {
+      const key = item.title.toLowerCase().trim().slice(0, 40);
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(item.id);
+    });
+    const dupes = Object.fromEntries(Object.entries(groups).filter(([, ids]) => ids.length > 1));
+    setDuplicateGroups(dupes);
+    setShowDuplicates(Object.keys(dupes).length > 0);
+    showToast('Scan Complete', `Found ${Object.keys(dupes).length} duplicate groups`, 'info');
+  };
+
+  const toggleBulkSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const bulkMarkRead = () => {
+    setReadArticleIds((prev) => {
+      const next = new Set(prev);
+      selectedIds.forEach((id) => next.add(id));
+      return next;
+    });
+    showToast('Bulk Update', `Marked ${selectedIds.size} articles as read`, 'success');
+    setSelectedIds(new Set());
+    setShowBulkActions(false);
+  };
+
+  const bulkStar = () => {
+    selectedIds.forEach((id) => setStarredIds((prev) => new Set(prev).add(id)));
+    showToast('Bulk Update', `Starred ${selectedIds.size} articles`, 'success');
+    setSelectedIds(new Set());
+    setShowBulkActions(false);
+  };
+
+  const bulkArchive = () => {
+    setArticles((prev) => prev.filter((a) => !selectedIds.has(a.id)));
+    showToast('Bulk Archive', `Archived ${selectedIds.size} articles`, 'success');
+    setSelectedIds(new Set());
+    setShowBulkActions(false);
+  };
+
+  const incrementReadCount = () => {
+    setArticlesReadToday((prev) => {
+      const next = prev + 1;
+      if (next >= readingGoal) {
+        showToast('Goal Reached', `You read ${readingGoal} articles today!`, 'success');
+      }
+      return next;
+    });
+  };
+
+  const shareArticle = async (item: NewsItem) => {
+    setShareTarget(item);
+    setShowShareSheet(true);
+  };
+
+  const openImagePreview = (url: string) => {
+    setShowImagePreview(url);
+  };
+
+  const togglePrintMode = () => {
+    setPrintMode((prev) => !prev);
+    showToast('Print Mode', printMode ? 'Exited print mode' : 'Entered print mode - use browser print', 'info');
+  };
+
+  const adjustFontSize = (size: 'sm' | 'md' | 'lg') => {
+    setFontSize(size);
+    showToast('Font Size', `Font size set to ${size}`, 'info');
+  };
+
+  const toggleKeyboardShortcuts = () => {
+    setShowKeyboardShortcuts((prev) => !prev);
+  };
+
+  const addToOfflineQueue = (item: NewsItem) => {
+    setOfflineQueue((prev) => {
+      if (prev.some((q) => q.id === item.id)) return prev;
+      return [...prev, item];
+    });
+    showToast('Offline Queue', 'Article saved for offline reading', 'success');
+  };
+
+  const clearOfflineQueue = () => {
+    setOfflineQueue([]);
+    showToast('Cleared', 'Offline queue cleared', 'info');
+  };
+
+  const generateDailyDigest = () => {
+    const today = new Date().toDateString();
+    const todays = articles.filter((a) => new Date(a.date).toDateString() === today || a._ts && new Date(a._ts).toDateString() === today);
+    const top = todays.sort((a, b) => (b._ts || 0) - (a._ts || 0)).slice(0, 10);
+    setDailyDigest(top);
+    setShowDigest(true);
+  };
+
+  const createBookmarkFolder = () => {
+    setShowFolderModal(true);
+  };
+
   const markAsRead = (id: string) => {
     setReadArticleIds((prev) => new Set(prev).add(id));
   };
@@ -328,6 +641,42 @@ export const RSSReader: React.FC = () => {
 
   const copyLink = (url: string) => {
     navigator.clipboard.writeText(url).then(() => showToast('Copied', 'Link copied to clipboard', 'success'));
+  };
+
+  const openReader = (item: NewsItem) => {
+    setReaderArticle(item);
+    markAsRead(item.id);
+  };
+
+  const saveNote = (id: string, text: string) => {
+    setArticleNotes((prev) => ({ ...prev, [id]: text }));
+  };
+
+  const exportArticles = () => {
+    const list = activeTab === 'saved' ? savedArticles : activeTab === 'readlater' ? readLater : articles;
+    if (!list.length) {
+      showToast('Nothing to export', 'No articles available to export', 'info');
+      return;
+    }
+    let content = '';
+    let mime = 'text/plain';
+    let ext = 'txt';
+    if (exportFormat === 'json') {
+      content = JSON.stringify(list.map(({ id, title, summary, date, url, source, category }) => ({ id, title, summary, date, url, source, category })), null, 2);
+      mime = 'application/json';
+      ext = 'json';
+    } else {
+      content = list.map((a) => `[${a.date}] ${a.source} - ${a.title}\n${a.summary}\n${a.url}\n`).join('\n');
+    }
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `rss-export-${new Date().toISOString().slice(0, 10)}.${ext}`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Exported', `Articles exported as ${ext.toUpperCase()}`, 'success');
+    setShowExportMenu(false);
   };
 
   const currentList = activeTab === 'saved' ? savedArticles : activeTab === 'readlater' ? readLater : articles;
@@ -348,8 +697,41 @@ export const RSSReader: React.FC = () => {
     return counts;
   }, [currentList]);
 
-  const visibleArticles = filteredArticles.slice(0, visibleCount);
+  const visibleArticles = useMemo(() => {
+    const sorted = [...filteredArticles].map((article, index) => ({ ...article, _originalIndex: index }));
+    sorted.sort((a, b) => {
+      if (sortMode === 'date') {
+        const dateA = new Date(a.date).getTime() || a._ts || 0;
+        const dateB = new Date(b.date).getTime() || b._ts || 0;
+        const cmp = dateB - dateA;
+        return cmp !== 0 ? cmp : a._originalIndex - b._originalIndex;
+      } else {
+        const sourceA = a.source.toLowerCase();
+        const sourceB = b.source.toLowerCase();
+        const cmp = sourceA < sourceB ? -1 : sourceA > sourceB ? 1 : 0;
+        return cmp !== 0 ? cmp : a._originalIndex - b._originalIndex;
+      }
+    });
+    return sorted.slice(0, visibleCount);
+  }, [filteredArticles, sortMode, visibleCount]);
   const hasMore = visibleCount < filteredArticles.length;
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!readerArticle) return;
+      if (e.key === 'Escape') setReaderArticle(null);
+      if (e.key === 'ArrowRight' || e.key === 'j') {
+        const idx = visibleArticles.findIndex((a) => a.id === readerArticle.id);
+        if (idx >= 0 && idx < visibleArticles.length - 1) setReaderArticle(visibleArticles[idx + 1]);
+      }
+      if (e.key === 'ArrowLeft' || e.key === 'k') {
+        const idx = visibleArticles.findIndex((a) => a.id === readerArticle.id);
+        if (idx > 0) setReaderArticle(visibleArticles[idx - 1]);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [readerArticle, visibleArticles]);
 
   const successfulSources = sources.filter((s) => s.status === 'success');
   const failedSources = sources.filter((s) => s.status === 'failed');
@@ -380,7 +762,9 @@ export const RSSReader: React.FC = () => {
     const isSaved = savedArticles.some((a) => a.id === art.id);
     const isReadLater = readLater.some((a) => a.id === art.id);
     const isRead = readArticleIds.has(art.id);
+    const isStarred = starredIds.has(art.id);
     const readingTime = calculateReadingTime(art.summary + ' ' + art.title);
+    const userRating = ratings[art.id] || 0;
 
     let domain = '';
     try {
@@ -393,19 +777,30 @@ export const RSSReader: React.FC = () => {
     const fallbackImage = art.imageUrl || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&auto=format&fit=crop';
 
     const isNewlyLoaded = recentlyLoaded.includes(art.source);
+    const cardBase = `group flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer hover:bg-white/5 ${
+      isRead ? 'bg-white/5 border-white/10' : 'bg-white/[0.02] border-white/5'
+    } ${isNewlyLoaded ? 'animate-slideIn' : ''}`;
+    const fontSizeClass = fontSize === 'lg' ? 'text-base' : fontSize === 'sm' ? 'text-[11px]' : 'text-sm';
 
     if (viewMode === 'compact') {
       return (
         <div
           key={art.id}
-          className={`group flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer hover:bg-white/5 ${
-            isRead ? 'bg-white/5 border-white/10' : 'bg-white/[0.02] border-white/5'
-          } ${isNewlyLoaded ? 'animate-slideIn' : ''}`}
+          className={cardBase}
           onClick={() => {
             markAsRead(art.id);
+            incrementReadCount();
             window.open(art.url, '_blank', 'noopener,noreferrer');
           }}
         >
+          {showBulkActions && (
+            <input
+              type="checkbox"
+              checked={selectedIds.has(art.id)}
+              onChange={(e) => { e.stopPropagation(); toggleBulkSelect(art.id); }}
+              className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-red-500 focus:ring-red-500 cursor-pointer"
+            />
+          )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <span className={`px-1.5 py-0.5 rounded text-[9px] font-mono font-bold border ${getSourceBadgeColor(art.category)}`}>
@@ -413,12 +808,32 @@ export const RSSReader: React.FC = () => {
               </span>
               <span className="text-[10px] text-slate-500 font-mono truncate">{art.source}</span>
               <span className="text-[10px] text-slate-600 font-mono">{readingTime} min</span>
+              {isStarred && <Star className="w-3 h-3 text-amber-400 fill-amber-400" />}
+              {userRating > 0 && <span className="text-[10px] text-amber-300 font-mono">★{userRating}</span>}
             </div>
-            <h4 className={`text-sm font-semibold truncate ${isRead ? 'text-slate-500' : 'text-white'}`}>
+            <h4 className={`${fontSizeClass} font-semibold truncate ${isRead ? 'text-slate-500' : 'text-white'}`}>
               {art.title}
             </h4>
+            {(highlights[art.id] || []).length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-1">
+                {(highlights[art.id] || []).slice(0, 3).map((h, i) => (
+                  <span key={i} className="px-1.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[9px] font-mono">
+                    {h}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-1 shrink-0">
+            <button
+              onClick={(e) => { e.stopPropagation(); openReader(art); }}
+              className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+                isRead ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'border-transparent text-slate-500 hover:text-white'
+              }`}
+              title="Read in app"
+            >
+              <Eye className="w-3.5 h-3.5" />
+            </button>
             <button
               onClick={(e) => { e.stopPropagation(); toggleReadLater(art); }}
               className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
@@ -426,6 +841,29 @@ export const RSSReader: React.FC = () => {
               }`}
             >
               <BookMarked className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); toggleStar(art.id); }}
+              className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+                isStarred ? 'bg-amber-500/20 border-amber-500/40 text-amber-400' : 'border-transparent text-slate-500 hover:text-white'
+              }`}
+              title="Star"
+            >
+              <Star className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); speakArticle(art); }}
+              className={`p-1.5 rounded-lg border transition-all cursor-pointer ${textToSpeech ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'border-transparent text-slate-500 hover:text-white'}`}
+              title="Text-to-speech"
+            >
+              {textToSpeech ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); addToOfflineQueue(art); }}
+              className="p-1.5 rounded-lg border border-transparent text-slate-500 hover:text-white cursor-pointer"
+              title="Save offline"
+            >
+              <WifiOff className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); toggleSaveArticle(art); }}
@@ -447,6 +885,7 @@ export const RSSReader: React.FC = () => {
           className={`group rounded-2xl border overflow-hidden transition-all cursor-pointer hover:border-white/20 bg-white/[0.02] border-white/5 ${isNewlyLoaded ? 'animate-slideIn' : ''}`}
           onClick={() => {
             markAsRead(art.id);
+            incrementReadCount();
             window.open(art.url, '_blank', 'noopener,noreferrer');
           }}
         >
@@ -461,6 +900,11 @@ export const RSSReader: React.FC = () => {
             <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-slate-950/80 backdrop-blur border border-white/10 text-[9px] font-mono font-bold">
               {art.category}
             </span>
+            {isStarred && (
+              <span className="absolute top-2 right-2">
+                <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+              </span>
+            )}
           </div>
           <div className="p-3 space-y-2">
             <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-mono">
@@ -468,17 +912,45 @@ export const RSSReader: React.FC = () => {
               <span>{art.date}</span>
               <span className="text-slate-600">·</span>
               <span>{readingTime} min</span>
+              {userRating > 0 && <span className="text-amber-300">★{userRating}</span>}
             </div>
             <h4 className="text-sm font-semibold text-white leading-snug line-clamp-2 group-hover:text-red-300 transition-colors">
               {art.title}
             </h4>
             <p className="text-xs text-slate-400 line-clamp-2">{art.summary}</p>
+            {(highlights[art.id] || []).length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {(highlights[art.id] || []).slice(0, 3).map((h, i) => (
+                  <span key={i} className="px-1.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[9px] font-mono">
+                    {h}
+                  </span>
+                ))}
+              </div>
+            )}
             <div className="flex items-center justify-between pt-2">
               <div className="flex items-center gap-1.5">
                 <img src={providerLogo} alt={domain} className="w-3.5 h-3.5 rounded-full" />
                 <span className="text-[10px] text-slate-400 truncate max-w-[80px]">{domain}</span>
               </div>
               <div className="flex items-center gap-1">
+                <button
+                  onClick={(e) => { e.stopPropagation(); openReader(art); }}
+                  className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+                    isRead ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'border-white/10 text-slate-400 hover:text-white'
+                  }`}
+                  title="Read in app"
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); toggleStar(art.id); }}
+                  className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+                    isStarred ? 'bg-amber-500/20 border-amber-500/40 text-amber-400' : 'border-white/10 text-slate-400 hover:text-white'
+                  }`}
+                  title="Star"
+                >
+                  <Star className="w-3.5 h-3.5" />
+                </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); toggleSaveArticle(art); }}
                   className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
@@ -500,10 +972,21 @@ export const RSSReader: React.FC = () => {
         className={`group rounded-2xl border overflow-hidden transition-all cursor-pointer hover:border-white/20 bg-white/[0.02] border-white/5 ${isNewlyLoaded ? 'animate-slideIn' : ''}`}
         onClick={() => {
           markAsRead(art.id);
+          incrementReadCount();
           window.open(art.url, '_blank', 'noopener,noreferrer');
         }}
       >
         <div className="flex gap-4 p-4">
+          {showBulkActions && (
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                checked={selectedIds.has(art.id)}
+                onChange={(e) => { e.stopPropagation(); toggleBulkSelect(art.id); }}
+                className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-red-500 focus:ring-red-500 cursor-pointer"
+              />
+            </div>
+          )}
           <div className="relative w-32 h-24 rounded-xl overflow-hidden bg-slate-950 shrink-0">
             <img
               src={fallbackImage}
@@ -512,6 +995,11 @@ export const RSSReader: React.FC = () => {
               onError={(e) => { (e.target as HTMLImageElement).src = fallbackImage; }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 to-transparent" />
+            {isStarred && (
+              <div className="absolute top-2 right-2">
+                <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+              </div>
+            )}
           </div>
           <div className="flex-1 min-w-0 space-y-2">
             <div className="flex items-center gap-2">
@@ -524,11 +1012,22 @@ export const RSSReader: React.FC = () => {
                   Read
                 </span>
               )}
+              {isStarred && <Star className="w-3 h-3 text-amber-400 fill-amber-400" />}
+              {userRating > 0 && <span className="text-[10px] text-amber-300 font-mono">★{userRating}</span>}
             </div>
-            <h4 className="text-sm font-semibold text-white leading-snug line-clamp-2 group-hover:text-red-300 transition-colors">
+            <h4 className={`${fontSizeClass} font-semibold text-white leading-snug line-clamp-2 group-hover:text-red-300 transition-colors`}>
               {art.title}
             </h4>
             <p className="text-xs text-slate-400 line-clamp-2">{art.summary}</p>
+            {(highlights[art.id] || []).length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {(highlights[art.id] || []).slice(0, 3).map((h, i) => (
+                  <span key={i} className="px-1.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[9px] font-mono">
+                    {h}
+                  </span>
+                ))}
+              </div>
+            )}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 text-[10px] text-slate-500 font-mono">
                 <span className="flex items-center gap-1">
@@ -538,6 +1037,38 @@ export const RSSReader: React.FC = () => {
                 <span>{readingTime} min read</span>
               </div>
               <div className="flex items-center gap-1">
+                <button
+                  onClick={(e) => { e.stopPropagation(); openReader(art); }}
+                  className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+                    isRead ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'border-white/10 text-slate-400 hover:text-white'
+                  }`}
+                  title="Read in app"
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); toggleStar(art.id); }}
+                  className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+                    isStarred ? 'bg-amber-500/20 border-amber-500/40 text-amber-400' : 'border-white/10 text-slate-400 hover:text-white'
+                  }`}
+                  title="Star"
+                >
+                  <Star className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); speakArticle(art); }}
+                  className={`p-1.5 rounded-lg border transition-all cursor-pointer ${textToSpeech ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'border-white/10 text-slate-400 hover:text-white'}`}
+                  title="Text-to-speech"
+                >
+                  {textToSpeech ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); addToOfflineQueue(art); }}
+                  className="p-1.5 rounded-lg border border-white/10 text-slate-400 hover:text-white cursor-pointer"
+                  title="Save offline"
+                >
+                  <WifiOff className="w-3.5 h-3.5" />
+                </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); toggleReadLater(art); }}
                   className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
@@ -570,6 +1101,18 @@ export const RSSReader: React.FC = () => {
                         <Copy className="w-3.5 h-3.5" /> {t.copyLink}
                       </button>
                       <button
+                        onClick={(e) => { e.stopPropagation(); shareArticle(art); setShowShareMenu(null); }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+                      >
+                        <Share2 className="w-3.5 h-3.5" /> Share
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); addToOfflineQueue(art); setShowShareMenu(null); }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+                      >
+                        <WifiOff className="w-3.5 h-3.5" /> Save Offline
+                      </button>
+                      <button
                         onClick={(e) => { e.stopPropagation(); window.open(art.url, '_blank', 'noopener,noreferrer'); setShowShareMenu(null); }}
                         className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800 rounded-lg cursor-pointer"
                       >
@@ -591,7 +1134,7 @@ export const RSSReader: React.FC = () => {
   return (
     <div className={`space-y-4 rounded-3xl transition-colors duration-300 ${readerClasses}`}>
       {/* Header */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 shadow-2xl">
+      <div className="liquid-glass p-5">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-gradient-to-br from-red-500/20 to-red-500/20 border border-red-500/30 rounded-2xl text-red-400">
@@ -609,7 +1152,7 @@ export const RSSReader: React.FC = () => {
             <select
               value={refreshInterval}
               onChange={(e) => setRefreshInterval(Number(e.target.value))}
-              className="px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-red-500"
+              className="liquid-glass-btn px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500"
             >
               <option value={0}>Auto-refresh: Off</option>
               <option value="5">Every 5 min</option>
@@ -619,7 +1162,7 @@ export const RSSReader: React.FC = () => {
 
             <button
               onClick={() => setReaderMode((m) => (m === 'dark' ? 'light' : 'dark'))}
-              className="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition-all cursor-pointer"
+              className="liquid-glass-btn p-2.5 text-slate-300"
               title="Toggle reading mode"
             >
               {readerMode === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -628,26 +1171,339 @@ export const RSSReader: React.FC = () => {
             <button
               onClick={() => { if (activeTab !== 'saved' && activeTab !== 'readlater') loadNews(activeTab); }}
               disabled={loading}
-              className="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition-all cursor-pointer disabled:opacity-50"
+              className="liquid-glass-btn p-2.5 text-slate-300 disabled:opacity-50"
               title="Refresh feeds"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-red-400' : ''}`} />
+            </button>
+
+            <button
+              onClick={togglePrintMode}
+              className="liquid-glass-btn p-2.5 text-slate-300"
+              title="Print mode"
+            >
+              <FileText className="w-4 h-4" />
+            </button>
+
+            <button
+              onClick={toggleKeyboardShortcuts}
+              className="liquid-glass-btn p-2.5 text-slate-300"
+              title="Keyboard shortcuts"
+            >
+              <Zap className="w-4 h-4" />
             </button>
           </div>
         </div>
       </div>
 
+      {/* Quick Stats Bar */}
+      <div className="liquid-glass p-3 flex flex-wrap items-center gap-3 text-[11px] font-mono">
+        <span className="text-slate-300">Articles: <strong className="text-white">{filteredArticles.length}</strong></span>
+        <span className="text-slate-500">|</span>
+        <span className="text-slate-300">Read: <strong className="text-white">{readArticleIds.size}</strong></span>
+        <span className="text-slate-500">|</span>
+        <span className="text-slate-300">Saved: <strong className="text-white">{savedArticles.length}</strong></span>
+        <span className="text-slate-500">|</span>
+        <span className="text-slate-300">Starred: <strong className="text-white">{starredIds.size}</strong></span>
+        <span className="text-slate-500">|</span>
+        <span className="text-slate-300">Streak: <strong className="text-red-400">{streak} days</strong></span>
+        <span className="text-slate-500">|</span>
+        <span className="text-slate-300">Goal: <strong className="text-white">{articlesReadToday}/{readingGoal}</strong></span>
+        <span className="text-slate-500">|</span>
+        <span className="text-slate-300">Online: <strong className={isOnline ? 'text-emerald-400' : 'text-red-400'}>{isOnline ? 'Yes' : 'No'}</strong></span>
+        {offlineQueue.length > 0 && (
+          <>
+            <span className="text-slate-500">|</span>
+            <span className="text-slate-300">Offline: <strong className="text-amber-400">{offlineQueue.length}</strong></span>
+          </>
+        )}
+        <div className="ml-auto flex items-center gap-1">
+          <button onClick={generateDailyDigest} className="liquid-glass-btn px-2 py-1 text-[10px] font-bold flex items-center gap-1">
+            <Flame className="w-3 h-3" /> Digest
+          </button>
+          <button onClick={detectDuplicates} className="liquid-glass-btn px-2 py-1 text-[10px] font-bold flex items-center gap-1">
+            <Copy className="w-3 h-3" /> Dupes
+          </button>
+          <button onClick={exportOpml} className="liquid-glass-btn px-2 py-1 text-[10px] font-bold flex items-center gap-1">
+            <Download className="w-3 h-3" /> OPML
+          </button>
+          <button onClick={() => setShowOpmlModal(true)} className="liquid-glass-btn px-2 py-1 text-[10px] font-bold flex items-center gap-1">
+            <Upload className="w-3 h-3" /> Import
+          </button>
+          <button onClick={() => setShowStats(!showStats)} className={`liquid-glass-btn px-2 py-1 text-[10px] font-bold flex items-center gap-1 ${showStats ? 'bg-red-500/20 border-red-500/40 text-red-400' : ''}`}>
+            <BarChart3 className="w-3 h-3" /> Stats
+          </button>
+        </div>
+      </div>
+
+      {/* Font Size Controls */}
+      <div className="liquid-glass p-2 flex items-center gap-2">
+        <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">Font:</span>
+        {(['sm', 'md', 'lg'] as const).map((size) => (
+          <button
+            key={size}
+            onClick={() => adjustFontSize(size)}
+            className={`liquid-glass-btn px-3 py-1.5 text-[10px] font-bold cursor-pointer ${fontSize === size ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'text-slate-300'}`}
+          >
+            {size === 'sm' ? 'S' : size === 'md' ? 'M' : 'L'}
+          </button>
+        ))}
+        <div className="ml-auto flex items-center gap-1">
+          <button onClick={() => setHighlightMode(!highlightMode)} className={`liquid-glass-btn px-2 py-1.5 text-[10px] font-bold cursor-pointer ${highlightMode ? 'bg-amber-500/20 border-amber-500/40 text-amber-400' : 'text-slate-300'}`}>
+            Highlighter
+          </button>
+          <button onClick={() => setShowBulkActions(!showBulkActions)} className={`liquid-glass-btn px-2 py-1.5 text-[10px] font-bold cursor-pointer ${showBulkActions ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'text-slate-300'}`}>
+            Bulk Edit
+          </button>
+        </div>
+      </div>
+
+      {/* Reading Stats Panel */}
+      {showStats && (
+        <div className="liquid-glass p-4 space-y-3">
+          <h4 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2">
+            <BarChart3 className="w-4 h-4 text-red-400" /> Reading Statistics
+          </h4>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+              <div className="text-2xl font-black text-white">{readArticleIds.size}</div>
+              <div className="text-[10px] text-slate-400 font-mono">Articles Read</div>
+            </div>
+            <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+              <div className="text-2xl font-black text-red-400">{starredIds.size}</div>
+              <div className="text-[10px] text-slate-400 font-mono">Starred</div>
+            </div>
+            <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+              <div className="text-2xl font-black text-amber-400">{streak}</div>
+              <div className="text-[10px] text-slate-400 font-mono">Day Streak</div>
+            </div>
+            <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+              <div className="text-2xl font-black text-emerald-400">{Object.keys(ratings).length}</div>
+              <div className="text-[10px] text-slate-400 font-mono">Rated</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setShowGoalModal(true)} className="liquid-glass-btn px-3 py-2 text-xs font-bold flex items-center gap-1">
+              <Target className="w-3.5 h-3.5" /> Set Goal
+            </button>
+            <button onClick={() => showToast('Coming Soon', 'Weekly reports coming soon', 'info')} className="liquid-glass-btn px-3 py-2 text-xs font-bold flex items-center gap-1">
+              <TrendingUp className="w-3.5 h-3.5" /> Weekly Report
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Daily Digest Modal */}
+      {showDigest && (
+        <div className="liquid-glass p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2">
+              <Flame className="w-4 h-4 text-red-400" /> Daily Digest
+            </h4>
+            <button onClick={() => setShowDigest(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 cursor-pointer">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          {dailyDigest.length === 0 ? (
+            <p className="text-xs text-slate-400">No articles published today yet.</p>
+          ) : (
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {dailyDigest.map((art) => (
+                <div key={art.id} className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-start gap-3">
+                  <div className="flex-1 min-w-0">
+                    <h5 className="text-xs font-bold text-white truncate">{art.title}</h5>
+                    <p className="text-[10px] text-slate-400 mt-1 line-clamp-2">{art.summary}</p>
+                  </div>
+                  <button onClick={() => { openReader(art); setShowDigest(false); }} className="liquid-glass-btn p-1.5 shrink-0">
+                    <Eye className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Keyboard Shortcuts Modal */}
+      {showKeyboardShortcuts && (
+        <div className="liquid-glass p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-bold text-white uppercase tracking-widest">Keyboard Shortcuts</h4>
+            <button onClick={toggleKeyboardShortcuts} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 cursor-pointer">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
+            <div className="p-2 rounded-lg bg-white/5 border border-white/10"><span className="text-white">j / →</span> <span className="text-slate-400">Next article</span></div>
+            <div className="p-2 rounded-lg bg-white/5 border border-white/10"><span className="text-white">k / ←</span> <span className="text-slate-400">Previous article</span></div>
+            <div className="p-2 rounded-lg bg-white/5 border border-white/10"><span className="text-white">Esc</span> <span className="text-slate-400">Close modal</span></div>
+            <div className="p-2 rounded-lg bg-white/5 border border-white/10"><span className="text-white">r</span> <span className="text-slate-400">Refresh feeds</span></div>
+            <div className="p-2 rounded-lg bg-white/5 border border-white/10"><span className="text-white">f</span> <span className="text-slate-400">Focus search</span></div>
+            <div className="p-2 rounded-lg bg-white/5 border border-white/10"><span className="text-white">s</span> <span className="text-slate-400">Toggle sort</span></div>
+            <div className="p-2 rounded-lg bg-white/5 border border-white/10"><span className="text-white">v</span> <span className="text-slate-400">Cycle view</span></div>
+            <div className="p-2 rounded-lg bg-white/5 border border-white/10"><span className="text-white">p</span> <span className="text-slate-400">Print mode</span></div>
+          </div>
+        </div>
+      )}
+
+      {/* OPML Import Modal */}
+      {showOpmlModal && (
+        <div className="liquid-glass p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-bold text-white uppercase tracking-widest">Import OPML / Feed URL</h4>
+            <button onClick={() => setShowOpmlModal(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 cursor-pointer">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={opmlImportUrl}
+              onChange={(e) => setOpmlImportUrl(e.target.value)}
+              placeholder="Paste RSS/Atom feed URL..."
+              className="flex-1 px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-red-500 placeholder-slate-500"
+            />
+            <button onClick={importOpml} className="liquid-glass-btn px-4 py-2 text-xs font-bold flex items-center gap-1">
+              <Upload className="w-3.5 h-3.5" /> Import
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Reading Goal Modal */}
+      {showGoalModal && (
+        <div className="liquid-glass p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-bold text-white uppercase tracking-widest">Set Daily Reading Goal</h4>
+            <button onClick={() => setShowGoalModal(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 cursor-pointer">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              min={1}
+              max={100}
+              value={readingGoal}
+              onChange={(e) => setReadingGoal(Number(e.target.value))}
+              className="w-20 px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-red-500"
+            />
+            <span className="text-xs text-slate-400">articles per day</span>
+            <button onClick={() => { setReadingGoal(readingGoal); setShowGoalModal(false); showToast('Updated', `Daily goal set to ${readingGoal}`, 'success'); }} className="liquid-glass-btn px-3 py-2 text-xs font-bold">
+              Save
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Folder Modal */}
+      {showFolderModal && (
+        <div className="liquid-glass p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-bold text-white uppercase tracking-widest">Create Bookmark Folder</h4>
+            <button onClick={() => setShowFolderModal(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 cursor-pointer">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={newFolderName}
+              onChange={(e) => setNewFolderName(e.target.value)}
+              placeholder="Folder name..."
+              className="flex-1 px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-red-500 placeholder-slate-500"
+            />
+            <button onClick={addBookmarkFolder} className="liquid-glass-btn px-4 py-2 text-xs font-bold flex items-center gap-1">
+              <Plus className="w-3.5 h-3.5" /> Create
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Share Sheet */}
+      {showShareSheet && shareTarget && (
+        <div className="liquid-glass p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-bold text-white uppercase tracking-widest">Share Article</h4>
+            <button onClick={() => setShowShareSheet(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 cursor-pointer">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <button onClick={() => { copyLink(shareTarget.url); setShowShareSheet(false); }} className="liquid-glass-btn px-3 py-2 text-xs font-bold flex items-center gap-1">
+              <Copy className="w-3.5 h-3.5" /> Copy Link
+            </button>
+            <button onClick={() => { window.open(shareTarget.url, '_blank', 'noopener,noreferrer'); setShowShareSheet(false); }} className="liquid-glass-btn px-3 py-2 text-xs font-bold flex items-center gap-1">
+              <ExternalLink className="w-3.5 h-3.5" /> Open Original
+            </button>
+            <button onClick={() => { shareArticle(shareTarget); setShowShareSheet(false); }} className="liquid-glass-btn px-3 py-2 text-xs font-bold flex items-center gap-1">
+              <Share2 className="w-3.5 h-3.5" /> System Share
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Duplicates Panel */}
+      {showDuplicates && (
+        <div className="liquid-glass p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2">
+              <Copy className="w-4 h-4 text-red-400" /> Duplicate Articles
+            </h4>
+            <button onClick={() => setShowDuplicates(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 cursor-pointer">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="space-y-2 max-h-64 overflow-y-auto">
+            {Object.entries(duplicateGroups).map(([key, ids]) => (
+              <div key={key} className="p-3 rounded-xl bg-white/5 border border-white/10">
+                <div className="text-xs font-bold text-white mb-1">{key}...</div>
+                <div className="flex flex-wrap gap-1">
+                  {ids.map((id) => {
+                    const art = currentList.find((a) => a.id === id);
+                    return (
+                      <button key={id} onClick={() => openReader(art || currentList[0])} className="liquid-glass-btn px-2 py-1 text-[10px] font-mono truncate max-w-[180px]">
+                        {art?.source}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Actions Bar */}
+      {showBulkActions && (
+        <div className="liquid-glass p-3 flex items-center gap-2">
+          <span className="text-xs font-mono text-slate-300">{selectedIds.size} selected</span>
+          <button onClick={bulkMarkRead} className="liquid-glass-btn px-3 py-2 text-xs font-bold flex items-center gap-1">
+            <Check className="w-3.5 h-3.5" /> Mark Read
+          </button>
+          <button onClick={bulkStar} className="liquid-glass-btn px-3 py-2 text-xs font-bold flex items-center gap-1">
+            <Star className="w-3.5 h-3.5" /> Star
+          </button>
+          <button onClick={bulkArchive} className="liquid-glass-btn px-3 py-2 text-xs font-bold flex items-center gap-1">
+            <Trash2 className="w-3.5 h-3.5" /> Archive
+          </button>
+          <button onClick={() => setSelectedIds(new Set())} className="liquid-glass-btn px-3 py-2 text-xs font-bold text-slate-300">
+            Clear
+          </button>
+        </div>
+      )}
+
       {/* Tabs & Controls */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-slate-900/60 p-2 border border-slate-800 rounded-2xl">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 liquid-glass p-2">
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
           {(['all', 'aviation', 'world'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${
+              className={`liquid-glass-btn px-4 py-2 text-xs font-bold flex items-center gap-2 cursor-pointer whitespace-nowrap ${
                 activeTab === tab
-                  ? 'bg-gradient-to-r from-red-600 to-red-600 text-white shadow-lg'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                  ? 'bg-gradient-to-r from-red-600 to-red-600 text-white shadow-lg border-red-500/40'
+                  : 'text-slate-300'
               }`}
             >
               {tab === 'all' && <Layers className="w-4 h-4" />}
@@ -662,10 +1518,10 @@ export const RSSReader: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('saved')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${
+            className={`liquid-glass-btn px-4 py-2 text-xs font-bold flex items-center gap-2 cursor-pointer whitespace-nowrap ${
               activeTab === 'saved'
-                ? 'bg-gradient-to-r from-red-600 to-red-600 text-white shadow-lg'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                ? 'bg-gradient-to-r from-red-600 to-red-600 text-white shadow-lg border-red-500/40'
+                : 'text-slate-300'
             }`}
           >
             <ShieldCheck className="w-4 h-4 text-red-400" />
@@ -674,10 +1530,10 @@ export const RSSReader: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('readlater')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer whitespace-nowrap ${
+            className={`liquid-glass-btn px-4 py-2 text-xs font-bold flex items-center gap-2 cursor-pointer whitespace-nowrap ${
               activeTab === 'readlater'
-                ? 'bg-gradient-to-r from-red-600 to-red-600 text-white shadow-lg'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                ? 'bg-gradient-to-r from-red-600 to-red-600 text-white shadow-lg border-red-500/40'
+                : 'text-slate-300'
             }`}
           >
             <BookMarked className="w-4 h-4 text-red-400" />
@@ -689,7 +1545,7 @@ export const RSSReader: React.FC = () => {
           {activeTab !== 'saved' && activeTab !== 'readlater' && (
             <button
               onClick={markAllAsRead}
-              className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition-all cursor-pointer text-xs font-bold flex items-center gap-1"
+              className="liquid-glass-btn px-3 py-2 text-xs font-bold flex items-center gap-1"
             >
               <Check className="w-3.5 h-3.5" />
               Mark All Read
@@ -697,20 +1553,23 @@ export const RSSReader: React.FC = () => {
           )}
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
-              showFilters ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white'
-            }`}
+            className={`liquid-glass-btn p-2.5 ${showFilters ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'text-slate-300'}`}
           >
             <Filter className="w-4 h-4" />
           </button>
-          <div className="flex items-center gap-1 bg-slate-950 border border-slate-800 rounded-xl p-0.5">
+          <button
+            onClick={() => setSortMode(m => m === 'date' ? 'source' : 'date')}
+            className="liquid-glass-btn px-3 py-2 text-xs font-bold flex items-center gap-1"
+            title={sortMode === 'date' ? 'Sort by Date' : 'Sort by Source'}
+          >
+            {sortMode === 'date' ? 'Date ↓' : 'Source A→Z'}
+          </button>
+          <div className="flex items-center gap-1 bg-slate-950/60 border border-slate-800 rounded-xl p-0.5">
             {(['list', 'grid', 'compact'] as ViewMode[]).map((mode) => (
               <button
                 key={mode}
                 onClick={() => setViewMode(mode)}
-                className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-                  viewMode === mode ? 'bg-red-500 text-white' : 'text-slate-400 hover:text-white'
-                }`}
+                className={`liquid-glass-btn p-1.5 ${viewMode === mode ? 'bg-red-500 text-white' : 'text-slate-300'}`}
               >
                 {mode === 'list' && <Newspaper className="w-4 h-4" />}
                 {mode === 'grid' && <TrendingUp className="w-4 h-4" />}
@@ -723,7 +1582,7 @@ export const RSSReader: React.FC = () => {
 
       {/* Filters Bar */}
       {showFilters && (
-        <div className="flex flex-col md:flex-row items-center justify-between gap-3 p-4 bg-slate-900/40 border border-slate-800 rounded-2xl animate-slideIn">
+        <div className="liquid-glass p-4 space-y-3">
           <div className="relative w-full md:w-80">
             <Search className="absolute left-3.5 top-3 w-4 h-4 text-slate-500" />
             <input
@@ -741,10 +1600,10 @@ export const RSSReader: React.FC = () => {
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1 rounded-lg text-xs font-mono transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${
+                className={`liquid-glass-btn px-3 py-1 text-xs font-mono flex items-center gap-1.5 cursor-pointer ${
                   selectedCategory === cat
-                    ? 'bg-red-500/20 text-red-300 border border-red-500/40 font-bold'
-                    : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-white'
+                    ? 'bg-red-500/20 border-red-500/40 text-red-300 font-bold'
+                    : 'text-slate-300'
                 }`}
               >
                 {cat === 'all' ? 'All' : cat}
@@ -753,6 +1612,15 @@ export const RSSReader: React.FC = () => {
                 </span>
               </button>
             ))}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button onClick={() => setSelectedCategory('all')} className="liquid-glass-btn px-3 py-1.5 text-[10px] font-bold">
+              Clear Filters
+            </button>
+            <button onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }} className="liquid-glass-btn px-3 py-1.5 text-[10px] font-bold">
+              Reset All
+            </button>
           </div>
         </div>
       )}
@@ -843,7 +1711,7 @@ export const RSSReader: React.FC = () => {
         {/* Sidebar */}
         <div className="lg:col-span-4 space-y-4">
           {/* Add Custom Feed */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 space-y-3">
+          <div className="liquid-glass p-4 space-y-3">
             <h4 className="text-xs font-bold text-white uppercase tracking-widest">Add Custom Feed</h4>
             <form onSubmit={handleAddCustomFeed} className="flex items-center gap-2">
               <div className="relative flex-1">
@@ -858,7 +1726,7 @@ export const RSSReader: React.FC = () => {
               <button
                 type="submit"
                 disabled={addingFeed || !customFeedUrl.trim()}
-                className="px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-600 hover:from-red-500 hover:to-red-500 text-white font-bold text-xs rounded-2xl shadow-lg transition-all flex items-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-50"
+                className="liquid-glass-btn px-4 py-2.5 text-white font-bold text-xs flex items-center gap-1.5 shrink-0 cursor-pointer disabled:opacity-50"
               >
                 <Plus className="w-4 h-4" />
                 <span>{addingFeed ? 'Syncing...' : 'Add'}</span>
@@ -868,7 +1736,7 @@ export const RSSReader: React.FC = () => {
 
           {/* Source Status */}
           {sources.length > 0 && (
-            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 space-y-3">
+            <div className="liquid-glass p-4 space-y-3">
               <div className="flex items-center gap-2">
                 <Activity className="w-4 h-4 text-red-400" />
                 <h4 className="text-xs font-bold text-white uppercase tracking-widest">Source Status</h4>
@@ -879,11 +1747,11 @@ export const RSSReader: React.FC = () => {
                   return (
                     <div key={src.name} className="flex items-center justify-between text-xs">
                       <span className="text-slate-300 truncate max-w-[140px] flex items-center gap-1.5">
-                        <span className={`w-2 h-2 rounded-full shrink-0 ${isWorking ? 'bg-red-400' : 'bg-red-400'}`} />
+                        <span className={`w-2 h-2 rounded-full shrink-0 ${isWorking ? 'bg-emerald-400' : 'bg-red-400'}`} />
                         {src.name}
                       </span>
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold border ${
-                        isWorking ? 'text-red-400 bg-red-500/10 border-red-500/30' : 'text-red-400 bg-red-500/10 border-red-500/30'
+                        isWorking ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' : 'text-red-400 bg-red-500/10 border-red-500/30'
                       }`}>
                         {isWorking ? 'Working' : 'Failed'}
                       </span>
@@ -896,7 +1764,262 @@ export const RSSReader: React.FC = () => {
               </div>
             </div>
           )}
+
+          {/* Offline Queue */}
+          {offlineQueue.length > 0 && (
+            <div className="liquid-glass p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                  <WifiOff className="w-4 h-4 text-amber-400" /> Offline Queue
+                </h4>
+                <button onClick={clearOfflineQueue} className="liquid-glass-btn px-2 py-1 text-[10px] font-bold text-slate-300">
+                  Clear
+                </button>
+              </div>
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {offlineQueue.map((item) => (
+                  <div key={item.id} className="p-2 rounded-xl bg-white/5 border border-white/10 flex items-start gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-bold text-white truncate">{item.title}</div>
+                      <div className="text-[10px] text-slate-400">{item.source}</div>
+                    </div>
+                    <button onClick={() => window.open(item.url, '_blank', 'noopener,noreferrer')} className="liquid-glass-btn p-1.5 shrink-0">
+                      <ExternalLink className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Bookmark Folders */}
+          <div className="liquid-glass p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                <BookmarkPlus className="w-4 h-4 text-red-400" /> Bookmark Folders
+              </h4>
+              <button onClick={createBookmarkFolder} className="liquid-glass-btn p-1.5">
+                <Plus className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {Object.keys(bookmarkFolders).length === 0 ? (
+                <p className="text-[11px] text-slate-400">No folders yet. Create one to organize bookmarks.</p>
+              ) : (
+                Object.entries(bookmarkFolders).map(([folder, items]) => (
+                  <div key={folder} className="p-2 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+                    <div>
+                      <div className="text-xs font-bold text-white">{folder}</div>
+                      <div className="text-[10px] text-slate-400">{items.length} articles</div>
+                    </div>
+                    <button onClick={() => setActiveBookmarkFolder(folder === activeBookmarkFolder ? null : folder)} className={`liquid-glass-btn px-2 py-1 text-[10px] font-bold ${folder === activeBookmarkFolder ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'text-slate-300'}`}>
+                      {folder === activeBookmarkFolder ? 'Close' : 'Open'}
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+            {activeBookmarkFolder && (bookmarkFolders[activeBookmarkFolder] || []).length === 0 && (
+              <p className="text-[11px] text-slate-400">This folder is empty.</p>
+            )}
+          </div>
         </div>
+
+        {/* Export */}
+        <div className="liquid-glass p-4 space-y-3">
+          <h4 className="text-xs font-bold text-white uppercase tracking-widest">Export</h4>
+          <div className="flex items-center gap-2">
+            <select
+              value={exportFormat}
+              onChange={(e) => setExportFormat(e.target.value as 'json' | 'text')}
+              className="flex-1 px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-red-500"
+            >
+              <option value="json">JSON</option>
+              <option value="text">Plain Text</option>
+            </select>
+            <div className="relative">
+              <button
+                onClick={() => setShowExportMenu(!showExportMenu)}
+                className="liquid-glass-btn px-3 py-2 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5" />
+              </button>
+              {showExportMenu && (
+                <div className="absolute right-0 top-10 z-20 bg-slate-900 border border-slate-700 rounded-xl shadow-xl p-1.5 space-y-1 min-w-[160px]">
+                  <button
+                    onClick={() => exportArticles()}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5" /> Export current view
+                  </button>
+                  <button
+                    onClick={exportOpml}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800 rounded-lg cursor-pointer"
+                  >
+                    <FileDown className="w-3.5 h-3.5" /> Export OPML
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Article Reader Modal */}
+        {readerArticle && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={() => setReaderArticle(null)}>
+            <div className="w-full max-w-3xl max-h-[90vh] bg-slate-950 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between p-4 border-b border-slate-800">
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setReaderArticle(null)} className="p-2 hover:bg-slate-800 rounded-xl text-slate-400 cursor-pointer">
+                    <X className="w-4 h-4" />
+                  </button>
+                  <span className="text-xs font-bold text-white uppercase tracking-wider">Article Reader</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      const idx = visibleArticles.findIndex((a) => a.id === readerArticle.id);
+                      if (idx > 0) setReaderArticle(visibleArticles[idx - 1]);
+                    }}
+                    className="p-2 hover:bg-slate-800 rounded-xl text-slate-400 cursor-pointer"
+                    title="Previous (k/←)"
+                  >
+                    <ChevronDown className="w-4 h-4 rotate-90" />
+                  </button>
+                  <span className="text-[10px] text-slate-500 font-mono">
+                    {visibleArticles.findIndex((a) => a.id === readerArticle.id) + 1}/{visibleArticles.length}
+                  </span>
+                  <button
+                    onClick={() => {
+                      const idx = visibleArticles.findIndex((a) => a.id === readerArticle.id);
+                      if (idx >= 0 && idx < visibleArticles.length - 1) setReaderArticle(visibleArticles[idx + 1]);
+                    }}
+                    className="p-2 hover:bg-slate-800 rounded-xl text-slate-400 cursor-pointer"
+                    title="Next (j/→)"
+                  >
+                    <ChevronDown className="w-4 h-4 -rotate-90" />
+                  </button>
+                </div>
+              </div>
+              <div className="overflow-y-auto max-h-[calc(90vh-60px)] p-6 space-y-4">
+                {readerArticle.imageUrl && (
+                  <img src={readerArticle.imageUrl} alt={readerArticle.title} className="w-full h-56 object-cover rounded-2xl" />
+                )}
+                <div>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold border ${getSourceBadgeColor(readerArticle.category)}`}>
+                    {getCategoryIcon(readerArticle.category)} {readerArticle.category}
+                  </span>
+                </div>
+                <h2 className="text-2xl font-black text-white leading-tight">{readerArticle.title}</h2>
+                <div className="flex items-center gap-3 text-xs text-slate-500 font-mono">
+                  <span>{readerArticle.source}</span>
+                  <span>·</span>
+                  <span>{readerArticle.date}</span>
+                  <span>·</span>
+                  <span>{calculateReadingTime(readerArticle.summary + ' ' + readerArticle.title)} min read</span>
+                </div>
+                <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">{readerArticle.summary}</p>
+                <div className="pt-4 border-t border-slate-800 space-y-3">
+                  <label className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                    <PenLine className="w-3.5 h-3.5" /> Notes
+                  </label>
+                  <textarea
+                    value={articleNotes[readerArticle.id] || ''}
+                    onChange={(e) => saveNote(readerArticle.id, e.target.value)}
+                    placeholder="Add private notes for this article..."
+                    className="w-full h-28 px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-red-500 placeholder-slate-500 resize-none"
+                  />
+                </div>
+                <div className="pt-4 border-t border-slate-800 space-y-3">
+                  <label className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                    <Star className="w-3.5 h-3.5" /> Rate Article
+                  </label>
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() => rateArticle(readerArticle.id, star)}
+                        className={`p-1.5 rounded-lg border transition-all cursor-pointer ${(ratings[readerArticle.id] || 0) >= star ? 'bg-amber-500/20 border-amber-500/40 text-amber-400' : 'border-white/10 text-slate-400 hover:text-white'}`}
+                      >
+                        <Star className={`w-4 h-4 ${(ratings[readerArticle.id] || 0) >= star ? 'fill-amber-400' : ''}`} />
+                      </button>
+                    ))}
+                    <span className="ml-2 text-xs text-slate-400 font-mono">{ratings[readerArticle.id] || 0}/5</span>
+                  </div>
+                </div>
+                <div className="pt-4 border-t border-slate-800 space-y-3">
+                  <label className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                    <Highlighter className="w-3.5 h-3.5" /> Highlights
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {readerArticle.summary.split(' ').slice(0, 20).map((word, i) => (
+                      <button
+                        key={i}
+                        onClick={() => toggleHighlight(readerArticle.id, word.replace(/[^a-zA-Z0-9]/g, ''))}
+                        className={`px-2 py-1 rounded-lg border text-[11px] cursor-pointer transition-all ${(highlights[readerArticle.id] || []).includes(word.replace(/[^a-zA-Z0-9]/g, '')) ? 'bg-amber-500/20 border-amber-500/40 text-amber-300' : 'border-white/10 text-slate-400 hover:text-white'}`}
+                      >
+                        {word}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 pt-2">
+                  <button
+                    onClick={() => window.open(readerArticle.url, '_blank', 'noopener,noreferrer')}
+                    className="liquid-glass-btn px-4 py-2 text-xs font-bold flex items-center gap-2"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" /> Open Original
+                  </button>
+                  <button
+                    onClick={() => speakArticle(readerArticle)}
+                    className={`liquid-glass-btn px-4 py-2 text-xs font-bold flex items-center gap-2 ${textToSpeech ? 'bg-red-500/20 border-red-500/40 text-red-400' : ''}`}
+                  >
+                    {textToSpeech ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+                    {textToSpeech ? 'Stop TTS' : 'Listen'}
+                  </button>
+                  <button
+                    onClick={() => addToOfflineQueue(readerArticle)}
+                    className="liquid-glass-btn px-4 py-2 text-xs font-bold flex items-center gap-2"
+                  >
+                    <WifiOff className="w-3.5 h-3.5" /> Save Offline
+                  </button>
+                  <button
+                    onClick={() => togglePrintMode()}
+                    className="liquid-glass-btn px-4 py-2 text-xs font-bold flex items-center gap-2"
+                  >
+                    <Printer className="w-3.5 h-3.5" /> Print
+                  </button>
+                  <button
+                    onClick={() => {
+                      toggleSaveArticle(readerArticle);
+                    }}
+                    className={`px-4 py-2 rounded-xl border transition-all text-xs font-bold flex items-center gap-2 cursor-pointer ${
+                      savedArticles.some((a) => a.id === readerArticle.id)
+                        ? 'bg-red-500/20 border-red-500/40 text-red-400'
+                        : 'bg-slate-800 border-slate-700 text-white hover:bg-slate-700'
+                    }`}
+                  >
+                    {savedArticles.some((a) => a.id === readerArticle.id) ? <Check className="w-3.5 h-3.5" /> : <Bookmark className="w-3.5 h-3.5" />}
+                    {savedArticles.some((a) => a.id === readerArticle.id) ? 'Saved' : 'Save'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      toggleReadLater(readerArticle);
+                    }}
+                    className={`px-4 py-2 rounded-xl border transition-all text-xs font-bold flex items-center gap-2 cursor-pointer ${
+                      readLater.some((a) => a.id === readerArticle.id)
+                        ? 'bg-red-500/20 border-red-500/40 text-red-400'
+                        : 'bg-slate-800 border-slate-700 text-white hover:bg-slate-700'
+                    }`}
+                  >
+                    {readLater.some((a) => a.id === readerArticle.id) ? <BookMarked className="w-3.5 h-3.5" /> : <Bookmark className="w-3.5 h-3.5" />}
+                    {readLater.some((a) => a.id === readerArticle.id) ? 'In Read Later' : 'Read Later'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
