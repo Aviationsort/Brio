@@ -1196,64 +1196,109 @@ export const RSSReader: React.FC = () => {
         </div>
       </div>
 
-      {/* Quick Stats Bar */}
-      <div className="liquid-glass p-3 flex flex-wrap items-center gap-3 text-[11px] font-mono">
-        <span className="text-slate-300">Articles: <strong className="text-white">{filteredArticles.length}</strong></span>
-        <span className="text-slate-500">|</span>
-        <span className="text-slate-300">Read: <strong className="text-white">{readArticleIds.size}</strong></span>
-        <span className="text-slate-500">|</span>
-        <span className="text-slate-300">Saved: <strong className="text-white">{savedArticles.length}</strong></span>
-        <span className="text-slate-500">|</span>
-        <span className="text-slate-300">Starred: <strong className="text-white">{starredIds.size}</strong></span>
-        <span className="text-slate-500">|</span>
-        <span className="text-slate-300">Streak: <strong className="text-red-400">{streak} days</strong></span>
-        <span className="text-slate-500">|</span>
-        <span className="text-slate-300">Goal: <strong className="text-white">{articlesReadToday}/{readingGoal}</strong></span>
-        <span className="text-slate-500">|</span>
-        <span className="text-slate-300">Online: <strong className={isOnline ? 'text-emerald-400' : 'text-red-400'}>{isOnline ? 'Yes' : 'No'}</strong></span>
-        {offlineQueue.length > 0 && (
-          <>
+      {/* Quick Stats Bar - Organized with visual groups */}
+      <div className="liquid-glass p-4">
+        <div className="flex flex-wrap items-center gap-4 text-[11px] font-mono">
+          {/* Content Stats Group */}
+          <div className="flex items-center gap-3 px-3 py-2 bg-white/5 rounded-xl border border-white/10">
+            <span className="text-slate-400 uppercase tracking-wider text-[10px] font-bold">Content</span>
+            <div className="h-4 w-px bg-slate-700"></div>
+            <span className="text-slate-300">Articles: <strong className="text-white">{filteredArticles.length}</strong></span>
             <span className="text-slate-500">|</span>
-            <span className="text-slate-300">Offline: <strong className="text-amber-400">{offlineQueue.length}</strong></span>
-          </>
-        )}
-        <div className="ml-auto flex items-center gap-1">
-          <button onClick={generateDailyDigest} className="liquid-glass-btn px-2 py-1 text-[10px] font-bold flex items-center gap-1">
-            <Flame className="w-3 h-3" /> Digest
-          </button>
-          <button onClick={detectDuplicates} className="liquid-glass-btn px-2 py-1 text-[10px] font-bold flex items-center gap-1">
-            <Copy className="w-3 h-3" /> Dupes
-          </button>
-          <button onClick={exportOpml} className="liquid-glass-btn px-2 py-1 text-[10px] font-bold flex items-center gap-1">
-            <Download className="w-3 h-3" /> OPML
-          </button>
-          <button onClick={() => setShowOpmlModal(true)} className="liquid-glass-btn px-2 py-1 text-[10px] font-bold flex items-center gap-1">
-            <Upload className="w-3 h-3" /> Import
-          </button>
-          <button onClick={() => setShowStats(!showStats)} className={`liquid-glass-btn px-2 py-1 text-[10px] font-bold flex items-center gap-1 ${showStats ? 'bg-red-500/20 border-red-500/40 text-red-400' : ''}`}>
-            <BarChart3 className="w-3 h-3" /> Stats
-          </button>
+            <span className="text-slate-300">Read: <strong className="text-emerald-400">{readArticleIds.size}</strong></span>
+          </div>
+
+          {/* Saved & Favorites Group */}
+          <div className="flex items-center gap-3 px-3 py-2 bg-white/5 rounded-xl border border-white/10">
+            <span className="text-slate-400 uppercase tracking-wider text-[10px] font-bold">Saved</span>
+            <div className="h-4 w-px bg-slate-700"></div>
+            <span className="text-slate-300">Vault: <strong className="text-red-400">{savedArticles.length}</strong></span>
+            <span className="text-slate-500">|</span>
+            <span className="text-slate-300">Starred: <strong className="text-amber-400">{starredIds.size}</strong></span>
+          </div>
+
+          {/* Progress Group */}
+          <div className="flex items-center gap-3 px-3 py-2 bg-white/5 rounded-xl border border-white/10">
+            <span className="text-slate-400 uppercase tracking-wider text-[10px] font-bold">Progress</span>
+            <div className="h-4 w-px bg-slate-700"></div>
+            <span className="text-slate-300">Streak: <strong className="text-orange-400">{streak}🔥</strong></span>
+            <span className="text-slate-500">|</span>
+            <span className="text-slate-300">Goal: <strong className="text-white">{articlesReadToday}/{readingGoal}</strong></span>
+          </div>
+
+          {/* Connection Status */}
+          <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border ${isOnline ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-red-500/10 border-red-500/30'}`}>
+            <span className={`text-xs font-bold ${isOnline ? 'text-emerald-400' : 'text-red-400'}`}>
+              {isOnline ? '● Online' : '○ Offline'}
+            </span>
+            {offlineQueue.length > 0 && (
+              <span className="text-amber-400 font-bold">({offlineQueue.length} queued)</span>
+            )}
+          </div>
+
+          {/* Quick Actions */}
+          <div className="ml-auto flex items-center gap-1.5">
+            <button onClick={generateDailyDigest} className="liquid-glass-btn px-3 py-2 text-[10px] font-bold flex items-center gap-1.5 hover:bg-orange-500/20 hover:border-orange-500/40 transition-colors" title="Today's top stories">
+              <Flame className="w-3.5 h-3.5" /> Digest
+            </button>
+            <button onClick={detectDuplicates} className="liquid-glass-btn px-3 py-2 text-[10px] font-bold flex items-center gap-1.5 hover:bg-purple-500/20 hover:border-purple-500/40 transition-colors" title="Find duplicates">
+              <Copy className="w-3.5 h-3.5" /> Dupes
+            </button>
+            <button onClick={exportOpml} className="liquid-glass-btn px-3 py-2 text-[10px] font-bold flex items-center gap-1.5 hover:bg-blue-500/20 hover:border-blue-500/40 transition-colors" title="Export feeds">
+              <Download className="w-3.5 h-3.5" /> OPML
+            </button>
+            <button onClick={() => setShowOpmlModal(true)} className="liquid-glass-btn px-3 py-2 text-[10px] font-bold flex items-center gap-1.5 hover:bg-green-500/20 hover:border-green-500/40 transition-colors" title="Import feeds">
+              <Upload className="w-3.5 h-3.5" /> Import
+            </button>
+            <button onClick={() => setShowStats(!showStats)} className={`liquid-glass-btn px-3 py-2 text-[10px] font-bold flex items-center gap-1.5 transition-colors ${showStats ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'hover:bg-indigo-500/20 hover:border-indigo-500/40'}`} title="View statistics">
+              <BarChart3 className="w-3.5 h-3.5" /> Stats
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Font Size Controls */}
-      <div className="liquid-glass p-2 flex items-center gap-2">
-        <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">Font:</span>
-        {(['sm', 'md', 'lg'] as const).map((size) => (
-          <button
-            key={size}
-            onClick={() => adjustFontSize(size)}
-            className={`liquid-glass-btn px-3 py-1.5 text-[10px] font-bold cursor-pointer ${fontSize === size ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'text-slate-300'}`}
+      {/* Font Size & Display Controls */}
+      <div className="liquid-glass p-3 flex items-center gap-3">
+        <div className="flex items-center gap-2 px-3 py-2 bg-white/5 rounded-xl border border-white/10">
+          <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-bold">Font Size</span>
+          <div className="flex items-center gap-1">
+            {(['sm', 'md', 'lg'] as const).map((size) => (
+              <button
+                key={size}
+                onClick={() => adjustFontSize(size)}
+                className={`px-3 py-1.5 text-[10px] font-bold cursor-pointer rounded-lg transition-all ${
+                  fontSize === size 
+                    ? 'bg-red-500/20 border border-red-500/40 text-red-400 shadow-sm' 
+                    : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                }`}
+              >
+                {size === 'sm' ? 'A⁺' : size === 'md' ? 'A' : 'A⁻'}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 px-3 py-2 bg-white/5 rounded-xl border border-white/10">
+          <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-bold">Tools</span>
+          <button 
+            onClick={() => setHighlightMode(!highlightMode)} 
+            className={`px-3 py-1.5 text-[10px] font-bold cursor-pointer rounded-lg transition-all flex items-center gap-1.5 ${
+              highlightMode 
+                ? 'bg-amber-500/20 border border-amber-500/40 text-amber-400 shadow-sm' 
+                : 'text-slate-300 hover:bg-white/5 hover:text-white'
+            }`}
           >
-            {size === 'sm' ? 'S' : size === 'md' ? 'M' : 'L'}
+            <Highlighter className="w-3.5 h-3.5" /> Highlight
           </button>
-        ))}
-        <div className="ml-auto flex items-center gap-1">
-          <button onClick={() => setHighlightMode(!highlightMode)} className={`liquid-glass-btn px-2 py-1.5 text-[10px] font-bold cursor-pointer ${highlightMode ? 'bg-amber-500/20 border-amber-500/40 text-amber-400' : 'text-slate-300'}`}>
-            Highlighter
-          </button>
-          <button onClick={() => setShowBulkActions(!showBulkActions)} className={`liquid-glass-btn px-2 py-1.5 text-[10px] font-bold cursor-pointer ${showBulkActions ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'text-slate-300'}`}>
-            Bulk Edit
+          <button 
+            onClick={() => setShowBulkActions(!showBulkActions)} 
+            className={`px-3 py-1.5 text-[10px] font-bold cursor-pointer rounded-lg transition-all flex items-center gap-1.5 ${
+              showBulkActions 
+                ? 'bg-red-500/20 border border-red-500/40 text-red-400 shadow-sm' 
+                : 'text-slate-300 hover:bg-white/5 hover:text-white'
+            }`}
+          >
+            <BookmarkPlus className="w-3.5 h-3.5" /> Bulk Edit
           </button>
         </div>
       </div>
@@ -1493,89 +1538,145 @@ export const RSSReader: React.FC = () => {
         </div>
       )}
 
-      {/* Tabs & Controls */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 liquid-glass p-2">
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-          {(['all', 'aviation', 'world'] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`liquid-glass-btn px-4 py-2 text-xs font-bold flex items-center gap-2 cursor-pointer whitespace-nowrap ${
-                activeTab === tab
-                  ? 'bg-gradient-to-r from-red-600 to-red-600 text-white shadow-lg border-red-500/40'
-                  : 'text-slate-300'
-              }`}
-            >
-              {tab === 'all' && <Layers className="w-4 h-4" />}
-              {tab === 'aviation' && <Plane className="w-4 h-4 text-red-400" />}
-              {tab === 'world' && <Globe className="w-4 h-4 text-red-400" />}
-              <span>{tab === 'all' ? 'All Live Feeds' : tab === 'aviation' ? 'Aviation' : 'World News'}</span>
-              <span className="px-1.5 py-0.5 rounded-full bg-white/10 text-[10px] font-mono">
-                {activeTab === tab ? currentList.length : '—'}
-              </span>
-            </button>
-          ))}
-
-          <button
-            onClick={() => setActiveTab('saved')}
-            className={`liquid-glass-btn px-4 py-2 text-xs font-bold flex items-center gap-2 cursor-pointer whitespace-nowrap ${
-              activeTab === 'saved'
-                ? 'bg-gradient-to-r from-red-600 to-red-600 text-white shadow-lg border-red-500/40'
-                : 'text-slate-300'
-            }`}
-          >
-            <ShieldCheck className="w-4 h-4 text-red-400" />
-            <span>Saved ({savedArticles.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('readlater')}
-            className={`liquid-glass-btn px-4 py-2 text-xs font-bold flex items-center gap-2 cursor-pointer whitespace-nowrap ${
-              activeTab === 'readlater'
-                ? 'bg-gradient-to-r from-red-600 to-red-600 text-white shadow-lg border-red-500/40'
-                : 'text-slate-300'
-            }`}
-          >
-            <BookMarked className="w-4 h-4 text-red-400" />
-            <span>Read Later ({readLater.length})</span>
-          </button>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {activeTab !== 'saved' && activeTab !== 'readlater' && (
-            <button
-              onClick={markAllAsRead}
-              className="liquid-glass-btn px-3 py-2 text-xs font-bold flex items-center gap-1"
-            >
-              <Check className="w-3.5 h-3.5" />
-              Mark All Read
-            </button>
-          )}
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className={`liquid-glass-btn p-2.5 ${showFilters ? 'bg-red-500/20 border-red-500/40 text-red-400' : 'text-slate-300'}`}
-          >
-            <Filter className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setSortMode(m => m === 'date' ? 'source' : 'date')}
-            className="liquid-glass-btn px-3 py-2 text-xs font-bold flex items-center gap-1"
-            title={sortMode === 'date' ? 'Sort by Date' : 'Sort by Source'}
-          >
-            {sortMode === 'date' ? 'Date ↓' : 'Source A→Z'}
-          </button>
-          <div className="flex items-center gap-1 bg-slate-950/60 border border-slate-800 rounded-xl p-0.5">
-            {(['list', 'grid', 'compact'] as ViewMode[]).map((mode) => (
+      {/* Navigation Tabs - Organized with visual hierarchy */}
+      <div className="liquid-glass p-3">
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+          {/* Primary Navigation Tabs */}
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 lg:pb-0">
+            {(['all', 'aviation', 'world'] as const).map((tab) => (
               <button
-                key={mode}
-                onClick={() => setViewMode(mode)}
-                className={`liquid-glass-btn p-1.5 ${viewMode === mode ? 'bg-red-500 text-white' : 'text-slate-300'}`}
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-5 py-3 text-xs font-bold flex items-center gap-2.5 cursor-pointer whitespace-nowrap rounded-xl transition-all duration-200 ${
+                  activeTab === tab
+                    ? 'bg-gradient-to-r from-red-600 to-red-600 text-white shadow-lg shadow-red-500/25 border border-red-500/40 scale-105'
+                    : 'text-slate-300 hover:bg-white/5 hover:text-white border border-transparent'
+                }`}
               >
-                {mode === 'list' && <Newspaper className="w-4 h-4" />}
-                {mode === 'grid' && <TrendingUp className="w-4 h-4" />}
-                {mode === 'compact' && <Zap className="w-4 h-4" />}
+                <span className={`p-1.5 rounded-lg ${activeTab === tab ? 'bg-white/20' : 'bg-white/5'}`}>
+                  {tab === 'all' && <Layers className="w-4 h-4" />}
+                  {tab === 'aviation' && <Plane className="w-4 h-4" />}
+                  {tab === 'world' && <Globe className="w-4 h-4" />}
+                </span>
+                <span>{tab === 'all' ? 'All Feeds' : tab === 'aviation' ? 'Aviation News' : 'World News'}</span>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold transition-colors ${
+                  activeTab === tab 
+                    ? 'bg-white/20 text-white' 
+                    : 'bg-white/10 text-slate-400'
+                }`}>
+                  {activeTab === tab ? currentList.length : '—'}
+                </span>
               </button>
             ))}
+
+            {/* Secondary Tabs - Saved & Read Later */}
+            <div className="h-8 w-px bg-slate-700 mx-1"></div>
+            
+            <button
+              onClick={() => setActiveTab('saved')}
+              className={`px-5 py-3 text-xs font-bold flex items-center gap-2.5 cursor-pointer whitespace-nowrap rounded-xl transition-all duration-200 ${
+                activeTab === 'saved'
+                  ? 'bg-gradient-to-r from-emerald-600 to-emerald-600 text-white shadow-lg shadow-emerald-500/25 border border-emerald-500/40 scale-105'
+                  : 'text-slate-300 hover:bg-white/5 hover:text-white border border-transparent'
+              }`}
+            >
+              <span className={`p-1.5 rounded-lg ${activeTab === 'saved' ? 'bg-white/20' : 'bg-white/5'}`}>
+                <ShieldCheck className="w-4 h-4" />
+              </span>
+              <span>Encrypted Vault</span>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                activeTab === 'saved' ? 'bg-white/20 text-white' : 'bg-emerald-500/20 text-emerald-400'
+              }`}>
+                {savedArticles.length}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('readlater')}
+              className={`px-5 py-3 text-xs font-bold flex items-center gap-2.5 cursor-pointer whitespace-nowrap rounded-xl transition-all duration-200 ${
+                activeTab === 'readlater'
+                  ? 'bg-gradient-to-r from-amber-600 to-amber-600 text-white shadow-lg shadow-amber-500/25 border border-amber-500/40 scale-105'
+                  : 'text-slate-300 hover:bg-white/5 hover:text-white border border-transparent'
+              }`}
+            >
+              <span className={`p-1.5 rounded-lg ${activeTab === 'readlater' ? 'bg-white/20' : 'bg-white/5'}`}>
+                <BookMarked className="w-4 h-4" />
+              </span>
+              <span>Read Later</span>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                activeTab === 'readlater' ? 'bg-white/20 text-white' : 'bg-amber-500/20 text-amber-400'
+              }`}>
+                {readLater.length}
+              </span>
+            </button>
+          </div>
+
+          {/* View Controls */}
+          <div className="flex items-center gap-2 shrink-0">
+            {activeTab !== 'saved' && activeTab !== 'readlater' && (
+              <button
+                onClick={markAllAsRead}
+                className="liquid-glass-btn px-4 py-2.5 text-xs font-bold flex items-center gap-2 hover:bg-emerald-500/20 hover:border-emerald-500/40 transition-colors rounded-xl"
+                title="Mark all articles as read"
+              >
+                <Check className="w-4 h-4" />
+                Mark All Read
+              </button>
+            )}
+            
+            <div className="h-6 w-px bg-slate-700"></div>
+            
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`liquid-glass-btn px-3 py-2.5 rounded-xl transition-all ${
+                showFilters 
+                  ? 'bg-red-500/20 border-red-500/40 text-red-400 shadow-sm' 
+                  : 'text-slate-300 hover:bg-white/5 hover:text-white'
+              }`}
+              title="Toggle filters"
+            >
+              <Filter className="w-4 h-4" />
+            </button>
+            
+            <button
+              onClick={() => setSortMode(m => m === 'date' ? 'source' : 'date')}
+              className="liquid-glass-btn px-3 py-2.5 text-xs font-bold flex items-center gap-2 hover:bg-white/5 rounded-xl transition-colors"
+              title={sortMode === 'date' ? 'Sort by Date' : 'Sort by Source'}
+            >
+              {sortMode === 'date' ? (
+                <>
+                  <Clock className="w-4 h-4" />
+                  <span>Date ↓</span>
+                </>
+              ) : (
+                <>
+                  <Rss className="w-4 h-4" />
+                  <span>Source A→Z</span>
+                </>
+              )}
+            </button>
+            
+            <div className="h-6 w-px bg-slate-700"></div>
+            
+            {/* View Mode Selector */}
+            <div className="flex items-center gap-1 bg-slate-950/60 border border-slate-800 rounded-xl p-1">
+              {(['list', 'grid', 'compact'] as ViewMode[]).map((mode) => (
+                <button
+                  key={mode}
+                  onClick={() => setViewMode(mode)}
+                  className={`px-3 py-2 rounded-lg transition-all ${
+                    viewMode === mode 
+                      ? 'bg-red-500 text-white shadow-sm' 
+                      : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                  }`}
+                  title={`${mode.charAt(0).toUpperCase() + mode.slice(1)} View`}
+                >
+                  {mode === 'list' && <Newspaper className="w-4 h-4" />}
+                  {mode === 'grid' && <TrendingUp className="w-4 h-4" />}
+                  {mode === 'compact' && <Zap className="w-4 h-4" />}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
