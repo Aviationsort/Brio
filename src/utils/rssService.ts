@@ -566,9 +566,10 @@ interface FeedResult {
 }
 
 const feedCache = new Map<string, { data: NewsItem[]; timestamp: number }>();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes for aviation feeds
 
-const MAX_CONCURRENCY = 3;
+const MAX_CONCURRENCY = 5;
+const REQUEST_TIMEOUT_MS = 10000;
 
 async function runWithConcurrency<T>(
   tasks: (() => Promise<T>)[],
@@ -1259,8 +1260,33 @@ async function tryParseJsonFeed(text: string, url: string): Promise<{ items: New
   return JsonFeedParser.parse(text, url);
 }
 
-const FETCH_TIMEOUT_MS = 20000;
-const MAX_RESPONSE_BYTES = 2 * 1024 * 1024;
+const FETCH_TIMEOUT_MS = 15000;
+const MAX_RESPONSE_BYTES = 1 * 1024 * 1024;
+const RSS_PARSER_POOL_SIZE = 3;
+
+const parserQueue: Array<() => void> = [];
+let activeParsers = 0;
+
+async function withParserLimit<T>(fn: () => Promise<T>): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const execute = () => {
+      fn().then(resolve).catch(reject).finally(() => {
+        activeParsers--;
+        if (parserQueue.length > 0) {
+          const next = parserQueue.shift();
+          if (next) next();
+        }
+      });
+    };
+    
+    if (activeParsers < RSS_PARSER_POOL_SIZE) {
+      activeParsers++;
+      execute();
+    } else {
+      parserQueue.push(execute);
+    }
+  });
+}
 
 function dec(enc: string): string {
   try { return decodeURIComponent(enc); } catch { return enc; }
